@@ -1,0 +1,175 @@
+/**
+ * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
+ * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ */
+
+import CryptoJS from "crypto-js";
+import { Dimensions, Platform, StatusBar } from "react-native";
+
+const tintColorLight = '#4F772D';
+const tintColorDark = '#fff';
+
+export const marginStyle = {
+  marginTop: Platform.OS === 'android' ? (StatusBar.currentHeight ?? 10) + 0 : 50,
+};
+
+export const DIMENSION = {
+    HEIGHT : Dimensions.get('window').height,
+    WIDTH : Dimensions.get('window').width
+}
+
+const key = CryptoJS.enc.Utf8.parse('12345678901234567890123456789012'); // 32 chars
+const iv = CryptoJS.enc.Utf8.parse('1234567890123456'); // 16 chars
+
+export const encryptData = (text: any) => {
+  const encrypted = CryptoJS.AES.encrypt(text, key, {
+    iv: iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  });
+
+  return encrypted.toString(); // Base64 string
+};
+
+export const decryptData = (text: any) => {
+  const decrypted = CryptoJS.AES.decrypt(text, key, {
+    iv: iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  });
+
+  // Return as UTF-8 string
+  return decrypted.toString(CryptoJS.enc.Utf8);
+};
+
+
+export const encryptAmount = (text: any) => {
+  const encrypted = CryptoJS.AES.encrypt(String(text), key, {
+    iv: iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  });
+  return encrypted.toString();
+};
+
+export const decryptamount = (text: any) => {
+  const decrypted = CryptoJS.AES.decrypt(text, key, {
+    iv: iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  });
+  const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
+  const amount = Number(decryptedString);
+  if (isNaN(amount)) return 0; // handle invalid decryptions gracefully
+  return amount;
+};
+
+export const convertToReadableDateTime = (dateStr: string, timeStr: string): string => {
+  try {
+    // Combine the date and time strings
+    const combined = `${dateStr} ${timeStr}`;
+
+    // Convert to Date
+    const date = new Date(combined);
+
+    // Handle cases where the Date constructor fails (especially on iOS)
+    if (isNaN(date.getTime())) {
+      const [year, month, day] = dateStr.split("-");
+      return `${day} ${new Date(dateStr).toLocaleString("default", { month: "short" })}, ${year} at ${timeStr.toUpperCase()}`;
+    }
+
+    // Format date and time
+    const formattedDate = date.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    const formattedTime = date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return `${formattedDate.replace(',', '')} at ${formattedTime}`;
+  } catch (error) {
+    console.error("Date conversion error:", error);
+    return `${dateStr} at ${timeStr}`;
+  }
+};
+
+
+export const Colors = {
+  yellow: "#FFCC00B2",
+  yellow1: "#FFCC00",
+  yellow2: "#C4BD02",
+  yellow3: "#fffee6",
+  shadow: "#f1f7fceb",
+  white: '#fff',
+  gray6: "#f2f2f2",
+  gray7: "#d9d9d9",
+  gray9: "#8C8A93",
+  gray10: "#D6D6D6",
+  gray11: "#EDEEF2",
+  gray8:"#E1E6EF",
+  wallet: "#90A955",
+  custicon: "#FD6922B2",
+  helmet: "#FFF1B7",
+  helmetbackground: "#fff7d7",
+  blacktext: "#5A5B78",
+  bookingbackground: "#eaf4f0",
+  bookingoutline: "#15aa5b",
+  clock: "#cedfd6",
+  clock1: "#d5e7de",
+  gold: '#FF9A3E',
+  marker:'#FF7043',
+  green: "#4F772D",
+  green1: "#94BC06",
+  green2: "#198754",
+  green3: "#D1E7DD75",
+  green4: "#27C153",
+  green5: "#299A33",
+  green6: "#e9f3ef",
+  green7: "#edefe5",
+  green8: "#4F6400",
+  green9: '#00860C',
+  green10: '#daeae5',
+  clock2: "#eaf4f0",
+  clock3: "#aec594",
+  offwhite:"#eef0e6",
+  offwhite1: "#EFEFEF",
+  offwhite2: "#E7E7E7",
+  offwhite3: "#FAFAFA",
+  error100: '#fcdcbf',
+  error200: "#FEE4E2",
+  error300: "#FEF3F2",
+  gray: "#f2f2f2",
+  gray1: "#A0A0AA",
+  lightgray: "#F6F7F9",
+  red: "#ED2F46",
+  red2: "#FDE8EA",
+  brown:"#865300",
+  brown1:"#FFECC6",
+  lemon: "#808500",
+  lemon1:"#fffee8",
+  primary4:'#27C153',
+  primary5: '#e2f2e9',
+
+
+  light: {
+    text: '#11181C',
+    background: '#fff',
+    tint: tintColorLight,
+    icon: '#687076',
+    tabIconDefault: '#687076',
+    tabIconSelected: tintColorLight,
+  },
+  dark: {
+    text: '#ECEDEE',
+    background: '#151718',
+    tint: tintColorDark,
+    icon: '#9BA1A6',
+    tabIconDefault: '#9BA1A6',
+    tabIconSelected: tintColorDark,
+  },
+};
+
