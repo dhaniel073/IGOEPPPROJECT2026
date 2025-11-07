@@ -30,7 +30,7 @@ const { height } = Dimensions.get('window');
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
     const router = useRouter()
     const navigation = useNavigation();
-    const {id, name} = useLocalSearchParams<any>()
+    const {id, name, invoice_type} = useLocalSearchParams<any>()
     const {logout} = useAuth()
     const [modalVisible, setModalVisible] = useState(false);
     const slideAnim = React.useRef(new Animated.Value(height)).current; // Start below the screen
@@ -160,7 +160,7 @@ const { height } = Dimensions.get('window');
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 10 }}>
 
                     <TouchableOpacity activeOpacity={0.6} style={[styles.card, { backgroundColor: Colors.yellow3, padding:12, borderRadius:12 }]} onPress={() => [closePopup(), router.push(
-                        {pathname: '/selectartisan', params:{request_type:"P", catid: id, subcatid:formData.subcatid, preassessment_flg: formData.preassessment_flg}})]}>
+                        {pathname: '/selectartisan', params:{request_type:"P", invoice_type: invoice_type, catid: id, subcatid:formData.subcatid, preassessment_flg: formData.preassessment_flg}})]}>
                         <MaterialIcons name="person" size={28} color={Colors.yellow2} style={styles.icon} />
                         <Text style={styles.cardTitle}>
                             Send to an Artisan
@@ -171,7 +171,7 @@ const { height } = Dimensions.get('window');
                     <View style={{marginHorizontal:5}}/>
 
                     <TouchableOpacity activeOpacity={0.6} style={[styles.card, { backgroundColor: Colors.green6, padding:12, borderRadius:12 }]} onPress={() => [closePopup(), router.push(
-                        {pathname:'/requesthelp', params:{request_type:"G",catid:id, subcatid:formData.subcatid, preassessment_flg: formData.preassessment_flg}})]}>
+                        {pathname:'/requesthelp', params:{request_type:"G", invoice_type: invoice_type,catid:id, subcatid:formData.subcatid, preassessment_flg: formData.preassessment_flg}})]}>
                         <FontAwesome name="group" size={20} color={Colors.green4} style={styles.icon} />
                         <Text style={styles.cardTitle}>
                             Send to all Artisans

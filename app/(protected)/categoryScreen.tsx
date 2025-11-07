@@ -5,11 +5,13 @@ import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { category } from '@/hooks/AuthRoutes';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { EvilIcons } from '@expo/vector-icons';
+import { EvilIcons, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { FlatList, Image, ImageBackground, StyleSheet, TextProps, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, FlatList, Image, ImageBackground, Modal, StyleSheet, Text, TextProps, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const { height } = Dimensions.get('window');
 
 
   export type Props = TextProps & {
@@ -28,10 +30,33 @@ import { SafeAreaView } from 'react-native-safe-area-context';
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
     const router = useRouter()
     const navigation = useNavigation();
-
+    const [modalVisible, setModalVisible] = useState(false);
     const [fetchedCategory, setFetchedCategory] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
+    const slideAnim = React.useRef(new Animated.Value(height)).current; // Start below the screen
+    const [formData, setFormData] = useState({
+      cat_name: "",
+      id: "",
+    });
+    const openPopup = () => {
+      setModalVisible(true);
+      Animated.timing(slideAnim, {
+      toValue: 0, // Slide to the screen
+      duration: 300,
+      useNativeDriver: true,
+      }).start();
+    };
+      
+    const closePopup = () => {
+      Animated.timing(slideAnim, {
+      toValue: height, // Slide back down
+      duration: 300,
+      useNativeDriver: true,
+      }).start(() => setModalVisible(false)); // Close after animation
+    };
+
+        
     useEffect(() => {
       const unsubscribe = navigation.addListener('focus', async () => {
         try {
@@ -98,12 +123,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
         <TouchableOpacity
           style={styles.card}
           activeOpacity={0.5}
-          onPress={() =>
-            router.push({
-              pathname: "/subcategoryScreen",
-              params: { id: item.id, name: item.cat_name },
-            })
-          }
+          onPress={() => [setFormData({id: item.id, cat_name: item.sub_cat_name}), openPopup()]}
         >
           {/* Image only */}
           <ImageBackground
@@ -126,12 +146,88 @@ import { SafeAreaView } from 'react-native-safe-area-context';
         </TouchableOpacity>
       )}
     />
-    </SafeAreaView>
+
+    <Modal
+      transparent
+      visible={modalVisible}
+      animationType="slide" 
+      onRequestClose={closePopup}
+    >
+      <TouchableOpacity style={styles.overlay} onPress={() => [closePopup()]} />
+
+      <Animated.View
+        style={[
+        styles.popup,
+        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+        ]}
+      >
+        <TouchableOpacity onPress={closePopup} style={{alignSelf:'flex-end'}}> 
+          <MaterialIcons name="cancel" size={24} color={Colors.green} />
+        </TouchableOpacity>
+
+        <ThemedText type='subtitle' style={{textAlign:'center'}}>Select a request type</ThemedText>
+
+        <View style={{margin:10}}/>
+
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 10 }}>
+
+        <TouchableOpacity activeOpacity={0.6} style={[styles.card, { backgroundColor: Colors.yellow3, padding:12, borderRadius:12 }]} onPress={() => [closePopup(), router.push(
+          {pathname: '/subcategoryScreen', params:{id: formData.id, name: formData.cat_name, invoice_type: 'Y'}})]}>
+          {/* <MaterialIcons name="person" size={28} color={Colors.yellow2} style={styles.icon} /> */}
+          <Text style={styles.cardTitle}>
+            Invoice Payment
+          </Text>
+          <Text style={styles.cardText}>Make payment later as invoice</Text>
+        </TouchableOpacity>
+
+        <View style={{marginHorizontal:5}}/>
+
+        <TouchableOpacity activeOpacity={0.6} style={[styles.card, { backgroundColor: Colors.green6, padding:12, borderRadius:12 }]} onPress={() => [closePopup(), router.push(
+          {pathname:'/subcategoryScreen', params:{id: formData.id, name: formData.cat_name, invoice_type: 'Y'}})]}>
+          {/* <FontAwesome name="group" size={20} color={Colors.green4} style={styles.icon} /> */}
+          <Text style={styles.cardTitle}>
+            Outright Payment
+          </Text>
+          <Text style={styles.cardText}>Make payment now</Text>
+        </TouchableOpacity>
+        </View>
+        <View style={{margin:15}}/>
+      </Animated.View>
+    </Modal>
+  </SafeAreaView>
   )
 }
 
 
 const styles = StyleSheet.create({
+  cardText: {
+    color: Colors.blacktext,
+  },
+  icon: {
+    marginBottom: 8,
+  },
+  cardTitle: {
+    color: '#000',
+    marginBottom: 6,
+    fontSize:12,
+    fontFamily:'poppinsMedium',
+    textAlign: 'center'
+    
+  },
+  popup: {
+    position: 'absolute',
+    bottom:0,
+    width: '100%',
+    backgroundColor: '#fff',
+    padding: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
   slide1:{
     borderRadius: 16,
     width: "100%",

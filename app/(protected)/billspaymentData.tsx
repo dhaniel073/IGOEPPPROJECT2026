@@ -461,7 +461,7 @@ export default function billspaymentData({
 
       <FullScreenModal
         visible={visible}
-        onClose={() => [setVisible(false), router.push('/(tabs)/payments')]}
+        onClose={() => [setVisible(false), router.push('/(protected)/(tabs)/payments')]}
         mainText="Transaction Successful!"
         subText={`Your data subscription of ${amount} was successful`}
       />

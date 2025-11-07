@@ -31,6 +31,25 @@ async function authenticateSignUp(email: any, password: any, gender: any, phone:
   return data;
 }
 
+async function authenticateSignUpBusiness(email: any, password: any, tin_number: any, rc_number: any, company_name: any, phone: any,referral_code: any){
+
+  let base = 'customer/storebusiness'
+  const loginUrl = 'https://phixotech.com/igoepp/public/api/'+ base
+  
+  const response = await axios.post(loginUrl, {
+    'company_name': company_name,
+    'email': email,
+    'tin_number': tin_number,
+    'rc_number': rc_number,
+    'phone': phone,
+    'password': password,
+    "referal_code": referral_code,
+    'application': "mobileapp"
+  })
+  const data = response.data;
+  return data;
+}
+
 async function category(){
   const response = await axios.get("https://phixotech.com/igoepp/public/api/category",)
   const data = response.data.data
@@ -905,15 +924,56 @@ async function getsubcathelper(id: any, token: any){
   return data
 }
 
+async function getbillsHistory(id: any, token: any){
+  const url = `https://phixotech.com/igoepp/public/api/auth/getbillsHistoryCustomer/${id}`
+  const response = await axios.get(url,{
+    headers:{
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  })
+
+  const data = response.data
+  return data
+}
+
+async function getbillsHistoryById(customerid: any, id: any, billerid:any, token: any){
+  const url = `https://phixotech.com/igoepp/public/api/auth/getbillsHistoryCustomerbyid/${customerid}/${id}/${billerid}`
+  const response = await axios.get(url,{
+    headers:{
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  })
+
+  const data = response.data
+  return data
+}
+
+async function deleteaccount(id: any, token: any){
+  const url = `https://phixotech.com/igoepp/public/api/auth/customer/deleteaccount`
+  const response = await axios.post(url,{
+    "customer_id": id,
+  }, {
+    headers:{
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  })
+
+  const data = response.data
+  return data
+}
 
 export {
-  authenticateLogin, authenticateSignUp, bidaccept, bidacceptcash, bidacceptdebitcard, bidaccepttransfer, biddecline, bidnegotiate, bidrequests,
+  authenticateLogin, authenticateSignUp, authenticateSignUpBusiness, bidaccept, bidacceptcash, bidacceptdebitcard, bidaccepttransfer, biddecline, bidnegotiate, bidrequests,
   biometricsetup, cancelrequests, cartcheckout, cartcheckoutcash, cartitem, cartitemstore, cartitemupdate, cartshow, category, csutomerwallet,
-  customerinfocheck, customerresetpassword, customeruploadAddressproof, customeruploadIdcard, customerwallethistory, customerwallethistoryall,
-  deletefromcart, disablealert, disablebiometric, enablealert, fetchrequestbyid, getbanks, getmaterialdetailsbyrequestidmobile, getpaystackkey,
-  getsession, getsubcathelper, gettotalamountnmaterialrequestid, getVFDVirtualAccountCustomerMaterial, helperget, loginwithbiometric, marketplaceitemsget,
-  materialpaymentbycustomer, notification, notificationbyid, profileupdate, resettoken, sessionId, setuppin, showcompletedrequestbycustomerid,
-  showpendingrequestbycustomerid, subcategory, termsandconditons, updatepin, validatecustomerpasswordchangetoken, validatepin, validatetransaction,
-  vfdvalidatetransaction, vfdvirtualaccount, viewalertsetup, virtualaccount, walletupdate
+  customerinfocheck, customerresetpassword, customeruploadAddressproof, customeruploadIdcard, customerwallethistory, customerwallethistoryall, deleteaccount,
+  deletefromcart, disablealert, disablebiometric, enablealert, fetchrequestbyid, getbanks, getbillsHistory, getbillsHistoryById,
+  getmaterialdetailsbyrequestidmobile, getpaystackkey, getsession, getsubcathelper, gettotalamountnmaterialrequestid,
+  getVFDVirtualAccountCustomerMaterial, helperget, loginwithbiometric, marketplaceitemsget, materialpaymentbycustomer, notification, notificationbyid,
+  profileupdate, resettoken, sessionId, setuppin, showcompletedrequestbycustomerid, showpendingrequestbycustomerid, subcategory, termsandconditons,
+  updatepin, validatecustomerpasswordchangetoken, validatepin, validatetransaction, vfdvalidatetransaction, vfdvirtualaccount, viewalertsetup,
+  virtualaccount, walletupdate
 };
 

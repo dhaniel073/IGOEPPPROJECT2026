@@ -1,11 +1,14 @@
 import GoBack from '@/components/GoBack'
 import Input from '@/components/Input'
 import LogoSpinner from '@/components/LoadingScreen'
+import { PasswordRules } from '@/components/PasswordRules'
 import { ThemedButton } from '@/components/ThemedButton'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
-import { Colors } from '@/constants/Colors'
-import { termsandconditons } from '@/hooks/AuthRoutes'
+import { validateSignupBusiness } from '@/components/validateSignupBusiness'
+import { Colors, encryptData } from '@/constants/Colors'
+import { useAuth } from '@/hooks/AuthContext'
+import { authenticateSignUpBusiness, termsandconditons } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Octicons } from '@expo/vector-icons'
 import { useNavigation, useRouter } from 'expo-router'
@@ -35,6 +38,7 @@ export default function signupBusiness({
     const navigation = useNavigation()
     const [htmlContent, setHtmlContent] = useState();
     const [isloading, setisloading] = useState(false)
+    const {login} = useAuth()
 
     
     const openPopup = () => {
@@ -54,9 +58,79 @@ export default function signupBusiness({
         }).start(() => setModalVisible(false)); // Close after animation
     };
 
-    const signuphandler = async () => {
-        return openPopup()
-    }
+    const [formData, setFormData] = useState({
+        companyname: "",
+        tinNumber: "",
+        rcNumber: "",
+        email: "",
+        phone: "",
+        password: "",
+        confirmPassword: "",
+        referral_code: "",
+    });
+
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const handleSignup = () => {
+        const validationErrors = validateSignupBusiness(formData);
+        setErrors(validationErrors);
+
+        if (Object.keys(validationErrors).length > 0) {
+            // stop signup — show all errors
+            console.log("Validation Errors:", validationErrors);
+
+            // Join all error messages together
+            const allErrors = Object.values(validationErrors).join("\n");
+
+            Alert.alert("❌ Validation Errors", allErrors);
+            return;
+        }
+
+
+        // proceed to API call, etc.
+        return openPopup();
+    };
+
+    
+    const signupHandler = async () => {
+        try {
+            setisloading(true);
+
+            // Make signup request
+            const response = await authenticateSignUpBusiness(
+            formData.email,
+            encryptData(formData.password),
+            formData.tinNumber,
+            formData.rcNumber,
+            formData.companyname,
+            formData.phone,
+            formData.referral_code
+            );
+            
+
+            console.log("✅ Signup successful:", response);
+
+            // Log in immediately after signup
+            await login(encryptData(response.access_token), response);
+
+        } catch (error: any) {
+            console.log("❌ Signup failed:", error.response.data);
+
+            // Safe error extraction
+            const errorMessage =
+            error?.response?.data?.email ||
+            error?.response?.data?.message ||
+            "Something went wrong. Please try again.";
+
+            Alert.alert("Sign Up Failed", errorMessage);
+        } finally {
+            // Always stop loading
+            setisloading(false);
+        }
+    };
+
+    
+
 
     useEffect(() => {
       const unsubscribe = navigation.addListener('focus', async () => {
@@ -107,7 +181,26 @@ export default function signupBusiness({
                 <Input
                     placeholder="Enter here"
                     keyboardType="default"
+                    value={formData.companyname}
+                    onUpdateValue={(val) =>
+                        setFormData({ ...formData, companyname: val })
+                    }
+                    isInvalid={!!errors.companyname}
+                    autoCapitalize='sentences'
                     // rightIcon={<Octicons name="person" size={18} color={Colors.gray9} />}
+                />
+                <View style={{margin:5}}/> 
+
+                <ThemedText>Email</ThemedText>
+                <Input
+                    placeholder="Enter here"
+                    keyboardType="email-address"
+                    // rightIcon={<Octicons name="person" size={18} color={Colors.gray9}/>}
+                    value={formData.email}
+                    onUpdateValue={(val) =>
+                        setFormData({ ...formData, email: val })
+                    }
+                    isInvalid={!!errors.email}
                 />
                 <View style={{margin:5}}/> 
 
@@ -115,6 +208,11 @@ export default function signupBusiness({
                 <Input
                     placeholder="Enter here"
                     keyboardType="default"
+                    value={formData.rcNumber}
+                    onUpdateValue={(val) =>
+                        setFormData({ ...formData, rcNumber: val })
+                    }
+                    isInvalid={!!errors.rcNumber}
                     // rightIcon={<Octicons name="person" size={18} color={Colors.gray9}/>}
                 />  
                 <View style={{margin:5}}/> 
@@ -123,6 +221,11 @@ export default function signupBusiness({
                 <Input
                     placeholder="Enter here"
                     keyboardType="default"
+                    value={formData.tinNumber}
+                    onUpdateValue={(val) =>
+                        setFormData({ ...formData, tinNumber: val })
+                    }
+                    isInvalid={!!errors.tinNumber}
                     // rightIcon={<MaterialIcons name="keyboard-arrow-down" size={18} color={Colors.gray9} />}
                 />
                 <View style={{margin:5}}/> 
@@ -153,8 +256,14 @@ export default function signupBusiness({
                 {/* Phone Number Input */}
                 <View style={{ flex: 1 }}>
                     <Input
-                    placeholder="Enter phone number"
-                    keyboardType="phone-pad"
+                        placeholder="Enter phone number"
+                        keyboardType="phone-pad"
+                        value={formData.phone}
+                        onUpdateValue={(val) =>
+                            setFormData({ ...formData, phone: val })
+                        }
+                        isInvalid={!!errors.phone}
+                        maxLength={10}
                     />
                 </View>
                 </View>
@@ -173,22 +282,30 @@ export default function signupBusiness({
                 <Input
                     placeholder="Password"
                     secure
+                    value={formData.password}
+                    onUpdateValue={(val) =>
+                        setFormData({ ...formData, password: val })
+                    }
+                    isInvalid={!!errors.password}
                 />
                 <View style={{margin:3}}/> 
-                <ThemedText>{`\u2022`} At least 8 characters bullet point</ThemedText>
-                <ThemedText>{`\u2022`} At least 1 upper case letter</ThemedText>
-                <ThemedText>{`\u2022`} At least 1 lower case letter</ThemedText>
-                <ThemedText>{`\u2022`} At least 1 number</ThemedText>
+                <View style={{margin:3}}/> 
+                <PasswordRules password={formData.password} />
                 <View style={{margin:5}}/> 
 
                 <ThemedText>Confirm Password</ThemedText>
                 <Input
                     placeholder="Confirm Password"
                     secure
+                    value={formData.confirmPassword}
+                    onUpdateValue={(val) =>
+                        setFormData({ ...formData, confirmPassword: val })
+                    }
+                    isInvalid={!!errors.confirmPassword}
                 />
                 <View style={{margin:10}}/> 
 
-                <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}} onPress={() => {signuphandler()}}>
+                <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}} onPress={() => {handleSignup()}}>
                     <ThemedText style={{color:'#fff'}}>Proceed</ThemedText>
                 </ThemedButton>
                 <View style={{margin:15}}/> 
@@ -227,7 +344,7 @@ export default function signupBusiness({
                         <ThemedButton
                             onPress={() => {
                                 closePopup();
-                                router.push("/welcomescreen");
+                                signupHandler();
                             }}
                             style={{paddingHorizontal:30, paddingVertical:13, borderRadius:30, alignSelf: "center", backgroundColor: Colors.green}}
                         >

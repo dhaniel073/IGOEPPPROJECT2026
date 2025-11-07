@@ -40,6 +40,8 @@ export default function bookings({
             console.log(response)
             setFetchedRequest(response);
             } catch (error: any) {
+                console.log(user)
+                console.log(error)
                 if (error.response?.status === 401) {
                     Alert.alert("Session expired", "Please log in again.");
                     await logout(); // from your AuthContext

@@ -98,7 +98,7 @@ export default function wallethistory({
                   <MaterialCommunityIcons name="wallet-plus" size={24} color="#fff" />
                 </View>
               </View> 
-              <ThemedText type='small'>Add Money</ThemedText>
+              <ThemedText type='small'>Add Money </ThemedText>
             </TouchableOpacity>
           </ThemedView>
         </ThemedView>

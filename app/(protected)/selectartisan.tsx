@@ -7,7 +7,7 @@ import { getsubcathelper } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { Alert, Animated, Dimensions, FlatList, Image, Modal, StyleSheet, TextInput, TextProps, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
   
@@ -31,10 +31,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
     const {token, user, logout} = useAuth()
     const [isModalVisible, setModalVisible] = useState(false);
     const slideAnim = React.useRef(new Animated.Value(height)).current; // Start below the screen
-    const {request_type, catid, subcatid, preassessment_flg} = useLocalSearchParams()
+    const {request_type, catid, subcatid, preassessment_flg, invoice_type} = useLocalSearchParams()
     const navigation = useNavigation()
     const [responseData, setresponseData] = useState<any>([])
-    const [searchQuery, setSearchQuery] = useState('')
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredData, setFilteredData] = useState(responseData);
     const [fetchedRequest, setFetchedRequest] = useState<any>([])
 
     useLayoutEffect(() => {
@@ -64,26 +65,17 @@ import { SafeAreaView } from 'react-native-safe-area-context'
       setModalVisible(!isModalVisible);
     };
 
-    const handleSearch = (query: string) => {
-      setSearchQuery(query);
-
-      const formattedQuery = query.toLowerCase().trim();
-
-      // Only filter when something is typed
-      if (formattedQuery.length > 0) {
-        const filteredData = responseData.filter(
-          (item: any) =>
-            item.helper_name?.toLowerCase().includes(formattedQuery) ||
-            item.helper_location?.toLowerCase().includes(formattedQuery)
-        );
-        setFetchedRequest(filteredData);
-      } else {
-        // If query is empty, reset to original data or empty list
-        setFetchedRequest(responseData);
+    useEffect(() => {
+      const q = searchQuery.trim().toLowerCase();
+        if (q.length === 0) {
+          setFilteredData(responseData);
+        } else {
+        setFilteredData(
+        responseData.filter((item: any) =>
+        (item.helper_name || '').toLowerCase().includes(q)
+        ));
       }
-    }
-
-
+    }, [searchQuery, responseData]);
     const openPopup = () => {
       setModalVisible(true);
       Animated.timing(slideAnim, {
@@ -108,22 +100,20 @@ import { SafeAreaView } from 'react-native-safe-area-context'
       <View style={{margin:15}}/> 
       
       <ThemedText type="titleMedium">Select Artisan</ThemedText>
+      <View style={{margin:5  }}/> 
 
-      <View style={{margin:10}}/> 
-
-      <TextInput
-        style={styles.input}
-        placeholder="Search helper or location"
-        value={searchQuery}
-        onChangeText={handleSearch}
-        placeholderTextColor={Colors.gray9}
-      />
-
+      <View style={styles.searchRow}> 
+        <TextInput style={styles.input} placeholder="Search artisans by name" value={searchQuery} onChangeText={setSearchQuery} returnKeyType="search" /> 
+        {searchQuery.length > 0 && ( 
+        <TouchableOpacity onPress={() => setSearchQuery('')}> 
+          <MaterialCommunityIcons name="close" size={20} color={color} /> 
+        </TouchableOpacity> )} 
+      </View>
       <View style={{margin:10}}/> 
 
       <FlatList
         keyExtractor={(item: any) => item.helper_id.toString()}
-        data={responseData}
+        data={filteredData}
         showsHorizontalScrollIndicator={false}
         numColumns={1}
         renderItem={({ item }) => (
@@ -182,11 +172,22 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 }
 
 const styles = StyleSheet.create({
+  searchRow: {
+    flexDirection: 'row',           // layout children horizontally
+    alignItems: 'center',           // center vertically
+    backgroundColor: Colors.clock1, // subtle background color matching your app palette
+    borderRadius: 8,                // rounded corners
+    paddingHorizontal: 10,          // left and right padding inside the bar
+    paddingVertical: 10,             // top and bottom padding inside the bar
+    marginBottom: 10,               // space below the search bar before the list
+  },
+
   input: {
-    flex: 1,
-    paddingVertical: 8,
-    marginLeft: 5,
+    flex: 1,                       
     fontSize: 16,
+    color: Colors.blacktext,           
+    paddingVertical: 7,            
+    paddingHorizontal: 10,          
   },
   image:{
     height:50,
@@ -197,6 +198,7 @@ const styles = StyleSheet.create({
   mainstyle:{
     flexDirection:'row', 
     borderRadius:8, 
+    marginBottom:3,
     justifyContent:'space-between', 
     alignItems:'center', 
     boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 

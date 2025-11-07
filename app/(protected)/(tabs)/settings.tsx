@@ -1,10 +1,11 @@
 import GoBack from '@/components/GoBack';
+import LogoSpinner from '@/components/LoadingScreen';
 import { ThemedButton } from '@/components/ThemedButton';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors, decryptData, encryptData } from '@/constants/Colors';
 import { useAuth } from '@/hooks/AuthContext';
-import { biometricsetup, disablebiometric } from '@/hooks/AuthRoutes';
+import { biometricsetup, deleteaccount, disablebiometric } from '@/hooks/AuthRoutes';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { AntDesign, Feather, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,7 +13,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from 'expo-router';
 import * as SecureStore from "expo-secure-store";
 import React, { useEffect, useState } from 'react';
-import { Alert, Animated, Dimensions, Modal, StyleSheet, Switch, TextProps, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, BackHandler, Dimensions, Modal, Platform, StyleSheet, Switch, TextProps, TouchableOpacity, View } from 'react-native';
 import 'react-native-get-random-values';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { v4 as uuidv4 } from "uuid";
@@ -48,6 +49,23 @@ export default function settings({
 
     console.log(user?.biometric_setup)
    
+    useEffect(() => {
+        if (Platform.OS === 'android' && modalVisible3) {
+        const backAction = () => {
+            // Prevent closing modal with back button
+            console.log('Back button pressed — modal stays open');
+            return true; // <- this stops Android from closing the modal
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction
+        );
+
+        return () => backHandler.remove(); // Clean up listener when modal closes
+        }
+    }, [modalVisible3]);
+
     useEffect(() => {
         const checkAvailability = async () => {
             const isSupported = await LocalAuthentication.hasHardwareAsync();
@@ -153,8 +171,22 @@ export default function settings({
         }).start(() => setModalVisible3(false)); // Close after animation
     };
 
-    const deleteaccount = async() => {
-        return ([closePopup(), openPopup1()])
+    const deleteaccounthandler = async() => {
+        closePopup()
+        try {
+            setLoading(true);
+            const response = await deleteaccount(user?.customer_id, decryptData(token));
+            openPopup1()
+        } catch (error:any) {
+            console.log("Error in SuccessHandler:", error.response);
+            Alert.alert("Sorry", "An error occurred. Please try again later", [ { text: "Ok", onPress: () => router.push("/"), }, ]);
+        }finally{
+            setLoading(false)
+        }
+    }
+
+    if(loading){
+        return <LogoSpinner lightColor='' darkColor=''/>
     }
     
     return (
@@ -271,7 +303,7 @@ export default function settings({
                         <ThemedButton style={{paddingVertical: 15,borderRadius: 10,alignItems: "center", flex:1}}>
                             <ThemedText>Cancel</ThemedText> 
                         </ThemedButton>
-                        <ThemedButton style={{paddingVertical: 15,borderRadius:30,alignItems: "center", backgroundColor: Colors.red, flex:1}} onPress={deleteaccount}>
+                        <ThemedButton style={{paddingVertical: 15,borderRadius:30,alignItems: "center", backgroundColor: Colors.red, flex:1}} onPress={deleteaccounthandler}>
                             <ThemedText>Delete</ThemedText> 
                         </ThemedButton>
                     </View>
@@ -284,7 +316,7 @@ export default function settings({
                 transparent
                 visible={modalVisible3}
                 animationType="slide" 
-                onRequestClose={closePopup1}
+                onRequestClose={() => {}}
             >
                 <TouchableOpacity style={styles.overlay}/>
     
@@ -308,10 +340,10 @@ export default function settings({
                     <View style={{margin:10}}/>
 
                     <View style={{flexDirection:'row', flex:1, justifyContent:'space-evenly'}}>
-                        <ThemedButton style={{paddingVertical: 15,borderRadius: 10,alignItems: "center", flex:1}} onPress={() => [closePopup1(),router.push("/signup")]}>
+                        <ThemedButton style={{paddingVertical: 15,borderRadius: 10,alignItems: "center", flex:1}} onPress={() => [closePopup1(),logout()]}>
                             <ThemedText>Create an Account</ThemedText> 
                         </ThemedButton>
-                        <ThemedButton style={{paddingVertical: 15,borderRadius:30,alignItems: "center", backgroundColor: Colors.green, flex:1}} onPress={() => [closePopup1(), router.push("/login")]}>
+                        <ThemedButton style={{paddingVertical: 15,borderRadius:30,alignItems: "center", backgroundColor: Colors.green, flex:1}} onPress={() => [closePopup1(), logout()]}>
                             <ThemedText>Exit App</ThemedText> 
                         </ThemedButton>
                     </View>

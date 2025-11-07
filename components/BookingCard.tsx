@@ -113,7 +113,7 @@ export const BookingCard = ({ item }: any) => {
                   })
                 }
               >
-                <Ionicons name="chatbubbles" size={32} color={Colors.green} />
+                <Ionicons name="chatbubbles" size={22} color={Colors.green} />
 
                 {/* Unread badge */}
                 {item.chat_unread_customer > 0 && (

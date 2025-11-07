@@ -18,6 +18,11 @@ type UserData = {
   customer_id: any;
   session_id: any;
   biometric_setup: any;
+  rc_number: any;
+  tin_number: any;
+  account_type: any;
+  business_id: any;
+  company_name: any;
   helper_user_id: any
 };
 

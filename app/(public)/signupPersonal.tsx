@@ -113,7 +113,7 @@ export default function signupPersonal({
             console.log("✅ Signup successful:", response);
 
             // Log in immediately after signup
-            await login(response.access_token, response);
+            await login(encryptData(response.access_token), response);
 
         } catch (error: any) {
             console.log("❌ Signup failed:", error.response.data);

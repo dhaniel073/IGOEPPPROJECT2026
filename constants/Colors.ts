@@ -133,6 +133,7 @@ export const Colors = {
   green8: "#4F6400",
   green9: '#00860C',
   green10: '#daeae5',
+  green11: '#5b8135',
   clock2: "#eaf4f0",
   clock3: "#aec594",
   offwhite:"#eef0e6",

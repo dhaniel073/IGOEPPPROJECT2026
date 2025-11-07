@@ -109,7 +109,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
             
             <ThemedView style={{marginLeft:30}}>
               <ThemedText>{greeting}</ThemedText>
-              <ThemedText type='subtitle' style={{fontSize:13}}>{user?.last_name} {user?.first_name}</ThemedText>
+              <ThemedText type='subtitle' style={{fontSize:13}}>{user?.account_type === 'C'  ?  user?.last_name+" "+user?.first_name : user?.company_name }</ThemedText>
             </ThemedView>
           </ThemedView>
 
@@ -170,7 +170,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
                   <MaterialCommunityIcons name="wallet-plus" size={24} color="#fff" />
                 </View>
               </View> 
-              <ThemedText type='small'>Add Money</ThemedText>
+              <ThemedText type='small'>Add Money </ThemedText>
             </TouchableOpacity>
           </ThemedView>
         </ThemedView>
