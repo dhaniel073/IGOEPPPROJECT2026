@@ -4,12 +4,9 @@ import { Stack, useNavigation, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-import { decryptData } from '@/constants/Colors';
 import { useAuth } from '@/hooks/AuthContext';
-import { customerinfocheck, notificationunread } from '@/hooks/AuthRoutes';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useEffect } from 'react';
-import { AppState } from 'react-native';
 
 export const unstable_settings = {
   initialRouteName: "(protected)"
@@ -42,47 +39,7 @@ export default function ProtectedLayout() {
       }
     }
   }, [isLoading, token]);
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('state', async () => {
-      try {
-        const response = await notificationunread(user?.userid, decryptData(token))
-        updateUserFields({notificationcount: response})
-      } catch (error: any) {
-        console.log(error.response)
-      }
-    })
-    return unsubscribe
-  }, [user?.notificationcount])
-
-  const updateUserSession = async () => {
-    try {
-      // You can skip the call if no token
-      if (!token) return;
-
-      const response = await customerinfocheck(user?.customer_id, decryptData(token));
-      // console.log("Session data:", response);
-
-      // Update your context with new user info
-      updateUser(response);
-    } catch (error) {
-      console.error("Session refresh failed:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (!token) return;
-
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') {
-        updateUserSession(); // refresh user when app becomes visible again
-      }
-    });
-
-    return () => subscription.remove();
-  }, [token]);
   
-
   if (isLoading) {
     // Show loading indicator while restoring session
     // return <LogoSpinner lightColor='' darkColor=''/>;
@@ -142,9 +99,7 @@ export default function ProtectedLayout() {
         <Stack.Screen name="recurringrequest" options={{ headerShown: false }} />
         <Stack.Screen name="invoice" options={{ headerShown: false }} />
         <Stack.Screen name="checkout" options={{ headerShown: false }} />
-
-
-        
+        <Stack.Screen name="carthistory" options={{ headerShown: false }} />        
 
         {/* <Stack.Screen name="+not-found" /> */}
       </Stack>

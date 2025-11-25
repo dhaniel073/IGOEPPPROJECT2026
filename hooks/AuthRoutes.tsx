@@ -138,6 +138,18 @@ async function walletupdate(id: any, token: any, amount: any){
   return data;
 }
 
+async function walletbal(customerId: any, token: any){
+  const url = `https://phixotech.com/igoepp/public/api/auth/customer/${customerId}/wallet`
+    const response = await axios.get(url, {
+      headers:{
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    })
+    const data = response.data
+  return data;
+}
+
 async function customerinfocheck(customer_id: any, token: any){
   const url = `https://phixotech.com/igoepp/public/api/auth/customer/${customer_id}`
   const response = await axios.get(url, {
@@ -779,6 +791,19 @@ async function deletefromcart(id: any, token: any){
   // const url = ''
   const response = await axios.delete(url, {
     headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  })
+  const data = response.data
+  return data;
+}
+
+//cart history
+async function cartpurchase(customerId: any, token: any){
+  const url = `https://phixotech.com/igoepp/public/api/auth/purchaseheaderbycustid/${customerId}`
+  const response = await axios.get(url, {
+    headers:{
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
     }
@@ -1482,7 +1507,7 @@ async function frequentlyusedartisans(token:string){
 
 export {
   authenticateLogin, authenticateSignUp, authenticateSignUpBusiness, authenticateSignUpBusniessEntity, betpay, bidaccept, bidacceptcash, bidacceptdebitcard, bidacceptinvoice, bidaccepttransfer,
-  biddecline, bidnegotiate, bidrequests, billcategory, biometricsetup, cancelrecurringrequestbyid, cancelrequests, cartcheckout, cartcheckoutcash, cartitem, cartitemstore, cartitemupdate, cartshow, categoriesbylga,
+  biddecline, bidnegotiate, bidrequests, billcategory, biometricsetup, cancelrecurringrequestbyid, cancelrequests, cartcheckout, cartcheckoutcash, cartitem, cartitemstore, cartitemupdate, cartpurchase, cartshow, categoriesbylga,
   category, csutomerwallet, customerbillercommission, customerinfocheck, customerresetpassword, customerupdateid, customeruploadAddressproof, customeruploadIdcard,
   customerwallethistory, customerwallethistoryall, deleteaccount, deletefromcart, disablealert, disablebiometric, discopayment, educationpay, enablealert, fetchrequestbyid, frequentlyusedartisans,
   getbanks, getbillsHistory, getbillsHistoryById, getlatestinvoices, getmaterialdetailsbyrequestidmobile, getpaystackkey, getpendinginvoices,
@@ -1490,6 +1515,6 @@ export {
   materialpaymentbycustomer, notification, notificationbyid, notificationunread, profileupdate, requestinfo, resettoken, sessionId, setuppin, showcompletedrequestbycustomerid, showhelperrating,
   showpendingrequestbycustomerid, showrecurringrequestbycustomerid, subcategory, termsandconditons, tvpay, tvrenewalpay, updateExpoToken, updatepin, uploadprofileimage, validatebetting, validatecustomerpasswordchangetoken,
   validatecustomerself, validatecustomerthirdparty, validatedisco, validateinternets, validatepin, validatetelevision, validatetransaction, vfdvalidatetransaction, vfdvirtualaccount,
-  viewalertsetup, virtualaccount, vtupayairtime, vtupaydata, walletupdate
+  viewalertsetup, virtualaccount, vtupayairtime, vtupaydata, walletbal, walletupdate
 };
 

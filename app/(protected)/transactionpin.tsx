@@ -133,14 +133,18 @@ export default function TransactionPin({
         }
       ]);
      
-    } catch (error) {
-      // console.error("Error updating PIN:", error);
+    } catch (error: any) {
+      console.error("Error updating PIN:", error.response.data.message);
+      Alert.alert("Error", error.response.data.message || "PIN reset failed!", [
+        {text: "ok",
+          onPress: () =>  router.back()
+        }
+      ]);
     } finally {
       setLoading(false);
     }
   };
 
- 
   // Dynamic UI per step
   const renderStepUI = () => {
 

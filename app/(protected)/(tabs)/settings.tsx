@@ -80,6 +80,7 @@ export default function settings({
 
     const updateBiometricOnServer = async (status: "Y" | "N") => {
         try {
+            setLoading(true)
             let deviceToken = await SecureStore.getItemAsync("deviceToken");
             if (!deviceToken) {
                 deviceToken = uuidv4();
@@ -99,6 +100,8 @@ export default function settings({
         } catch (error: any) {
             console.error("Failed to update biometric setup:", error.response?.data || error);
             Alert.alert("Error", "Failed to update biometric setting on server.");
+        }finally{
+            setLoading(false)
         }
     };
 
@@ -130,10 +133,20 @@ export default function settings({
                 Alert.alert("Failed", "Authentication failed. Try again.");
             }
         } else {
-            await AsyncStorage.removeItem("biometricEnabled");
-            await updateBiometricOnServer("N");
-            setEnabled(false);
-            Alert.alert("Disabled", "Biometric login disabled.");
+            const result = await LocalAuthentication.authenticateAsync({
+                promptMessage: "Verify to disable biometrics",
+                fallbackLabel: "Enter PIN",
+            });
+
+            if (result.success) {
+                await AsyncStorage.removeItem("biometricEnabled");
+                await updateBiometricOnServer("N");
+                setEnabled(false);
+                Alert.alert("Disabled", "Biometric login disabled.");
+            }else{
+                setEnabled(true);
+                Alert.alert("Failed", "Authentication failed. Try again.");
+            }
         }
     };
 

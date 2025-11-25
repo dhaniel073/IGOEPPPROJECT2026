@@ -18,16 +18,18 @@ type UserData = {
   customer_id: any;
   session_id: any;
   biometric_setup: any;
-  transaction_pin_setup: any,
+  transaction_pin_setup: any;
   rc_number: any;
   tin_number: any;
   account_type: any;
   business_id: any;
   company_name: any;
-  helper_user_id: any,
-  cartcount: any,
-  notificationcount: any,
-  pushtoken: any
+  helper_user_id: any;
+  cartcount: any;
+  notificationcount: any;
+  pushtoken: any;
+
+  updated_at?: number; // ADDED: timestamp to avoid overwriting new data
 };
 
 type AuthContextType = {
@@ -37,7 +39,7 @@ type AuthContextType = {
   login: (token: string, userData: UserData) => Promise<void>;
   logout: () => Promise<void>;
   updateToken: (newToken: string) => Promise<void>;
-  updateUser: (newUserData: UserData) => Promise<void>;
+  updateUser: (newUserData: Partial<UserData>) => Promise<void>;
   updateUserFields: (updates: Partial<UserData>) => Promise<void>;
   refreshUser: (silent?: boolean) => Promise<void>;
 };
@@ -53,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        setIsLoading(true)
+        setIsLoading(true);
         const storedToken = await AsyncStorage.getItem("userToken");
         const storedUser = await AsyncStorage.getItem("userData");
 
@@ -71,18 +73,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     restoreSession();
   }, []);
 
+  // LOGIN
   const login = async (token: string, userData: UserData) => {
     try {
       setIsLoading(true);
+      const stamped = { ...userData, updated_at: Date.now() };
+      setUser(stamped);
       setToken(token);
-      setUser(userData);
+
       await AsyncStorage.setItem("userToken", token);
-      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+      await AsyncStorage.setItem("userData", JSON.stringify(stamped));
     } finally {
       setIsLoading(false);
     }
   };
 
+  // LOGOUT
   const logout = async () => {
     try {
       setIsLoading(true);
@@ -94,38 +100,66 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // UPDATE TOKEN
   const updateToken = async (newToken: string) => {
     setToken(newToken);
     await AsyncStorage.setItem("userToken", newToken);
   };
 
-  const updateUser = async (newUserData: UserData) => {
-    setUser(newUserData);
-    await AsyncStorage.setItem("userData", JSON.stringify(newUserData));
+  // SAFELY UPDATE USER WITHOUT LOSING DATA
+  const updateUser = async (newUserData: Partial<UserData>) => {
+    if (!user) return;
+
+    const stamped = {
+      ...user,
+      ...newUserData,
+      updated_at: Date.now(),
+    };
+    console.log("[AuthContext] updateUser REPLACE called — source:", newUserData/* add caller info if possible */);
+    setUser(stamped);
+    await AsyncStorage.setItem("userData", JSON.stringify(stamped));
   };
 
+  // UPDATE ONLY CERTAIN FIELDS
   const updateUserFields = async (updates: Partial<UserData>) => {
     if (!user) return;
-    const updatedUser = { ...user, ...updates };
-    setUser(updatedUser);
-    await AsyncStorage.setItem("userData", JSON.stringify(updatedUser));
+
+    const merged = {
+      ...user,
+      ...updates,
+      updated_at: Date.now(),
+    };
+    // inside updateUserFields
+    console.log("[AuthContext] updateUserFields called, updates:", updates);
+    setUser(merged);
+    await AsyncStorage.setItem("userData", JSON.stringify(merged));
   };
 
+  // REFRESH USER FROM SERVER SAFELY
   const refreshUser = async (silent = false) => {
     if (!user?.customer_id || !token) return;
-    setIsLoading(!silent); // Only show loading if not silent
+
+    if (!silent) setIsLoading(true);
+
     try {
-      const response = await customerinfocheck(user.customer_id, decryptData(token));
-      if (response) {
-        if (silent) {
-          // Update user without triggering side-effects (like navigation)
-          setUser(response); 
-          await AsyncStorage.setItem("userData", JSON.stringify(response));
-        } else {
-          // Normal update
-          await updateUser(response);
-        }
-      }
+      const serverData = await customerinfocheck(
+        user.customer_id,
+        decryptData(token)
+      );
+
+      if (!serverData) return;
+
+      // Prevent overwriting LOCAL changes with older server data
+      const merged = {
+        ...user,
+        ...serverData,
+      };
+
+      // Keep the newer timestamps
+      merged.updated_at = Date.now();
+
+      setUser(merged);
+      await AsyncStorage.setItem("userData", JSON.stringify(merged));
     } catch (error) {
       console.error("Failed to refresh user:", error);
     } finally {
@@ -133,8 +167,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  if(isLoading){
-    return <LogoSpinner lightColor="" darkColor=""/>
+  if (isLoading) {
+    return <LogoSpinner lightColor="" darkColor="" />;
   }
 
   return (

@@ -11,6 +11,7 @@ import {
   ImageSourcePropType,
   Modal,
   StyleSheet,
+  Text,
   View
 } from "react-native";
 import ViewShot, { captureRef } from "react-native-view-shot";
@@ -205,12 +206,12 @@ export default function ReceiptView({
 
         {/* Action Buttons */}
         <View style={{ width: "100%" }}>
-          {/* <ThemedButton
+          <ThemedButton
             onPress={saveReceipt}
             style={[styles.button, { backgroundColor: Colors.green }]}
           >
             <Text style={styles.buttonText}>Download Receipt</Text>
-          </ThemedButton> */}
+          </ThemedButton>
 
           <View style={{margin:6}}/> 
           <ThemedButton

@@ -4,6 +4,7 @@ import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
+import { NotificationProvider } from '@/context/NotificationContext';
 import { AuthProvider } from '@/hooks/AuthContext';
 import { getpaystackkey } from '@/hooks/AuthRoutes';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -52,14 +53,11 @@ export default function RootLayout() {
     fetchPaystackKey();
   }, []);
 
-
-
   // if (!paystackKey) {
   //   return (
   //     <LogoSpinner lightColor='' darkColor=''/>
   //   );
   // }
-
 
   return (
     <PaystackProvider
@@ -68,6 +66,7 @@ export default function RootLayout() {
       currency='NGN'
       defaultChannels={["card", "bank_transfer"]}
     >
+      <NotificationProvider>
         <AuthProvider>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             <StatusBar style="auto" />
@@ -77,6 +76,7 @@ export default function RootLayout() {
             </Stack>
           </ThemeProvider>
         </AuthProvider>
+      </NotificationProvider>
     </PaystackProvider>
   );
 }

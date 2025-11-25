@@ -2,17 +2,21 @@ import { StatusModal } from '@/components/StatusModal';
 import { ThemedButton } from '@/components/ThemedButton';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Colors, decryptamount, decryptData, DIMENSION, formatDate } from '@/constants/Colors';
+import { Colors, decryptamount, decryptData, DIMENSION, encryptData, formatDate } from '@/constants/Colors';
+import { useNotification } from '@/context/NotificationContext';
 import { useAuth } from '@/hooks/AuthContext';
-import { customerinfocheck, frequentlyusedartisans, getlatestinvoices, notificationunread } from '@/hooks/AuthRoutes';
+import { frequentlyusedartisans, getlatestinvoices, notificationunread, updateExpoToken } from '@/hooks/AuthRoutes';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { AntDesign, Entypo, Feather, FontAwesome, Fontisto, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
+import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { Alert, Animated, Dimensions, Image, Modal, StyleSheet, TextProps, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Animated, Dimensions, Image, Modal, StyleSheet, TextProps, TouchableOpacity, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
   const { height } = Dimensions.get('window');
 
@@ -47,86 +51,69 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
   const [state, setState] = useState<any[]>([]);
   const [city, setCity] = useState<any[]>([]);
   const [invoice, setInvoice] = useState<any>([]);
+  const {expoPushToken, notification, error} = useNotification();
   const [formData, setFormData] = useState<any>({
     countryName: "",
     stateName: "",
     cityName: "",
   });
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     // if (!user || !token) return;
+  useFocusEffect(
+    useCallback(() => {
+      if (!user?.customer_id || !token) return;
 
-  //     if (user?.pushtoken === expoPushToken) {
-  //       return;
-  //     }
+      let isActive = true;
+      const syncToken = async () => {
+        try {
+          const tokenResponse = await Notifications.getExpoPushTokenAsync({
+            projectId:
+              Constants?.expoConfig?.extra?.eas?.projectId ??
+              Constants?.easConfig?.projectId,
+          });
+          const pushtoken = tokenResponse.data;
 
-  //     const syncToken = async () => {
-  //       try {
-  //         const response = await updateExpoToken(String(user?.customer_id), encryptData(expoPushToken), decryptData(token));
-  //         updateUserFields({ pushtoken: expoPushToken });
-  //         console.log("Push token synced successfully.");
-  //         setInvoice(response);
-  //       } catch (error: any) {
-  //         console.log("Error syncing notification token:", error.response.data);
-  //       }
-  //     };
+          if (!isActive) return;
+          if (!pushtoken) return;
 
-  //     syncToken();
-  //   }, [expoPushToken])
-  // );
-
-
-  //  useFocusEffect(
-  //   useCallback(() => {
-  //     // if (!user || !token) return;
-
-  //     if (user?.pushtoken === expoPushToken) {
-  //       return;
-  //     }
-      
-  //     const syncToken = async () => {
-  //       try {
-  //         const token = (await Notifications.getExpoPushTokenAsync({ projectId: Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId})).data;
-  //         console.log("push token:",token)
-
-  //         if(token){
-  //           await updateExpoToken(String(user?.customer_id), encryptData(token), decryptData(token));
-  //           updateUserFields({ pushtoken: expoPushToken });
-  //         }
-  //       } catch (error: any) {
-  //         console.log("Error syncing notification token:", error);
-  //       }
-  //     };
-
-  //     syncToken();
-  //   }, [])
-  // );
-
-
-  useLayoutEffect(() => {
-    const fetchPendingRequests = async () => {
-      try {
-        const response = await customerinfocheck(user?.customer_id, decryptData(token));
-        updateUser(response)
-      } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'Unable to load notification settings.')
+          // Only update if it's different from what's already stored in context
+          if (user?.pushtoken !== pushtoken) {
+            console.log("[HomeScreen] pushing new token to server:", pushtoken);
+            await updateExpoToken(String(user.customer_id), encryptData(pushtoken), decryptData(token));
+            updateUserFields({ pushtoken });
+          } else {
+            // nothing to do
+            // console.log("[HomeScreen] push token unchanged");
+          }
+        } catch (err) {
+          console.log("Error syncing notification token:", err);
         }
-        console.error("Error fetching pending requests:", error);
-      } finally {
-        // setisloading(false);
+      };
+
+      syncToken();
+
+      return () => { isActive = false; };
+    }, [user?.customer_id, token, user?.pushtoken, updateUserFields])
+  );
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await notificationunread(
+          user?.userid,
+          decryptData(token)
+        );
+        updateUserFields({
+          notificationcount: response,
+        });
+      } catch (error) {
+        console.log(error);
       }
     };
 
-    const unsubscribe = navigation.addListener("focus", fetchPendingRequests);
+    fetchNotifications();      
+  }, [user?.notificationcount])
 
-    return unsubscribe;
-  }, []);
+
 
   const openPopup = () => {
     setModalVisible(true);
@@ -225,24 +212,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
     }, [token])
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!user?.userid || !token) return;
-
-      const fetchNotifications = async () => {
-        try {
-          const response = await notificationunread(user.userid, decryptData(token));
-          updateUserFields({ notificationcount: response });
-        } catch (error) {
-          console.log(error);
-        }
-      };
-
-      fetchNotifications();
-    }, [user?.userid, token])
-  );
-
-
+  
   useEffect(() => {
     const interval = setInterval(() => {
       if (user?.transaction_pin_setup === "N") {

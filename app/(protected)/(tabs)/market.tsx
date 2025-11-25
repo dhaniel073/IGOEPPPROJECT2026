@@ -39,7 +39,7 @@ export default function Market() {
           await logout(); // from your AuthContext
           router.replace("/login"); // navigate to login screen
         } else {
-          Alert.alert('Error', 'Unable to load notification settings.')
+          Alert.alert('Error', 'Unable to load categories.')
         }
         console.log(error.response)
       }finally{
@@ -82,34 +82,46 @@ export default function Market() {
         ListHeaderComponent={
           <>
             {/* Cart Button */}
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.cartButton}
-              onPress={() => router.push('/cart')}
-            >
-              <MaterialIcons name="shopping-cart" size={22} color={Colors.green} />
-              {user?.cartcount > 0 && (
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: -5,
-                    right: -5,
-                    backgroundColor: Colors.red,
-                    minWidth: 18,
-                    height: 18,
-                    borderRadius: 9,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    paddingHorizontal: 4,
-                  }}
-                >
-                  <ThemedText style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>
-                    {user?.cartcount > 100 ? '99+' : user?.cartcount}
-                  </ThemedText>
-                </View>
-              )}
-            </TouchableOpacity>
+            <View style={{alignItems:'center', flexDirection:'row', justifyContent:'space-between'}}>
 
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => router.push('/carthistory')}
+              >
+                <ThemedText style={{ fontSize: 15 }}>
+                  Order history
+                </ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.cartButton}
+                onPress={() => router.push('/cart')}
+              >
+                <MaterialIcons name="shopping-cart" size={22} color={Colors.green} />
+                {user?.cartcount > 0 && (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: -5,
+                      right: -5,
+                      backgroundColor: Colors.red,
+                      minWidth: 18,
+                      height: 18,
+                      borderRadius: 9,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      paddingHorizontal: 4,
+                    }}
+                  >
+                    <ThemedText style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>
+                      {user?.cartcount > 100 ? '99+' : user?.cartcount}
+                    </ThemedText>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
+            
             {/* Titles */}
             <ThemedText type="titleMedium">Market Place</ThemedText>
             <ThemedText style={styles.subtitle}>

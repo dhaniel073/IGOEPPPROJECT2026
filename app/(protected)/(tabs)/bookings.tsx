@@ -47,7 +47,7 @@ export default function bookings({
                     await logout(); // from your AuthContext
                     router.replace("/login"); // navigate to login screen
                 } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
+                    Alert.alert('Error', 'Unable to load requests.')
                 }
             } finally {
             setIsFetching(false);
@@ -82,10 +82,10 @@ export default function bookings({
                     </Animated.ScrollView>
                 ) : (
                     <FlatList
-                    data={fetchedRequest}
-                    renderItem={({ item }) => <BookingCard item={item} />}
-                    keyExtractor={(item: any) => item.id.toString()}
-                    showsVerticalScrollIndicator={false}
+                        data={fetchedRequest}
+                        renderItem={({ item }) => <BookingCard item={item} />}
+                        keyExtractor={(item: any) => item.id.toString()}
+                        showsVerticalScrollIndicator={false}
                     />
                 )
             }
