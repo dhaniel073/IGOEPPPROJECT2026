@@ -95,7 +95,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
                 style={[styles.image1, {position:'absolute', left:130, top: 90}]}
             />
             <Image
-                source={require("@/assets/images/img1.jpg")}
+                source={require("@/assets/images/img6.jpg")}
                 style={[styles.image1, {position:'absolute', left:130, top: 150}]}
             />
             <Image

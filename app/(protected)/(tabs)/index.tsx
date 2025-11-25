@@ -7,16 +7,16 @@ import { useNotification } from '@/context/NotificationContext';
 import { useAuth } from '@/hooks/AuthContext';
 import { frequentlyusedartisans, getlatestinvoices, notificationunread, updateExpoToken } from '@/hooks/AuthRoutes';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { AntDesign, Entypo, Feather, FontAwesome, Fontisto, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, Entypo, Feather, FontAwesome, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import Constants from 'expo-constants';
+import * as LocalAuthentication from "expo-local-authentication";
 import * as Notifications from 'expo-notifications';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Animated, Dimensions, Image, Modal, StyleSheet, TextProps, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Dimensions, Image, Modal, StyleSheet, TextProps, TouchableOpacity, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-
 
   const { height } = Dimensions.get('window');
 
@@ -52,6 +52,11 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
   const [city, setCity] = useState<any[]>([]);
   const [invoice, setInvoice] = useState<any>([]);
   const {expoPushToken, notification, error} = useNotification();
+  const [isBalanceHidden, setIsBalanceHidden] = useState<"Y" | "N">(
+  user?.isBalanceHidden === "Y" || user?.isBalanceHidden === "N"
+    ? user.isBalanceHidden
+    : "Y"
+  );
   const [formData, setFormData] = useState<any>({
     countryName: "",
     stateName: "",
@@ -270,6 +275,39 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
     }
   };
 
+
+  const handleToggleBalance = async () => {
+    // Check hardware
+    const hasHardware = await LocalAuthentication.hasHardwareAsync();
+    if (!hasHardware) {
+      return Alert.alert("Security Required", "Your device does not support device lock.");
+    }
+
+    // Check if security is enrolled
+    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+    if (!isEnrolled) {
+      return Alert.alert(
+        "No Device Lock",
+        "Please enable fingerprint, FaceID, or passcode to protect your balance."
+      );
+    }
+
+    // Authenticate
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: "Authenticate to toggle balance visibility",
+      fallbackLabel: "Use Passcode",
+    });
+
+    if (!result.success) {
+      return Alert.alert("Authentication Failed", "Could not verify your identity.");
+    }
+
+    // Toggle between Y and N
+    const newState = isBalanceHidden === "Y" ? "N" : "Y";
+    setIsBalanceHidden(newState);
+    updateUserFields({isBalanceHidden: newState})
+  };
+
   
 
   const now = new Date();
@@ -370,15 +408,24 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
           <ThemedView style={{flexDirection:'row', justifyContent:'space-between', }}>
            <ThemedText type="title">
+            {user?.isBalanceHidden === 'N' ? "*******" :
+              <>
               {decryptamount(user?.wallet_balance)
                 .toLocaleString('en-NG', {
                   style: 'currency',
                   currency: 'NGN',
                 })}
+              </>
+            }
             </ThemedText>
             
-            <TouchableOpacity>
-              <Feather name="eye" size={22} color={color} />
+            <TouchableOpacity onPress={handleToggleBalance}>
+              {/* <Feather name="eye" size={22} color={color} /> */}
+              <Ionicons
+                name={user?.isBalanceHidden === "N" ? "eye-off" : "eye"}
+                size={22}
+                color={color}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity style={{ alignItems: 'center', marginTop:-20 }} onPress={() => router.push('/addmoney')}>

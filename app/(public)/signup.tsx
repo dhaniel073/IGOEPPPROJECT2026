@@ -41,7 +41,7 @@ export default function signup({
           style={[styles.image1, {position:'absolute', left:70, top: 150}]}
         />
         <Image
-          source={require("@/assets/images/img1.jpg")}
+          source={require("@/assets/images/img6.jpg")}
           style={[styles.image1, {position:'absolute', left:80, top: 270}]}
         />
         <Image

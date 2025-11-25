@@ -28,6 +28,7 @@ type UserData = {
   cartcount: any;
   notificationcount: any;
   pushtoken: any;
+  isBalanceHidden: any
 
   updated_at?: number; // ADDED: timestamp to avoid overwriting new data
 };

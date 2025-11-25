@@ -9,15 +9,25 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "We use notifications to keep you updated."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/icon1.png",
-        "backgroundImage": "./assets/images/loader.png",
-        "monochromeImage": "./assets/images/loader.png"
+        "backgroundImage": "./assets/images/icon1.png",
+        "monochromeImage": "./assets/images/icon1.png"
       },
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO",
+        "NOTIFICATIONS"
+      ],
       "package": "com.cdhaniel.igoeppCus",
       "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": true,
@@ -32,7 +42,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/loader.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -49,7 +59,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "e77e3120-f872-4cd9-8ceb-93dae514902d"
+        "projectId": "014b50f4-d447-4b64-a58c-4d6b29fba0d9"
       }
     },
     "owner": "cdhaniel"

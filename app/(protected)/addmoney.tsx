@@ -5,16 +5,16 @@ import { Colors, decryptamount, decryptData, DIMENSION } from '@/constants/Color
 import { useAuth } from '@/hooks/AuthContext'
 import { customerinfocheck } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
-import { Feather, FontAwesome, Fontisto, Ionicons, MaterialCommunityIcons, SimpleLineIcons } from '@expo/vector-icons'
+import { FontAwesome, Fontisto, Ionicons, MaterialCommunityIcons, SimpleLineIcons } from '@expo/vector-icons'
 import * as Clipboard from 'expo-clipboard'
+import * as LocalAuthentication from "expo-local-authentication"
 import { useNavigation, useRouter } from 'expo-router'
 import { useLayoutEffect, useState } from 'react'
 import { Alert, Animated, StyleSheet, TextProps, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-
 export type Props = TextProps & {
-  lightColor?: string;
+    lightColor?: string;
   darkColor?: string;
   headerBackgroundColor:{ dark: string; light: string };
 };
@@ -30,8 +30,13 @@ export default function addmoney({
     const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
     const router = useRouter()
     const [visible,setIsVisible] = useState(false)
-    const { user, token, updateUser, logout } = useAuth();
+    const { user, token, updateUser, logout, updateUserFields } = useAuth();
     const navigation = useNavigation()
+    const [isBalanceHidden, setIsBalanceHidden] = useState<"Y" | "N">(
+      user?.isBalanceHidden === "Y" || user?.isBalanceHidden === "N"
+        ? user.isBalanceHidden
+        : "Y"
+    );
 
     const copyToClipboard = async (number: string) => {
         await Clipboard.setStringAsync(number);
@@ -70,6 +75,38 @@ export default function addmoney({
         return unsubscribe;
     }, []);
     
+    const handleToggleBalance = async () => {
+        // Check hardware
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        if (!hasHardware) {
+          return Alert.alert("Security Required", "Your device does not support device lock.");
+        }
+    
+        // Check if security is enrolled
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        if (!isEnrolled) {
+          return Alert.alert(
+            "No Device Lock",
+            "Please enable fingerprint, FaceID, or passcode to protect your balance."
+          );
+        }
+    
+        // Authenticate
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: "Authenticate to toggle balance visibility",
+          fallbackLabel: "Use Passcode",
+        });
+    
+        if (!result.success) {
+          return Alert.alert("Authentication Failed", "Could not verify your identity.");
+        }
+    
+        // Toggle between Y and N
+        const newState = isBalanceHidden === "Y" ? "N" : "Y";
+        setIsBalanceHidden(newState);
+        updateUserFields({isBalanceHidden: newState})
+      };
+    
   return (
     <SafeAreaView style={{ flex: 1, paddingHorizontal:20, backgroundColor: color1, maxHeight: DIMENSION.HEIGHT }} edges={['top']}>
         <Animated.ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{flexGrow:1}}>  
@@ -99,19 +136,27 @@ export default function addmoney({
                 <ThemedView style={{flexDirection:'row', justifyContent:'space-between', }}>
                     <ThemedView>
                         <ThemedText type='title'>
-                            {decryptamount(user?.wallet_balance)
+                           {user?.isBalanceHidden === 'N' ? "*******" :
+                                <>
+                                {decryptamount(user?.wallet_balance)
                                 .toLocaleString('en-NG', {
                                     style: 'currency',
                                     currency: 'NGN',
-                                })
+                                })}
+                                </>
                             }
                         </ThemedText>
                         <ThemedText type='small' style={{color:Colors.gray9}}>Available balance</ThemedText>
                     </ThemedView>
 
                     
-                    <TouchableOpacity>
-                        <Feather name="eye" size={24} color={color} />
+                    <TouchableOpacity onPress={handleToggleBalance}>
+                        {/* <Feather name="eye" size={22} color={color} /> */}
+                        <Ionicons
+                        name={user?.isBalanceHidden === "N" ? "eye-off" : "eye"}
+                        size={22}
+                        color={color}
+                        />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={{ alignItems: 'center', marginTop:-25 }}>

@@ -53,6 +53,23 @@ export default function RootLayout() {
     fetchPaystackKey();
   }, []);
 
+  useEffect(() => {
+    askNotificationPermission();
+  }, []);
+
+  const askNotificationPermission = async () => {
+    const { status } = await Notifications.getPermissionsAsync();
+
+    // If not granted, ask the user
+    if (status !== 'granted') {
+      const { status: newStatus } = await Notifications.requestPermissionsAsync();
+      console.log("Notification permission:", newStatus);
+    } else {
+      console.log("Notification already granted");
+    }
+  };
+
+
   // if (!paystackKey) {
   //   return (
   //     <LogoSpinner lightColor='' darkColor=''/>

@@ -6,13 +6,13 @@ import { Colors, decryptamount, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { customerwallethistory } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
-import { AntDesign, Feather, MaterialCommunityIcons } from '@expo/vector-icons'
+import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation, useRouter } from 'expo-router'
 import React, { useLayoutEffect, useState } from 'react'
 import { Alert, Image, ScrollView, StyleSheet, Text, TextProps, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-
+import * as LocalAuthentication from "expo-local-authentication"
 export type Props = TextProps & {
   lightColor?: string;
   darkColor?: string;
@@ -21,46 +21,83 @@ export type Props = TextProps & {
 
 
 export default function wallethistory({
-    lightColor,
-    darkColor,
+  lightColor,
+  darkColor,
     headerBackgroundColor,
   }: Props){
-
+    
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
     const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
     const router = useRouter()
     const [history, sethistory] = useState<any>([])
-    const {user, token, logout} = useAuth()
+    const {user, token, logout, updateUserFields} = useAuth()
     const [isFetching, setIsFetching] = React.useState(false);
     const navigation = useNavigation()
+    const [isBalanceHidden, setIsBalanceHidden] = useState<"Y" | "N">(
+    user?.isBalanceHidden === "Y" || user?.isBalanceHidden === "N"
+      ? user.isBalanceHidden
+      : "Y"
+    );
     
     useLayoutEffect(() => {
-        const fetchPendingRequests = async () => {
-            try {
-            setIsFetching(true);
-            const response = await customerwallethistory(user?.customer_id, decryptData(token));
-            console.log(response)
-            sethistory(response.data);
-            } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert("Session expired", "Please log in again.");
-                    await logout(); // from your AuthContext
-                    router.replace("/login"); // navigate to login screen
-                } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
-                }
-            } finally {
-            setIsFetching(false);
-            }
-        };
+      const fetchPendingRequests = async () => {
+        try {
+        setIsFetching(true);
+        const response = await customerwallethistory(user?.customer_id, decryptData(token));
+        console.log(response)
+        sethistory(response.data);
+        } catch (error: any) {
+          if (error.response?.status === 401) {
+            Alert.alert("Session expired", "Please log in again.");
+            await logout(); // from your AuthContext
+            router.replace("/login"); // navigate to login screen
+          } else {
+            Alert.alert('Error', 'Unable to load notification settings.')
+          }
+        } finally {
+        setIsFetching(false);
+        }
+      };
 
-        const unsubscribe = navigation.addListener("focus", fetchPendingRequests);
+      const unsubscribe = navigation.addListener("focus", fetchPendingRequests);
 
-        return unsubscribe;
+      return unsubscribe;
     }, [navigation, user?.customer_id, token]);
 
+    const handleToggleBalance = async () => {
+      // Check hardware
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      if (!hasHardware) {
+        return Alert.alert("Security Required", "Your device does not support device lock.");
+      }
+  
+      // Check if security is enrolled
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      if (!isEnrolled) {
+        return Alert.alert(
+          "No Device Lock",
+          "Please enable fingerprint, FaceID, or passcode to protect your balance."
+        );
+      }
+  
+      // Authenticate
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Authenticate to toggle balance visibility",
+        fallbackLabel: "Use Passcode",
+      });
+  
+      if (!result.success) {
+        return Alert.alert("Authentication Failed", "Could not verify your identity.");
+      }
+  
+      // Toggle between Y and N
+      const newState = isBalanceHidden === "Y" ? "N" : "Y";
+      setIsBalanceHidden(newState);
+      updateUserFields({isBalanceHidden: newState})
+    };
+
     if(isFetching){
-        return <LogoSpinner lightColor='' darkColor=''/>
+      return <LogoSpinner lightColor='' darkColor=''/>
     }
 
   return (
@@ -78,17 +115,26 @@ export default function wallethistory({
 
           <ThemedView style={{flexDirection:'row', justifyContent:'space-between', }}>
            <ThemedText type="title">
+              {user?.isBalanceHidden === 'N' ? "*******" :
+              <>
               {decryptamount(user?.wallet_balance)
                 .toLocaleString('en-NG', {
                   style: 'currency',
                   currency: 'NGN',
                 })}
+              </>
+            }
             </ThemedText>
             
-            <TouchableOpacity>
-              <Feather name="eye" size={22} color={color} />
+            <TouchableOpacity onPress={handleToggleBalance}>
+              {/* <Feather name="eye" size={22} color={color} /> */}
+              <Ionicons
+                name={user?.isBalanceHidden === "N" ? "eye-off" : "eye"}
+                size={22}
+                color={color}
+              />
             </TouchableOpacity>
-
+            
             <TouchableOpacity style={{ alignItems: 'center', marginTop:-20 }} onPress={() => router.push('/addmoney')}>
               <View style={{backgroundColor: Colors.shadow, padding: 8,borderRadius: 30, 
                 // iOS shadow
