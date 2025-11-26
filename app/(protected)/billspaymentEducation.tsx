@@ -386,23 +386,31 @@ export default function billspaymentEducation({
             animationType="slide" 
             onRequestClose={closePopup1}
           >
-            <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
-  
-            <Animated.View
-              style={[
-                styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-              ]}
+            <KeyboardAvoidingView 
+              style={{ flex: 1 }} 
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
             >
-              <ThemedText type='titleMedium' style={{textAlign:'center'}}>Enter Pin</ThemedText>
-              <View style={{margin:8}}/> 
-  
-              <ThemedText style={{textAlign:'center', color: Colors.gray9}}>Enter Transaction PIN</ThemedText>
-              <View style={{margin:10}}/>
-              <View style={{margin:5}}/>
-              <PinInput length={4} secure={true} onSubmit={(pin) => {closePopup1(), pinvalidation(pin)}}/>
-              <View style={{margin:10}}/>
-            </Animated.View>
+              <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
+    
+              <Animated.View
+                style={[
+                  styles.popup,
+                  { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                ]}
+              >
+                <ThemedText type='titleMedium' style={{textAlign:'center'}}>Enter Pin</ThemedText>
+                <View style={{margin:8}}/> 
+    
+                <ThemedText style={{textAlign:'center', color: Colors.gray9}}>Enter Transaction PIN</ThemedText>
+                <View style={{margin:10}}/>
+                <View style={{margin:5}}/>
+                
+    
+                <PinInput length={4} secure={true} onSubmit={(pin) => {closePopup1(), pinvalidation(pin)}}/>
+                <View style={{margin:10}}/>
+              </Animated.View>
+            </KeyboardAvoidingView>
           </Modal>
 
           <ReceiptView visible={visible} onClose={() => setVisible(false)} watermarkText="IGOEPP">
@@ -467,7 +475,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
+    // boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
   },
   overlay: {
     flex: 1,

@@ -3,7 +3,7 @@ import LoadingScreen from '@/components/LoadingScreen'
 import { ThemedText } from '@/components/ThemedText'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { cartshow, category } from '@/hooks/AuthRoutes'
+import { cartshow, category, walletbal } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useNavigation, useRouter } from 'expo-router'
@@ -54,7 +54,8 @@ export default function Market() {
       try {
         setIsLoading(true)
         const response = await cartshow(user?.customer_id, decryptData(token))
-        updateUserFields({cartcount: response.length})
+        const wallet = await walletbal(user?.customer_id, decryptData(token));
+        updateUserFields({cartcount: response.length, wallet_balance: wallet.wallet_balance})
       } catch (error: any) {
         console.log(error.response)
       }finally{

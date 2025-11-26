@@ -200,6 +200,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
     }, [user, token])
   );
 
+
   useFocusEffect(
     useCallback(() => {
       if (!token) return;

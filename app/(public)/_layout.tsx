@@ -44,20 +44,22 @@ export default function PublicLayout() {
 
 
     return (
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <StatusBar style="auto" />
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="landingscreen" options={{ headerShown: false }} />
-            <Stack.Screen name="login" options={{ headerShown: false }} />
-            <Stack.Screen name="signup" options={{ headerShown: false }} />
-            <Stack.Screen name="signup1" options={{ headerShown: false }} />
-            <Stack.Screen name="signupPersonal" options={{ headerShown: false }} />
-            <Stack.Screen name="signupBusiness" options={{ headerShown: false }} />
-            <Stack.Screen name="welcomescreen" options={{ headerShown: false }} />
-            <Stack.Screen name="signupBusinessEntity" options={{ headerShown: false }} />
-            
-            {/* <Stack.Screen name="+not-found" /> */}
-          </Stack>
-        </ThemeProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <StatusBar style="auto" />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="landingscreen" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="signup" options={{ headerShown: false }} />
+          <Stack.Screen name="signup1" options={{ headerShown: false }} />
+          <Stack.Screen name="signupPersonal" options={{ headerShown: false }} />
+          <Stack.Screen name="signupBusiness" options={{ headerShown: false }} />
+          <Stack.Screen name="welcomescreen" options={{ headerShown: false }} />
+          <Stack.Screen name="signupBusinessEntity" options={{ headerShown: false }} />
+          <Stack.Screen name="forgotpassword" options={{ headerShown: false }} />
+
+          
+          {/* <Stack.Screen name="+not-found" /> */}
+        </Stack>
+      </ThemeProvider>
   );
 }

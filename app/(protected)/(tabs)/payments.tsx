@@ -4,12 +4,12 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { Colors, decryptData, toCamelCase } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { billcategory, getbillsHistory, getbillsHistoryById } from '@/hooks/AuthRoutes'
+import { billcategory, getbillsHistory, getbillsHistoryById, walletbal } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Entypo, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import dayjs from "dayjs"
 import { useNavigation, useRouter } from 'expo-router'
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { Alert, Animated, Dimensions, FlatList, StyleSheet, Text, TextProps, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 const { height } = Dimensions.get('window');
@@ -32,7 +32,7 @@ export default function payments({
     const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
     const router = useRouter()
     const navigation = useNavigation()
-    const {user, token, logout} = useAuth()
+    const {user, token, logout, updateUserFields} = useAuth()
 
     const [activeTab, setActiveTab] = useState<'bills' | 'history'>('bills');
 
@@ -63,6 +63,20 @@ export default function payments({
       }).start(() => setVisible(false)); // Close after animation
     };
 
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const response = await walletbal(user?.customer_id, decryptData(token));
+          updateUserFields({wallet_balance: response.wallet_balance})
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
+      fetchData();
+    }, [])
+    
+    
     
     useLayoutEffect(() => {
       const fetchPendingRequests = async () => {
@@ -70,6 +84,7 @@ export default function payments({
           setIsFetching(true);
           const response = await getbillsHistory(user?.customer_id, decryptData(token));
           setFetchedHistory(response);
+          console.log(response)
         } catch (error: any) {
           if (error.response?.status === 401) {
             Alert.alert("Session expired", "Please log in again.");
@@ -274,7 +289,7 @@ export default function payments({
                 showIcon={true}
                 imageuri={item.imagepath}
               >
-              <ThemedView key={item.referenceId} style={{backgroundColor: Colors.gray6, marginHorizontal:3, paddingHorizontal:5, paddingVertical:5, borderRadius:8}}>
+              <ThemedView key={item.referenceId} style={{backgroundColor: Colors.gray6, marginHorizontal:10, paddingHorizontal:20, paddingVertical:20}}>
                 <View style={{justifyContent:'space-between', flexDirection:'row'}}>
                   <ThemedText style={{color: '#000'}} type='small'>From</ThemedText>
                   <ThemedText style={{color:Colors.wallet }} type='small'>Wallet</ThemedText>

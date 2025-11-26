@@ -4,10 +4,10 @@ import LogoSpinner from '@/components/LoadingScreen'
 import { ThemedText } from '@/components/ThemedText'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { showpendingrequestbycustomerid } from '@/hooks/AuthRoutes'
+import { showpendingrequestbycustomerid, walletbal } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { useNavigation, useRouter } from 'expo-router'
-import React, { useLayoutEffect } from 'react'
+import React, { useEffect, useLayoutEffect } from 'react'
 import { Alert, Animated, FlatList, StyleSheet, TextProps, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -58,6 +58,19 @@ export default function bookings({
 
         return unsubscribe;
     }, [navigation, user?.customer_id, token]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+        try {
+            const response = await walletbal(user?.customer_id, decryptData(token));
+            updateUserFields({wallet_balance: response.wallet_balance})
+        } catch (error) {
+            console.log(error);
+        }
+        };
+
+        fetchData();
+    }, [])
 
     if(isFetching){
         return <LogoSpinner lightColor='' darkColor=''/>

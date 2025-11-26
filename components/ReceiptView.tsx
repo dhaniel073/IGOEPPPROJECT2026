@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { Ionicons } from "@expo/vector-icons";
+import { Entypo, Feather, Ionicons } from "@expo/vector-icons";
 import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
@@ -128,7 +128,7 @@ export default function ReceiptView({
   console.log(imageuri)
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={() => {}}>
       <ThemedView
         style={[styles.modalContainer, { backgroundColor }]}
         lightColor={backgroundColor}
@@ -205,23 +205,27 @@ export default function ReceiptView({
         </ViewShot>
 
         {/* Action Buttons */}
-        <View style={{ width: "100%" }}>
-          <ThemedButton
-            onPress={saveReceipt}
-            style={[styles.button, { backgroundColor: Colors.green }]}
-          >
-            <Text style={styles.buttonText}>Download Receipt</Text>
-          </ThemedButton>
+        <View style={{ width: "100%",}}>
+          <View style={{flexDirection:'row', justifyContent:'space-around'}}>
+            <ThemedButton
+              onPress={saveReceipt}
+              style={[styles.button, { backgroundColor: Colors.green, width:'47%', flexDirection:'row', alignItems:'center' }]}
+              >
+              <Text style={[styles.buttonText, {marginRight:5}]}>Download Receipt</Text>
+              <Feather name="download" size={15} color="white" />
+            </ThemedButton>
 
-          <View style={{margin:6}}/> 
-          <ThemedButton
-            onPress={shareReceipt}
-            style={[styles.button, { backgroundColor: Colors.green }]}
-          >
-            <ThemedText type="small" style={styles.buttonText}>Share Receipt</ThemedText>
-          </ThemedButton>
+            <View style={{margin:6}}/> 
+            <ThemedButton
+              onPress={shareReceipt}
+              style={[styles.button, { backgroundColor: Colors.green, width:'47%', flexDirection:'row', alignItems:'center' }]}
+            > 
+              <ThemedText type="small" style={[styles.buttonText, {marginRight:5}]}>Share Receipt</ThemedText>
+              <Entypo name="share" size={15} color="white" />  
+            </ThemedButton>
+          </View>
 
-          <ThemedButton onPress={() => [onClose(), router.push("/payments")]}>
+          <ThemedButton style={styles.button} onPress={() => [onClose(), router.push("/payments")]}>
             <ThemedText style={styles.buttonText}>Go To Home</ThemedText>
           </ThemedButton>
         </View>
@@ -258,7 +262,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontSize: 13,
+    fontSize: 11,
     textAlign: "center",
   },
 });

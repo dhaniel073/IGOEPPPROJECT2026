@@ -115,7 +115,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
       <View style={{margin:5  }}/> 
 
       <View style={styles.searchRow}> 
-        <TextInput style={styles.input} placeholder="Search artisans by name" value={searchQuery} onChangeText={setSearchQuery} returnKeyType="search" /> 
+        <TextInput style={styles.input} placeholder="Search artisans by name" placeholderTextColor={"#000"}  value={searchQuery} onChangeText={setSearchQuery} returnKeyType="search" /> 
         {searchQuery.length > 0 && ( 
         <TouchableOpacity onPress={() => setSearchQuery('')}> 
           <MaterialCommunityIcons name="close" size={20} color={color} /> 

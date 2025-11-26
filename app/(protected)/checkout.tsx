@@ -443,13 +443,17 @@ const { height } = Dimensions.get('window');
             </ThemedButton>
             <View style={{margin:15}}/> 
 
-
             <Modal
                 transparent
                 visible={modalVisible}
                 animationType="slide" 
                 onRequestClose={closePopup}
             >
+                <KeyboardAvoidingView 
+                style={{ flex: 1 }} 
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
+                >
                 <TouchableOpacity style={styles.overlay} onPress={() => [closePopup()]} />
     
                 <Animated.View
@@ -464,9 +468,12 @@ const { height } = Dimensions.get('window');
                 <ThemedText style={{textAlign:'center', color: Colors.gray9}}>Enter Transaction PIN</ThemedText>
                 <View style={{margin:10}}/>
                 <View style={{margin:5}}/>
+                
+    
                 <PinInput length={4} secure={true} onSubmit={(pin) => {closePopup(), pinvalidation(pin)}}/>
                 <View style={{margin:10}}/>
                 </Animated.View>
+                </KeyboardAvoidingView>
             </Modal>
 
             <StatusModal
@@ -510,7 +517,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
+        // boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
     },
     overlay: {
         flex: 1,

@@ -109,15 +109,26 @@ export default function carthistory({
                   <ThemedText>{item.category_name}</ThemedText>
                   <ThemedText type='small'>{item.product_name || 'Brand'}</ThemedText>
                   <ThemedText>NGN {Number(item.sub_total_amount).toLocaleString()}</ThemedText>
-                  {item.delivery_status === 'D' ? 
+                  { item.delivery_status === 'D' ? 
                       <ThemedText type="small" style={{color: Colors.green4}}>
                         Delivered
                       </ThemedText>
-                    :
+                    : item.delivery_status === 'P' ?
+                      <ThemedText type="small" style={{color: 'orange'}}>
+                        Packaged
+                      </ThemedText>
+                    : item.delivery_status === 'R' ?
+                      <ThemedText type="small" style={{color: Colors.yellow}}>
+                        Dispatched
+                      </ThemedText>
+                    : item.delivery_status === 'N' ?
                       <ThemedText type="small">
+                        Undelivered
+                      </ThemedText>
+                    : <ThemedText type="small" style={{color: Colors.red}}>
                         Cancelled
                       </ThemedText>
-                  }  
+                  }    
                     <View style={{margin:3}}/> 
 
                     <ThemedText  type="small">

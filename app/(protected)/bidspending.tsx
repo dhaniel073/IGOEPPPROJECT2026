@@ -1,18 +1,19 @@
 import EmptyScreen from '@/components/EmptyScreen';
 import GoBack from '@/components/GoBack';
 import LogoSpinner from '@/components/LoadingScreen';
+import PinInput from '@/components/PinInput';
 import { StatusModal } from '@/components/StatusModal';
 import { ThemedButton } from '@/components/ThemedButton';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Colors, decryptData } from '@/constants/Colors';
+import { Colors, decryptData, encryptData } from '@/constants/Colors';
 import { useAuth } from '@/hooks/AuthContext';
-import { bidaccept, bidacceptcash, bidacceptdebitcard, bidacceptinvoice, biddecline, bidnegotiate, bidrequests, getbanks, getsession } from '@/hooks/AuthRoutes';
+import { bidaccept, bidacceptcash, bidacceptdebitcard, bidacceptinvoice, biddecline, bidnegotiate, bidrequests, getbanks, getsession, validatepin } from '@/hooks/AuthRoutes';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Feather, FontAwesome, FontAwesome5, FontAwesome6, Fontisto, MaterialCommunityIcons, MaterialIcons, SimpleLineIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { Alert, Animated, Dimensions, FlatList, Image, Modal, StyleSheet, Text, TextInput, TextProps, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Dimensions, FlatList, Image, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TextProps, TouchableOpacity, View } from 'react-native';
 import { usePaystack } from 'react-native-paystack-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -92,6 +93,7 @@ export default function bidspending({
     const [modalVisible1, setModalVisible1] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
     const [modalVisible3, setModalVisible3] = useState(false);
+    const [modalVisible4, setModalVisible4] = useState(false);
     const [bank, setBank] = useState<any>([])
     const [availbank, setavailbank] = useState<string | null>()
 
@@ -103,6 +105,7 @@ export default function bidspending({
     const [amount1, setAmount1] = useState<any>()
     const {popup} = usePaystack()
     const [sessionid, setSessionId] = useState<any>()
+    const [isPinLoading, setIsPinLoading] = useState(false);
     const [renegotiatedata, setRenegotiateData] = useState<any>({service_name: '', date: '', time: ''})   
 
     const slideAnim = React.useRef(new Animated.Value(height)).current; // Start below the screen
@@ -163,7 +166,6 @@ export default function bidspending({
         };
 
         const unsubscribe = navigation.addListener("focus", fetchPendingRequests);
-
         return unsubscribe;
     }, []);
 
@@ -277,6 +279,31 @@ export default function bidspending({
         }
     };
 
+    const pinvalidation = async (pin: any) => {
+        console.log(pin);
+    
+        try {
+          setIsPinLoading(true);
+    
+          const response = await validatepin(
+            user?.customer_id,
+            encryptData(pin),
+            decryptData(token)
+          );
+    
+          console.log(response);
+    
+          closePopup1();        // close the PIN modal
+          makepayment();        // start payment loading immediately
+    
+        } catch (error: any) {
+          Alert.alert("Error", error.response?.data?.message || "PIN validation failed");
+          console.log(error.response?.data?.message);
+    
+        } finally {
+          setIsPinLoading(false);
+        }
+    };
     const renegotiatehandler = async () => {
         if (!amount || isNaN(amount) || Number(amount) <= 0) {
             return Alert.alert("Invalid", "Please enter a valid amount")
@@ -304,8 +331,6 @@ export default function bidspending({
         });
     };
 
-
-
     const openPopup = () => {
         setModalVisible(true);
         Animated.timing(slideAnim, {
@@ -325,6 +350,23 @@ export default function bidspending({
 
     const openPopup1 = () => {
         setModalVisible1(true);
+        Animated.timing(slideAnim, {
+        toValue: 0, // Slide to the screen
+        duration: 300,
+        useNativeDriver: true,
+        }).start();
+    };
+    
+    const closePopup2 = () => {
+        Animated.timing(slideAnim, {
+        toValue: height, // Slide back down
+        duration: 300,
+        useNativeDriver: true,
+        }).start(() => setModalVisible4(false)); // Close after animation
+    };
+
+    const openPopup2 = () => {
+        setModalVisible4(true);
         Animated.timing(slideAnim, {
         toValue: 0, // Slide to the screen
         duration: 300,
@@ -391,7 +433,7 @@ export default function bidspending({
         }
     }
 
-    if(isFetching){
+    if(isFetching || isPinLoading){
         return <LogoSpinner lightColor='' darkColor=''/>
     }
     
@@ -763,7 +805,7 @@ export default function bidspending({
                 }
 
                 <View style={{margin:10}}/>
-                <ThemedButton onPress={() => avail.id === makepayment()} enabled={!avail ? false : true} style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}}>
+                <ThemedButton onPress={() => [closePopup1(), openPopup2()]} enabled={!avail ? false : true} style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}}>
                     <ThemedText style={{color: '#fff'}}>Make Payment</ThemedText>
                 </ThemedButton>
 
@@ -825,6 +867,40 @@ export default function bidspending({
             </Animated.View>
         </Modal>
 
+        <Modal
+            transparent
+            visible={modalVisible4}
+            animationType="slide" 
+            onRequestClose={closePopup2}
+        >
+            <KeyboardAvoidingView 
+                style={{ flex: 1 }} 
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
+                >
+            <TouchableOpacity style={styles.overlay} onPress={() => [closePopup2()]} />
+
+                <Animated.View
+                style={[
+                    styles.popup,
+                    { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                ]}
+                >
+                <ThemedText type='titleMedium' style={{textAlign:'center'}}>Enter Pin</ThemedText>
+                <View style={{margin:8}}/> 
+
+                <ThemedText style={{textAlign:'center', color: Colors.gray9}}>Enter Transaction PIN</ThemedText>
+                <View style={{margin:10}}/>
+                <View style={{margin:5}}/>
+                
+
+                <PinInput length={4} secure={true} onSubmit={(pin) => {closePopup2(), pinvalidation(pin)}}/>
+                <View style={{margin:10}}/>
+                </Animated.View>
+            </KeyboardAvoidingView>
+        </Modal>
+
+
 
         <StatusModal
             visible={modalVisible2}
@@ -871,7 +947,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        boxShadow: '0px 4px 6px rgba(0,0,0,0.35)',
+        // boxShadow: '0px 4px 6px rgba(0,0,0,0.35)',
     },
     overlay: {
         flex: 1,

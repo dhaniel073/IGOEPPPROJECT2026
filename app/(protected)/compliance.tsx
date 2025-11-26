@@ -46,10 +46,10 @@ export default function complaince({
     const [modalVisible2, setModalVisible2] = useState(false);
     const [ids, setids] = useState<any>([])
     const [errors, setErrors] = useState<Record<string, string>>({});
-     const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState({
         idnum: "",
         idtype: ""
-      });
+    });
 
     const [fetchedInfo, setFetchedInfo] = useState<any>([])
     const navigation = useNavigation()

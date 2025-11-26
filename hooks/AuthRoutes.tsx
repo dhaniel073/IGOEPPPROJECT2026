@@ -1378,12 +1378,13 @@ async function tvrenewalpay(requestID: any, amount: any, token: any, commission:
   return data
 }
 
-async function validatecustomerthirdparty(id: any, phone: any, token: any){
+async function validatecustomerthirdparty(id: any,imagepath:any, phone: any, token: any){
   const url =  `https://phixotech.com/igoepp/public/api/auth/billpayment/validateCustomerPhoneThirdParty`
   const response = await axios.post(url, {
     "customerID": id,
     "phoneNumber": phone,
-    "type": "C"
+    "type": "C",
+    "imagepath": imagepath
   }, {
     headers:{
       Accept:'application/json',
@@ -1395,11 +1396,12 @@ async function validatecustomerthirdparty(id: any, phone: any, token: any){
   return data
 }
 
-async function validatecustomerself(id: any, token: any){
+async function validatecustomerself(id: any, imagepath:any, token: any){
   const url = `https://phixotech.com/igoepp/public/api/auth/billpayment/validateCustomerPhone`
   const response = await axios.post(url, {
       "customerID": id,
-      "type": "C"
+      "type": "C",
+      "imagepath": imagepath
   }, {
     headers:{
       Accept:'application/json',
@@ -1502,6 +1504,15 @@ async function frequentlyusedartisans(token:string){
   return data
 }
 
+async function forgotpass(email: any){
+  const url = "https://phixotech.com/igoepp/public/api/customer/forgetpassword"
+  const response = await axios.post(url, {
+    "email": email
+  })
+  const data = response.data
+  return data
+}
+
 
   
 
@@ -1509,7 +1520,7 @@ export {
   authenticateLogin, authenticateSignUp, authenticateSignUpBusiness, authenticateSignUpBusniessEntity, betpay, bidaccept, bidacceptcash, bidacceptdebitcard, bidacceptinvoice, bidaccepttransfer,
   biddecline, bidnegotiate, bidrequests, billcategory, biometricsetup, cancelrecurringrequestbyid, cancelrequests, cartcheckout, cartcheckoutcash, cartitem, cartitemstore, cartitemupdate, cartpurchase, cartshow, categoriesbylga,
   category, csutomerwallet, customerbillercommission, customerinfocheck, customerresetpassword, customerupdateid, customeruploadAddressproof, customeruploadIdcard,
-  customerwallethistory, customerwallethistoryall, deleteaccount, deletefromcart, disablealert, disablebiometric, discopayment, educationpay, enablealert, fetchrequestbyid, frequentlyusedartisans,
+  customerwallethistory, customerwallethistoryall, deleteaccount, deletefromcart, disablealert, disablebiometric, discopayment, educationpay, enablealert, fetchrequestbyid, forgotpass, frequentlyusedartisans,
   getbanks, getbillsHistory, getbillsHistoryById, getlatestinvoices, getmaterialdetailsbyrequestidmobile, getpaystackkey, getpendinginvoices,
   getsession, getsubcathelper, gettotalamountnmaterialrequestid, getVFDVirtualAccountCustomerMaterial, helperget, internetPayment, loginwithbiometric, marketplaceitemsget,
   materialpaymentbycustomer, notification, notificationbyid, notificationunread, profileupdate, requestinfo, resettoken, sessionId, setuppin, showcompletedrequestbycustomerid, showhelperrating,

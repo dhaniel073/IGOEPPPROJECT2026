@@ -199,7 +199,7 @@ export default function login({
 
                 <View style={{flexDirection:'row', justifyContent:'space-between'}}>
                     <ThemedText type='small' style={{color: Colors.green}}>Remember me</ThemedText>
-                    <ThemedButton>
+                    <ThemedButton onPress={() => router.push('/(public)/forgotpassword')}>
                         <ThemedText type='small' style={{color: Colors.green}}>Forgot password</ThemedText>
                     </ThemedButton>
                 </View>

@@ -85,7 +85,7 @@ export default function billspaymentAirtime({
   const [formData, setFormData] = useState({
     platform: "",
     platformName:"",
-    phone: "",
+    phone: user?.phone,
     amount: "",
     bosquetsamount:"",
     commission: "",
@@ -93,7 +93,7 @@ export default function billspaymentAirtime({
     imagepath: "",
     bouquets:"",
     thirdparty:"",
-    mode: ""
+    mode: "self"
   });
   
 
@@ -237,6 +237,7 @@ export default function billspaymentAirtime({
     }
   };
 
+  console.log(formData)
   const handleValidation = () => {
     let validationErrors = {};
 
@@ -274,11 +275,13 @@ export default function billspaymentAirtime({
       if (formData.mode.toLowerCase() === "self") {
         response = await validatecustomerself(
           user?.customer_id, 
+          formData.imagepath,
           decryptData(token)
         );
       } else {
         response = await validatecustomerthirdparty(
           user?.customer_id, 
+          formData.imagepath,
           formData.thirdparty, 
           decryptData(token)
         );
@@ -359,7 +362,7 @@ export default function billspaymentAirtime({
         response = await vtupaydata(
           formData.reference,
           formData.platform,
-          encryptData(formData.amount),
+          encryptData(formData.bosquetsamount),
           formData.bouquets,
           decryptData(token),
           formData.commission
@@ -433,7 +436,6 @@ export default function billspaymentAirtime({
                 ...prev,
                 platform: "",
                 platformName:"",
-                phone: "",
                 amount: "",
                 bosquetsamount:"",
                 commission: "",
@@ -442,7 +444,7 @@ export default function billspaymentAirtime({
                 bouquets:"",
                 thirdparty:"",
                 mode: "self"
-              }))]
+              })), setAmount(null), setFormattedAmount(null)]
             }
           >
             <Text style={[styles.tabText, activeTab === 'self' && styles.activeTabText]}>
@@ -457,7 +459,6 @@ export default function billspaymentAirtime({
                 ...prev,
                 platform: "",
                 platformName:"",
-                phone: "",
                 amount: "",
                 bosquetsamount:"",
                 commission: "",
@@ -466,7 +467,8 @@ export default function billspaymentAirtime({
                 bouquets:"",
                 thirdparty:"",
                 mode: "thirdparty"
-              }))
+              })),
+              setAmount(null), setFormattedAmount(null)
             ]}
           >
             <Text style={[styles.tabText, activeTab === 'thirdparty' && styles.activeTabText]}>
@@ -604,7 +606,7 @@ export default function billspaymentAirtime({
                         setFormData(prev => ({
                           ...prev,
                           bouquets: item.value,
-                          amount: item.price,
+                          bosquetsamount: item.price
                         }));
                       }}
                     />
@@ -832,7 +834,7 @@ export default function billspaymentAirtime({
                   <ThemedView style={{flexDirection:'row', justifyContent:'space-evenly'}}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                       {numbers.map((item, key) => (
-                        <TouchableOpacity key={key} style={{backgroundColor:Colors.offwhite,paddingLeft: 5, margin: 5,paddingRight:5, borderRadius:15, padding:5}} onPress={() => handleChange(item.amount)}>
+                        <TouchableOpacity key={key} style={{backgroundColor:Colors.offwhite,paddingLeft: 5, margin: 5,paddingRight:5, borderRadius:15, padding:5}} onPress={() => [handleChange(item.amount)]}>
                           <ThemedText style={{color: Colors.green8}} type='smallBold'><MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.green8} /> {item.amount.toLocaleString()+"."+"00"}</ThemedText>
                         </TouchableOpacity>
                       ))}
@@ -894,7 +896,7 @@ export default function billspaymentAirtime({
             <ThemedView style={{backgroundColor: Colors.gray7, marginHorizontal:10}}>
               <View style={{margin:10}}/>
               <ThemedText style={{color:Colors.blacktext, textAlign:'center'}}>Amount</ThemedText>
-              <ThemedText style={{color: Colors.green8, textAlign:'center'}} type='subtitle'>NGN {Number(formData.amount).toLocaleString()}</ThemedText>
+              <ThemedText style={{color: Colors.green8, textAlign:'center'}} type='subtitle'>NGN {formData.platform.toLowerCase().includes('airtime') ? Number(formData.amount).toLocaleString() : Number(formData.bosquetsamount).toLocaleString()}</ThemedText>
               <View style={{margin:10}}/>
             </ThemedView>
 
@@ -943,6 +945,11 @@ export default function billspaymentAirtime({
           animationType="slide" 
           onRequestClose={closePopup1}
         >
+          <KeyboardAvoidingView 
+            style={{ flex: 1 }} 
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
+          >
           <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
 
           <Animated.View
@@ -957,9 +964,12 @@ export default function billspaymentAirtime({
             <ThemedText style={{textAlign:'center', color: Colors.gray9}}>Enter Transaction PIN</ThemedText>
             <View style={{margin:10}}/>
             <View style={{margin:5}}/>
+           
+
             <PinInput length={4} secure={true} onSubmit={(pin) => {closePopup1(), pinvalidation(pin)}}/>
             <View style={{margin:10}}/>
           </Animated.View>
+          </KeyboardAvoidingView>
         </Modal>
 
         <ReceiptView
@@ -1121,7 +1131,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
+    // boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
   },
   overlay: {
     flex: 1,

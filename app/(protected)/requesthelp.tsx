@@ -392,7 +392,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={onChangeDate}
-              maximumDate={new Date()} // user can't pick a future date
+              minimumDate={new Date()}
             />
           )}
 
@@ -711,7 +711,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
         transparent
         visible={modalVisible}
         animationType="slide" 
-        onRequestClose={closePopup}
       >
         <TouchableOpacity style={styles.overlay} onPress={() => {}} />
 
