@@ -26,7 +26,7 @@ const profilepictureview = () => {
       {/* Zoomable Image */}
     
       <ImageViewer
-        imageUrls={[{ url: `https://phixotech.com/igoepp/public/customers/${imageUrl}` }]}
+        imageUrls={[{ url: `https://igoeppms.com/igoepp/public/customers/${imageUrl}` }]}
         enableSwipeDown={false}
         saveToLocalByLongPress={false}
         backgroundColor="#000"

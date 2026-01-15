@@ -175,7 +175,7 @@ export default function billspaymentAirtime({
         setIsLoading(true)
         const config = {
           method: 'get',
-          url: `https://phixotech.com/igoepp/public/api/auth/billpayment/getAllBillersByCategory/${billid}`,
+          url: `https://igoeppms.com/igoepp/public/api/auth/billpayment/getAllBillersByCategory/${billid}`,
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${decryptData(token)}`,
@@ -212,7 +212,7 @@ export default function billspaymentAirtime({
 
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/billpayment/getAllBouquetByBillerID/${billid}/${value}`,
+        `https://igoeppms.com/igoepp/public/api/auth/billpayment/getAllBouquetByBillerID/${billid}/${value}`,
         {
           headers: {
             Accept: "application/json",
@@ -880,7 +880,7 @@ export default function billspaymentAirtime({
           <Animated.View
             style={[
               styles.popup,
-              { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+              { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%" },
             ]}
           >
             <View style={{margin:10}}/>
@@ -1000,7 +1000,7 @@ export default function billspaymentAirtime({
 
           <View style={{justifyContent:'space-between', flexDirection:'row'}}>
             <ThemedText style={{color: '#000'}} type='small'>Topup amount</ThemedText>
-            <ThemedText style={{color:Colors.wallet }} type='small'>{formData.amount}</ThemedText>
+            <ThemedText style={{color:Colors.wallet }} type='small'>{formData.platform.toLowerCase().includes("airtime") ? formData.amount : formData.bosquetsamount}</ThemedText>
           </View>
           <View style={{margin:2}}/>
 

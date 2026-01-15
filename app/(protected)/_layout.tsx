@@ -99,7 +99,14 @@ export default function ProtectedLayout() {
         <Stack.Screen name="recurringrequest" options={{ headerShown: false }} />
         <Stack.Screen name="invoice" options={{ headerShown: false }} />
         <Stack.Screen name="checkout" options={{ headerShown: false }} />
-        <Stack.Screen name="carthistory" options={{ headerShown: false }} />        
+        <Stack.Screen name="carthistory" options={{ headerShown: false }} />      
+        <Stack.Screen name="addressdetialsforrequest" options={{ headerShown: false }} />      
+        <Stack.Screen name="commission" options={{ headerShown: false }} />      
+        <Stack.Screen name="dispute" options={{ headerShown: false }} />     
+        <Stack.Screen name="customerrating" options={{ headerShown: false }} />      
+
+
+
 
         {/* <Stack.Screen name="+not-found" /> */}
       </Stack>

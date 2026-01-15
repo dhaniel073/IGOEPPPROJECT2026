@@ -6,12 +6,14 @@ import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { customerinfocheck, uploadprofileimage } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
-import { AntDesign, FontAwesome, FontAwesome6, MaterialIcons } from '@expo/vector-icons'
+import { AntDesign, FontAwesome, FontAwesome6, Ionicons, MaterialIcons } from '@expo/vector-icons'
+import * as Clipboard from 'expo-clipboard'
 import * as ImagePicker from 'expo-image-picker'
 import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
 import { Alert, Animated, Dimensions, Image, Modal, StyleSheet, Text, TextProps, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+
 
 const { height } = Dimensions.get('window');
 
@@ -33,9 +35,21 @@ export default function profile({
     const [isloading, setIsLoading] = useState(false)
     const [modalVisible, setModalVisible] = useState(false);
     const [visible, setVisible] = useState(false);
+    const [visible1, setVisible1] = useState(false);
     const {user, token, updateUser} = useAuth()
     
     const slideAnim = React.useRef(new Animated.Value(height)).current;
+    
+    const copyToClipboard = async (number: any) => {
+        await Clipboard.setStringAsync(number);
+    };
+
+    const handlePlay = () => {
+        setVisible1(true)
+        setTimeout(() => {
+            setVisible1(false);
+        }, 2000); // Adjust this duration to match the length of your GIF
+    };
     const openPopup= () => {
         setModalVisible(true);
         Animated.timing(slideAnim, {
@@ -196,11 +210,19 @@ export default function profile({
             
             <View style={{margin:10}}/> 
 
+            {
+                visible1 ? 
+                <ThemedView style={{ position:'absolute', justifyContent:'center', alignSelf:'center',  marginTop: 8, marginBottom:10, padding:10, borderRadius:8, backgroundColor:color}}>
+                    <ThemedText style={{textAlign:'center', color: color1}}>Copied!</ThemedText>
+                </ThemedView>
+                : null
+            }
+
             <TouchableOpacity activeOpacity={0.8} onPress={openPopup1} style={{padding:15, borderWidth:1, alignSelf:'flex-start', borderRadius:100, borderColor: Colors.green}}>
                 {
                     user?.picture ?
                     <Image
-                        source={{uri: `https://phixotech.com/igoepp/public/customers/${user?.picture}`}} 
+                        source={{uri: `https://igoeppms.com/igoepp/public/customers/${user?.picture}`}} 
                         style={styles.image}
                     />
                     :
@@ -222,11 +244,12 @@ export default function profile({
                     <FontAwesome6 name="edit" size={13} color={Colors.green} />
                 </TouchableOpacity>
             </TouchableOpacity>    
-            <View style={{margin:15}}/> 
+            <View style={{margin:8}}/> 
 
 
             <ThemedView style={{backgroundColor:Colors.gray10, paddingHorizontal:15, paddingVertical:20, borderRadius:8}}>
                 <ThemedText style={{color: Colors.green}}>Basic Info</ThemedText>
+                <View style={{ borderWidth:0.2, borderColor: Colors.gray9}}/> 
 
                 <View style={{margin:3}}/> 
 
@@ -237,43 +260,71 @@ export default function profile({
                     :
                     <ThemedText style={{color: '#000'}}>{user?.company_name }</ThemedText>  
                 }
+                <View style={{ borderWidth:0.2, borderColor: Colors.gray9}}/> 
                 
-                <View style={{margin:3}}/> 
+                <View style={{margin:1}}/> 
+
+                <ThemedText style={{color: Colors.blacktext}}>Customer id</ThemedText>
+                <ThemedText style={{color: '#000'}}>{user?.customer_id}</ThemedText>
+
+                <View style={{ borderWidth:0.2, borderColor: Colors.gray9}}/> 
+                <View style={{margin:1}}/> 
+
+                <ThemedText style={{color: Colors.blacktext}}>Referal code</ThemedText>
+                <View style={{flexDirection:'row', alignItems:'center'}}>
+                    <ThemedText style={{color: '#000'}}>{user?.personal_referal_code}</ThemedText>
+                    <TouchableOpacity style={{paddingLeft:8}} onPress={() => [handlePlay(), copyToClipboard(user?.personal_referal_code)]}>
+                        <Ionicons name="copy" size={15} color={Colors.gray9} />
+                    </TouchableOpacity>
+                </View>
+                <View style={{ borderWidth:0.2, borderColor: Colors.gray9}}/> 
+                
+                <View style={{margin:1}}/> 
 
                 <ThemedText style={{color: Colors.blacktext}}>Phone number</ThemedText>
                 <ThemedText style={{color: '#000'}}>{user?.phone && `+234${user?.phone.startsWith('0') ? user?.phone.slice(1) : user?.phone}`}</ThemedText>
+                <View style={{ borderWidth:0.2, borderColor: Colors.gray9}}/> 
                 
-                <View style={{margin:3}}/> 
+                <View style={{margin:1}}/> 
 
                 <ThemedText style={{color: Colors.blacktext}}>Email</ThemedText>
                 <ThemedText style={{color: '#000'}}>{user?.email}</ThemedText>
+                <View style={{ borderWidth:0.2, borderColor: Colors.gray9}}/> 
 
-                <View style={{margin:3}}/> 
+                <View style={{margin:1}}/> 
 
                 <ThemedText style={{color: Colors.blacktext}}>Accoun type</ThemedText>
                 <ThemedText style={{color: '#000'}}>{user?.account_type === "B" ? "Business account" : "Personal account"}</ThemedText>
+                <View style={{ borderWidth:0.2, borderColor: Colors.gray9}}/> 
 
-                <View style={{margin:3}}/> 
+                <View style={{margin:1}}/> 
 
                 {
-                    user?.account_type === "B" || user?.account_type === "E" &&
+                    user?.account_type === "B" || user?.account_type === "E" ?
                     <>
                         <ThemedText style={{color: Colors.blacktext}}>Business id</ThemedText>
                         <ThemedText style={{color: '#000'}}>{user?.business_id}</ThemedText>
+                        <View style={{ borderWidth:0.2, borderColor: Colors.gray9}}/> 
                         
-                        <View style={{margin:3}}/> 
+                        <View style={{margin:1}}/> 
 
                         <ThemedText style={{color: Colors.blacktext}}>Tin number</ThemedText>
                         <ThemedText style={{color: '#000'}}>{user?.tin_number}</ThemedText>
-                        <View style={{margin:3}}/> 
+                        <View style={{ borderWidth:0.2, borderColor: Colors.gray9}}/> 
+
+                        <View style={{margin:1}}/> 
 
 
                         <ThemedText style={{color: Colors.blacktext}}>Rc number</ThemedText>
                         <ThemedText style={{color: '#000'}}>{user?.rc_number}</ThemedText>
                     </>
+                    : null
                 }
 
             </ThemedView>
+
+            
+            
 
             <Modal
                 transparent
@@ -287,7 +338,7 @@ export default function profile({
             <Animated.View
                 style={[
                 styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1  },
+                { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '15%'  },
                 ]}
             >
                 <View style={{flexDirection:'row'}}>
@@ -339,7 +390,7 @@ export default function profile({
                 <Animated.View
                     style={[
                         styles.popup,
-                        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                        { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '10%' },
                     ]}
                 >     
                     <ThemedText style={{textAlign:'center'}}>Choose Image Source (Address)</ThemedText>
@@ -371,8 +422,8 @@ export default function profile({
 
 const styles = StyleSheet.create({
     image:{
-        width: 100,
-        height: 100,
+        width: 85,
+        height: 85,
         borderRadius: 100,
         alignSelf:'flex-start',
         borderWidth:1,

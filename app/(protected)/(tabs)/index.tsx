@@ -1,5 +1,4 @@
 import { StatusModal } from '@/components/StatusModal';
-import { ThemedButton } from '@/components/ThemedButton';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors, decryptamount, decryptData, DIMENSION, encryptData, formatDate } from '@/constants/Colors';
@@ -8,14 +7,12 @@ import { useAuth } from '@/hooks/AuthContext';
 import { frequentlyusedartisans, getlatestinvoices, notificationunread, updateExpoToken } from '@/hooks/AuthRoutes';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { AntDesign, Entypo, Feather, FontAwesome, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import axios from 'axios';
 import Constants from 'expo-constants';
 import * as LocalAuthentication from "expo-local-authentication";
 import * as Notifications from 'expo-notifications';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Animated, Dimensions, Image, Modal, StyleSheet, TextProps, TouchableOpacity, View } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
+import { Alert, Animated, Dimensions, Image, Linking, Modal, StyleSheet, Text, TextProps, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
   const { height } = Dimensions.get('window');
@@ -37,31 +34,58 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const insets = useSafeAreaInsets();
   const router = useRouter()
-  const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible1, setModalVisible1] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = React.useRef(new Animated.Value(height)).current; // Start below the screen
   const { token, user, updateUser, logout, updateUserFields } = useAuth();
   const navigation = useNavigation()
   const [visible, setVisible] = useState(false);
   const [handymen, setHandymen] = useState<any>(null);
-  const [countryData, setCountryData] = useState<any[]>([]);
-  const [stateData, setStateData] = useState<any[]>([]);
-  const [cityData, setCityData] = useState<any[]>([]);
-  const [country, setCountry] = useState<any[]>([]);
-  const [state, setState] = useState<any[]>([]);
-  const [city, setCity] = useState<any[]>([]);
   const [invoice, setInvoice] = useState<any>([]);
   const {expoPushToken, notification, error} = useNotification();
+  const [needsUpdate, setNeedsUpdate] = useState(false);
+  const [requiredVersion, setRequiredVersion] = useState(null);
   const [isBalanceHidden, setIsBalanceHidden] = useState<"Y" | "N">(
   user?.isBalanceHidden === "Y" || user?.isBalanceHidden === "N"
     ? user.isBalanceHidden
     : "Y"
   );
-  const [formData, setFormData] = useState<any>({
-    countryName: "",
-    stateName: "",
-    cityName: "",
-  });
+
+  useEffect(() => {
+    const checkVersion = async () => {
+      try {
+        const response = await fetch("https://igoeppms.com/igoepp/public/api/getcustomerappversion");
+        const data = await response.json();
+
+        const currentAppVersion = Constants.expoConfig?.version ?? "unknown";
+        const required = data.version;
+
+        console.log(required);
+        setRequiredVersion(required);
+
+        if (currentAppVersion !== required) {
+          setNeedsUpdate(true);
+          setModalVisible(true);
+        } else {
+          console.log("not");
+        }
+      } catch (error) {
+        console.error("Failed to check version", error);
+      }
+    };
+
+    // Initial check immediately
+    checkVersion();
+
+    // Set interval to run checkVersion every 15 minutes (900000 milliseconds)
+    const intervalId = setInterval(() => {
+      checkVersion();
+    }, 900000);
+    // 900000
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -118,25 +142,6 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
     fetchNotifications();      
   }, [user?.notificationcount])
 
-
-
-  const openPopup = () => {
-    setModalVisible(true);
-    Animated.timing(slideAnim, {
-    toValue: 0, // Slide to the screen
-    duration: 300,
-    useNativeDriver: true,
-    }).start();
-  };
-    
-  const closePopup = () => {
-    Animated.timing(slideAnim, {
-    toValue: height, // Slide back down
-    duration: 300,
-    useNativeDriver: true,
-    }).start(() => setModalVisible(false)); // Close after animation
-  };
-
   const openPopup1 = () => {
     setVisible(true);
     Animated.timing(slideAnim, {
@@ -153,32 +158,6 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
     useNativeDriver: true,
     }).start(() => setVisible(false)); // Close after animation
   };
-
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const config = {
-          method: 'get',
-          url: "https://phixotech.com/igoepp/public/api/auth/general/country",
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${decryptData(token)}`,
-          },
-        };
-        const response = await axios(config);
-        const data = response.data.data;
-        const countryArray = data.map((item: any) => ({
-          label: item.country_name,
-          value: item.id,
-        }));
-        setCountryData(countryArray);
-      } catch (error) {
-        console.error("Country fetch error:", error);
-      }
-    };
-    fetchCountries();
-  }, []);
-
   
   useFocusEffect(
     useCallback(() => {
@@ -209,8 +188,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
         try {
           const response = await frequentlyusedartisans(decryptData(token));
           setHandymen(response);
-        } catch (error) {
-          console.log(error);
+        } catch (error: any) {
+          console.log(error.response);
         }
       };
 
@@ -228,52 +207,10 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
     return () => clearInterval(interval);
   }, [user?.transaction_pin_setup]);
-    
 
-  const handleState = async (countryCode: string) => {
-    try {
-      const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/general/state/${countryCode}`,
-        {
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${decryptData(token)}`,
-          },
-        }
-      );
-
-      const data = response.data.data;
-      const stateArray = data.map((item: any) => ({
-        label: item.state_name,
-        value: item.id,
-      }));
-      setStateData(stateArray);
-    } catch (error) {
-      console.error("State fetch error:", error);
-    }
-  };
-
-  const handleCity = async (stateCode: string) => {
-    try {
-      const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/general/lga/${stateCode}`,
-        {
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${decryptData(token)}`,
-          },
-        }
-      );
-
-      const data = response.data.data;
-      const cityArray = data.map((item: any) => ({
-        label: item.lga_name,
-        value: item.id,
-      }));
-      setCityData(cityArray);
-    } catch (error) {
-      console.error("City fetch error:", error);
-    }
+  const truncate = (text: string, max = 11) => {
+    if (!text) return '';
+    return text.length > max ? text.slice(0, max) + '..' : text;
   };
 
 
@@ -331,7 +268,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
               {user?.picture ? 
                 // <Image transition={1000} source={{uri: `https://igoeppms.com/igoepp/public/customers/${authCtx.picture}`}} style={{width:35, height:35, borderRadius:30, borderWidth:1, top:-5}}/>
                 <Image
-                  source={{uri: `https://phixotech.com/igoepp/public/customers/${user?.picture}`}} 
+                  source={{uri: `https://igoeppms.com/igoepp/public/customers/${user?.picture}`}} 
                   style={styles.reactLogo}
                 />
                 :
@@ -349,6 +286,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
                 :
                 <ThemedText type='subtitle' style={{fontSize:13}}>{user?.company_name }</ThemedText>  
               }
+              <ThemedText>{`Customer ID: ` + user?.customer_id}</ThemedText>
             </ThemedView>
           </ThemedView>
 
@@ -385,7 +323,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
         </ThemedView>
 
-        <View style={{margin:20}}/>
+        <View style={{margin:10}}/>
       
         {/* Wallet panel */}
         <ThemedView style={styles.walletcontainer}>
@@ -466,9 +404,23 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
               <ThemedText type='small' style={{paddingLeft:4}}>Ref. Code: {user?.personal_referal_code}</ThemedText>
             </ThemedView>
 
-            <ThemedText type='titleLight'>Customer ID</ThemedText>
+            <ThemedText type='titleLight'>Commission Bal</ThemedText>
             <View style={{margin:7}}/>
-            <ThemedText type='title'>{user?.customer_id}</ThemedText>
+            <ThemedText type='titleBold'>
+              {decryptamount(user?.commission_balance)
+                .toLocaleString('en-NG', {
+                  style: 'currency',
+                  currency: 'NGN',
+              })}
+            </ThemedText>
+            <TouchableOpacity style={{ alignItems: 'flex-end', marginTop:-10}} onPress={() => router.push('/(protected)/commission')}>
+              <View style={{backgroundColor: Colors.yellow, padding: 6,borderRadius: 30, 
+                // iOS shadow
+                boxShadow: '0px 4px 6px rgba(0,0,0,0.35)',
+              }}>
+                <MaterialCommunityIcons name="wallet-plus" size={13} color="#fff" />
+              </View>
+            </TouchableOpacity>
           </ThemedView>
 
         </ThemedView>
@@ -527,7 +479,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
         
         <View style={{margin:15}}/>
 
-        <TouchableOpacity activeOpacity={0.5} onPress={openPopup}>
+        <TouchableOpacity activeOpacity={0.5} onPress={() => router.push('/(protected)/addressdetialsforrequest')}>
           <View style={{backgroundColor: Colors.helmetbackground, borderRadius:8, padding:15, flexDirection:'row', borderWidth:1.5, borderColor: Colors.helmet}}>
             <ThemedView style={{backgroundColor: Colors.helmet, padding: 10, borderRadius: 30, alignSelf: 'flex-start'}}>
               <View style={{backgroundColor: "white", padding: 5, borderRadius: 20, alignSelf: 'flex-start'}}>
@@ -579,7 +531,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
         <View style={{margin:10}}/>
 
         {
-        !handymen ? (
+        !handymen || handymen.length === 0  ? (
         // FALLBACK UI WHEN EMPTY/LOADING
         <Animated.ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.card}>
@@ -618,14 +570,16 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
               <Image
                 source={
                   artisan.photo
-                    ? {uri: `https://phixotech.com/igoepp/public/handyman/${artisan.photo}`}
-                    : require('@/assets/images/artisan.png')
+                    ? {uri: `https://igoeppms.com/igoepp/public/handyman/${artisan.photo}`}
+                    : 
+                    require('@/assets/images/artisan.png')
                 }
                 style={styles.image}
               />
 
               <ThemedView style={styles.details}>
-                <ThemedText type="default">{artisan.first_name} {artisan.last_name}</ThemedText>
+                <ThemedText type="default">{truncate(`${artisan.first_name} ${artisan.last_name}`, 20)}</ThemedText>
+                
 
                 <View style={{ margin: 5 }} />
 
@@ -667,121 +621,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
         <View style={{margin:10}}/>
 
-        <Modal
-          transparent
-          visible={modalVisible}
-          animationType="slide" 
-          onRequestClose={closePopup}
-        >
-          <TouchableOpacity style={styles.overlay} onPress={() => [closePopup()]} />
-
-          <Animated.View
-            style={[
-              styles.popup,
-              { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-            ]}
-          >
-            <View style={{margin:10}}/>
-            <ThemedText type='subtitle'>Enter Location</ThemedText>
-            <ThemedText type='small' style={{fontSize:12}}>This will help us tailor available help categories</ThemedText>
-            <ThemedText type='small' style={{fontSize:12}}>close to you</ThemedText>
-
-            <View style={{margin:10}}/>
-              <View style={{margin:5}}/>
         
-          <ThemedText>Country</ThemedText>
-          <View style={{margin:5}}/>
-          <Dropdown
-            style={[styles.dropdown]}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
-            data={countryData}
-            labelField="label"
-            valueField="label"
-            placeholder="Please Select"
-            maxHeight={300}
-            value={formData.countryName}
-            search
-            searchPlaceholder="Search..."
-            inputSearchStyle={{ color: Colors.gray9 }}
-            onChange={(item: any) => {
-              setFormData({ ...formData, countryName: item.label, stateName: "", cityName: "" });
-              setCountry(item.label)
-              setStateData([]);
-              setCityData([]);
-              handleState(item.value);
-            }}
-            renderRightIcon={() => (
-              <MaterialIcons name="keyboard-arrow-down" size={20} color={Colors.gray9} />
-            )}
-          />
-                    
-          
-          <View style={{margin:5}}/>
-          
-          <ThemedText>State</ThemedText>
-          <View style={{margin:5}}/>
-          <Dropdown
-            style={[styles.dropdown]}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
-            data={stateData}
-            labelField="label"
-            valueField="label"
-            placeholder="Please Select"
-            value={formData.stateName}
-            maxHeight={300}
-            search
-            searchPlaceholder="Search..."
-            inputSearchStyle={{ color: Colors.gray9 }}
-            onChange={(item: any) => {
-              setFormData({ ...formData, stateName: item.label, cityName: "" });
-              setCityData([]);
-              setState(item.label)
-              handleCity(item.value);
-            }}
-            renderRightIcon={() => (
-              <MaterialIcons name="keyboard-arrow-down" size={20} color={Colors.gray9} />
-            )}
-          />
-
-          <View style={{margin:5}}/>
-
-          <ThemedText>Local Government Area</ThemedText>
-          <View style={{margin:5}}/>
-          <Dropdown
-            style={[styles.dropdown]}
-            // placeholderStyle={{ color: Colors.gray9 }}
-            // selectedTextStyle={{ color: "#000" }}
-            data={cityData}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
-            labelField="label"
-            valueField="label"
-            placeholder="Please Select"
-            value={formData.cityName}
-            maxHeight={300}
-            search
-            searchPlaceholder="Search..."
-            inputSearchStyle={{ color: Colors.gray9 }}
-            onChange={(item: any) => {
-              setFormData({ ...formData, cityName: item.label });
-              setCity(item.label)
-            }}
-            renderRightIcon={() => (
-              <MaterialIcons name="keyboard-arrow-down" size={20} color={Colors.gray9} />
-            )}
-          />
-
-        <View style={{margin:5}}/>
-
-            <View style={{margin:15}}/>
-
-            <ThemedButton style={{ padding: 15, borderRadius:30, alignItems:'center', backgroundColor: Colors.green}} onPress={() => !formData.cityName ? alert("Please select one of the following to continue")  : [closePopup(),router.push({pathname:"/categoryScreen", params:{lga: formData.cityName}})]}>
-              <ThemedText type='smallBold' style={{color:"#fff"}}>Proceed</ThemedText>
-            </ThemedButton>
-          </Animated.View>
-        </Modal>
 
          <Modal
             transparent
@@ -795,7 +635,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
             <Animated.View
               style={[
               styles.popup,
-              { transform: [{ translateY: slideAnim }], backgroundColor: color1  },
+              { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%"  },
               ]}
             >
               <View style={{flexDirection:'row'}}>
@@ -830,6 +670,37 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
               </Animated.View>
               {/* </Pressable> */}
           </Modal>
+          
+          <Modal
+            // animationType="slide"   // slides from the bottom
+            transparent={true}      // transparent background
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)} // Android back button
+          >
+            <View style={styles.overlay1}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.emoji}>🚀✨</Text>
+                <Text style={styles.title}>Hey there! 🎉</Text>
+                <Text style={styles.message}>
+                  A shiny new version <Text style={styles.version}>{requiredVersion}</Text> is ready for you! 🎈{'\n\n'}
+                  Update now to get the best features and fixes. 🛠💡
+                </Text>
+
+                <TouchableOpacity
+                  style={[styles.button, styles.updateButton]}
+                  onPress={() => Linking.openURL('https://play.google.com/store/apps/details?id=com.cdhaniel.IgoeppAgent')}
+                >
+                  <Text style={styles.buttonText}>Update Now 🔄</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
+                  <Text style={[styles.buttonText, styles.laterText]}>Maybe Later 🤔</Text>
+                </TouchableOpacity>
+
+                <View style={{margin:10}}/>
+              </View>
+            </View>
+          </Modal>
 
         <StatusModal
           visible={modalVisible1}
@@ -845,6 +716,62 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 }
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    elevation: 15,
+  },
+  emoji: {
+    fontSize: 48,
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
+    marginBottom: 12,
+    color: '#333',
+  },
+  message: {
+    fontSize: 17,
+    textAlign: 'center',
+    color: '#555',
+    marginBottom: 10,
+  },
+  version: {
+    fontWeight: 'bold',
+    color: '#008080',
+  },
+
+  overlay1: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+
+  button: {
+    width: '70%',
+    paddingVertical: 14,
+    borderRadius: 30,
+    marginVertical: 6,
+    alignItems: 'center',
+  },
+
+  updateButton: {
+    backgroundColor: Colors.green,
+  },
+
+  buttonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  laterText: {
+    color: '#1E90FF',
+  },
+  
   card: {
     borderRadius: 12,
     marginRight: 15,
@@ -857,24 +784,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12
-  },
-  dropdown: {
-    height: 60,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    backgroundColor: '#fff',
-  },
-  placeholderStyle: {
-    color: '#999',
-    fontSize: 14,
-    fontFamily: 'poppinsRegular'
-  },
-  selectedTextStyle: {
-    fontSize: 14,
-    color: '#333',
-    fontFamily: 'poppinsRegular'
   },
   popup: {
     position: 'absolute',

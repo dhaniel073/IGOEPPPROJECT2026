@@ -61,8 +61,8 @@ export default function NotificationSetup({
 
         const url =
             action === 'custalertsetups'
-            ? `https://phixotech.com/igoepp/public/api/auth/customer/custalertsetups`
-            : `https://phixotech.com/igoepp/public/api/auth/customer/removecustalertsetups/${user?.customer_id}/${type}/${alert_type}`;
+            ? `https://igoeppms.com/igoepp/public/api/auth/customer/custalertsetups`
+            : `https://igoeppms.com/igoepp/public/api/auth/customer/removecustalertsetups/${user?.customer_id}/${type}/${alert_type}`;
 
 
         const method = action === 'custalertsetups' ? 'post' : 'get';

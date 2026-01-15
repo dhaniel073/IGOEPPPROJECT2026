@@ -199,7 +199,7 @@ export default function virtualaccounttopup({
 
         <FullScreenModal
             visible={visible1}
-            onClose={() => [setIsVisible1(false), router.push('/addmoney')]}
+            onClose={() => [setIsVisible1(false), router.replace('/addmoney')]}
             mainText="Transaction Successful!"
             subText={`₦${formattedamount} has been added to your wallet`}
         />

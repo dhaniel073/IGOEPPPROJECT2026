@@ -93,7 +93,7 @@ export default function payments({
           } else {
               Alert.alert('Error', 'Unable to load bills history')
           }
-          console.error("Error fetching bills history", error);
+          console.error("Error fetching bills history", error.response);
         } finally {
             setIsFetching(false);
         }
@@ -289,7 +289,7 @@ export default function payments({
                 showIcon={true}
                 imageuri={item.imagepath}
               >
-              <ThemedView key={item.referenceId} style={{backgroundColor: Colors.gray6, marginHorizontal:10, paddingHorizontal:20, paddingVertical:20}}>
+              <ThemedView key={item.request_id} style={{backgroundColor: Colors.gray6, marginHorizontal:10, paddingHorizontal:20, paddingVertical:20}}>
                 <View style={{justifyContent:'space-between', flexDirection:'row'}}>
                   <ThemedText style={{color: '#000'}} type='small'>From</ThemedText>
                   <ThemedText style={{color:Colors.wallet }} type='small'>Wallet</ThemedText>

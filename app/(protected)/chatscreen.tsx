@@ -51,7 +51,7 @@ export default function ChatScreen() {
   // Fetch chat messages
     const fetchMessages = useCallback(async () => {
         try {
-        const url = `https://phixotech.com/igoepp/public/api/auth/hrequest/helpchatview/${id}/customer`;
+        const url = `https://igoeppms.com/igoepp/public/api/auth/hrequest/helpchatview/${id}/customer`;
         const response = await axios.get(url, {
             headers: {
             Accept: "application/json",
@@ -92,7 +92,7 @@ export default function ChatScreen() {
     }, []);
 
     const SendMessage = (text: any,) => {
-      const url = `https://phixotech.com/igoepp/public/api/auth/hrequest/helpchat`
+      const url = `https://igoeppms.com/igoepp/public/api/auth/hrequest/helpchat`
       // console.log(text)
         axios.post(url, {
             help_id: id,
@@ -157,7 +157,7 @@ export default function ChatScreen() {
     }
 
   return (
-     <SafeAreaView style={{ flex: 1, paddingTop:10, backgroundColor: backgroundColor }} edges={['top']}> 
+     <SafeAreaView style={{ flex: 1, paddingTop:10, backgroundColor: backgroundColor,}} edges={['top']}> 
         <ThemedView  style={{flexDirection:'row', alignItems:'center', marginHorizontal:15, marginBottom:10}}>
             <GoBack onClick={() => router.push("/(protected)/(tabs)/bookings")} lightColor={""} darkColor={""}> 
                 <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
@@ -166,7 +166,7 @@ export default function ChatScreen() {
              helperdata.photo === null ? 
              <Image style={styles.image} source={require("@/assets/images/avatar1.png")}/>
              :
-             <Image style={styles.image} source={{uri: `https://phixotech.com/igoepp/public/handyman/${helperdata.photo}`}}/>
+             <Image style={styles.image} source={{uri: `https://igoeppms.com/igoepp/public/handyman/${helperdata.photo}`}}/>
            }
            <ThemedText style={{fontSize: 14, fontFamily: 'poppinsSemiBold'}}>{helperdata.first_name} {helperdata.last_name}</ThemedText>
            {/* <Text style={styles.chattxt}>Chat</Text> */}
@@ -189,17 +189,7 @@ export default function ChatScreen() {
         // onKeyboardWillShow={() => console.log("Keyboard opening")}
         // onKeyboardDidShow={() => console.log("Keyboard opened")}
       />
-      {/* <GiftedChat
-        {...({
-            messages,
-            onSend: (onSend),
-            user: { _id: 1, name: "You" },
-            alwaysShowSend: true,
-            keyboardShouldPersistTaps: "handled",
-            scrollToBottom: true, // 👈 Fix here
-            scrollToBottomComponent: () => null,
-        } as any)} // 👈 tell TS to chill
-        /> */}
+      <View style={{marginBottom:'10%'}}/>
     </SafeAreaView>
   );
 }

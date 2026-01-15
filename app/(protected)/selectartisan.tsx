@@ -48,7 +48,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
       const fetchPendingRequests = async () => {
       try {
         setisloading(true)
-        const response = await getsubcathelper(catid, decryptData(token));
+        const response = await getsubcathelper(subcatid, decryptData(token));
         console.log(response)
         setresponseData(response.data)
         setFetchedRequest(response.data)
@@ -137,7 +137,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
                   !item.photo ? 
                   <Image style={[styles.image, ]} source={require("@/assets/images/person-4.png")}/>
                   :
-                  <Image style={[styles.image, ]} source={{ uri: `https://phixotech.com/igoepp/public/handyman/${item.photo}` }} />
+                  <Image style={[styles.image, ]} source={{ uri: `https://igoeppms.com/igoepp/public/handyman/${item.photo}` }} />
                 }
               </View>
               <View>
@@ -166,7 +166,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
       <Animated.View
         style={[
         styles.popup,
-        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+        { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '15%' },
         ]}
       >
         <TouchableOpacity style={styles.option} onPress={() => [closePopup(), router.push({pathname:"/requesthelp", params:{request_type, catid, subcatid, preassessment_flg, name, helperid: formData.helperid, enable_go_to_artisan}})]}>

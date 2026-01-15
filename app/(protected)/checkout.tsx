@@ -89,7 +89,7 @@ const { height } = Dimensions.get('window');
         try {
             const config = {
             method: 'get',
-            url: "https://phixotech.com/igoepp/public/api/auth/general/country",
+            url: "https://igoeppms.com/igoepp/public/api/auth/general/country",
                 headers: {
                     Accept: 'application/json',
                     Authorization: `Bearer ${decryptData(token)}`,
@@ -112,7 +112,7 @@ const { height } = Dimensions.get('window');
     const handleState = async (countryCode: string) => {
         try {
             const response = await axios.get(
-                `https://phixotech.com/igoepp/public/api/auth/general/state/${countryCode}`,
+                `https://igoeppms.com/igoepp/public/api/auth/general/state/${countryCode}`,
                 {
                 headers: {
                     Accept: 'application/json',
@@ -135,7 +135,7 @@ const { height } = Dimensions.get('window');
     const handleCity = async (stateCode: string) => {
         try {
             const response = await axios.get(
-                `https://phixotech.com/igoepp/public/api/auth/general/lga/${stateCode}`,
+                `https://igoeppms.com/igoepp/public/api/auth/general/lga/${stateCode}`,
                 {
                 headers: {
                     Accept: 'application/json',

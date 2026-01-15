@@ -294,7 +294,7 @@ export default function settings({
                 <Animated.View
                     style={[
                         styles.popup,
-                        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                        { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "8%" },
                     ]}
                 >     
                     <ThemedView style={{alignSelf:'center', backgroundColor: Colors.error300, padding:10, borderRadius:100}}>
@@ -303,7 +303,7 @@ export default function settings({
                         </View>
                     </ThemedView>
 
-                    <View style={{margin:10}}/>
+                    <View style={{margin:5}}/>
 
                     <ThemedText type='subtitle' style={{textAlign:'center', color: Colors.red}}>Delete Account</ThemedText>
                     <View style={{margin:2}}/>
@@ -336,7 +336,7 @@ export default function settings({
                 <Animated.View
                     style={[
                         styles.popup,
-                        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                        { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "10%" },
                     ]}
                 >     
                     <ThemedView style={{alignSelf:'center', backgroundColor: Colors.error300, padding:10, borderRadius:100}}>
@@ -345,12 +345,12 @@ export default function settings({
                         </View>
                     </ThemedView>
 
-                    <View style={{margin:10}}/>
+                    <View style={{margin:5}}/>
 
                     <ThemedText type='subtitle' style={{textAlign:'center', color: Colors.red}}>Account Deleted</ThemedText>
                     <ThemedText type='subtitle' style={{textAlign:'center', color: Colors.red}}>Successfully</ThemedText>
 
-                    <View style={{margin:10}}/>
+                    <View style={{margin:5}}/>
 
                     <View style={{flexDirection:'row', flex:1, justifyContent:'space-evenly'}}>
                         <ThemedButton style={{paddingVertical: 15,borderRadius: 10,alignItems: "center", flex:1}} onPress={() => [closePopup1(),logout()]}>

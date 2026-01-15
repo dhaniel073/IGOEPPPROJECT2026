@@ -12,10 +12,20 @@ export interface RequestData {
   interest: any,
   vehiclerequest: any,
   uploadUrl?: any,
+  start_date?: any,
+  end_date?: any,
+  payment_frequency?: any,
 }
 
 export const validateRequest = (data: RequestData) => {
   const errors: Record<string, string> = {};
+
+  const normalize = (value: any) =>
+    String(value || "")
+      .toLowerCase()
+      .replace(/[\s-]/g, ""); // remove spaces & hyphens
+
+  const normalizedFrequency = normalize(data.frequency);
 
   // Address
   if (!data.addressfield.trim()) errors.addressfield = 'Address is required';
@@ -51,6 +61,13 @@ export const validateRequest = (data: RequestData) => {
   if (!data.vehiclerequest) errors.vehiclerequest = 'Vehicle request is required';
   
   if (data.uploadUrl === null) {}
+
+  // ✅ Extra validation for ONE-OFF
+  if (normalizedFrequency !== "oneoff") {
+    if (!data.start_date?.trim()) errors.start_date = "Start date is required";
+    if (!data.end_date?.trim()) errors.end_date = "End date is required";
+    if (!data.payment_frequency?.trim()) errors.payment_frequency = "Payment frequency is required ";
+  }
 
 
   return errors; // ✅ Return only the errors object

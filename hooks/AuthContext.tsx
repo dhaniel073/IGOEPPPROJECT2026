@@ -28,7 +28,9 @@ type UserData = {
   cartcount: any;
   notificationcount: any;
   pushtoken: any;
-  isBalanceHidden: any
+  status: any;
+  isBalanceHidden: any,
+  commission_balance: any,
 
   updated_at?: number; // ADDED: timestamp to avoid overwriting new data
 };

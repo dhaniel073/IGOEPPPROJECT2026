@@ -186,7 +186,7 @@ export default function profileEdit({
       try {
         const config = {
           method: 'get',
-          url: "https://phixotech.com/igoepp/public/api/auth/general/country",
+          url: "https://igoeppms.com/igoepp/public/api/auth/general/country",
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${decryptData(token)}`,
@@ -209,7 +209,7 @@ export default function profileEdit({
   const handleState = async (countryCode: string) => {
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/general/state/${countryCode}`,
+        `https://igoeppms.com/igoepp/public/api/auth/general/state/${countryCode}`,
         {
           headers: {
             Accept: 'application/json',
@@ -232,7 +232,7 @@ export default function profileEdit({
   const handleCity = async (stateCode: string) => {
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/general/lga/${stateCode}`,
+        `https://igoeppms.com/igoepp/public/api/auth/general/lga/${stateCode}`,
         {
           headers: {
             Accept: 'application/json',
@@ -540,7 +540,7 @@ export default function profileEdit({
             <Animated.View
               style={[
                 styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '15%' },
               ]}
             >
               <View style={{margin:15}}/>

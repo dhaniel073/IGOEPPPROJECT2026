@@ -168,7 +168,7 @@ const { height } = Dimensions.get('window');
                                 item.image === null || "" ? 
                                 <Image source={require('@/assets/images/bookings.png')} style={styles.image} />
                                 :
-                                <Image source={{uri: `https://phixotech.com/igoepp/public/subcategory/${item.image}`}} style={styles.image} />
+                                <Image source={{uri: `https://igoeppms.com/igoepp/public/subcategory/${item.image}`}} style={styles.image} />
                             }
 
                             <View style={{margin:15}}/>
@@ -218,7 +218,7 @@ const { height } = Dimensions.get('window');
             <Animated.View
                 style={[
                 styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '10%' },
                 ]}
             >
                 <TouchableOpacity onPress={closePopup1} style={{alignSelf:'flex-end'}}> 
@@ -266,7 +266,7 @@ const { height } = Dimensions.get('window');
             <Animated.View
                 style={[
                 styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '10%' },
                 ]}
             >
                 <TouchableOpacity onPress={closePopup} style={{alignSelf:'flex-end'}}> 

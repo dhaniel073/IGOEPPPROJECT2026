@@ -54,6 +54,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
   const slideAnim = React.useRef(new Animated.Value(height)).current; 
   const {request_type, catid, subcatid, preassessment_flg, name, helperid, enable_go_to_artisan} = useLocalSearchParams()
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDatePickerStart, setShowDatePickerStart] = useState(false);
+  const [showDatePickerEnd, setShowDatePickerEnd] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [countryData, setCountryData] = useState<any[]>([]);
   const [stateData, setStateData] = useState<any[]>([]);
@@ -81,6 +83,10 @@ import { SafeAreaView } from 'react-native-safe-area-context'
     helpdate: "",
     frequency: "",
     uploadUrl: "",
+    start_date: "",
+    end_date: "",
+    payment_frequency: "",
+    no_of_helper:""
   });
 
   const openPopup = () => {
@@ -130,6 +136,22 @@ import { SafeAreaView } from 'react-native-safe-area-context'
     }
   };
 
+  const onChangeStartDate = (event: any, selectedDate?: Date) => {
+    setShowDatePickerStart(Platform.OS === "ios"); // keep open on iOS
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      setFormData({ ...formData, start_date: formattedDate });
+    }
+  };
+
+  const onChangeEndDate = (event: any, selectedDate?: Date) => {
+    setShowDatePickerEnd(Platform.OS === "ios"); // keep open on iOS
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      setFormData({ ...formData, end_date: formattedDate });
+    }
+  };
+
   const onChangeTime = (event: any, selectedTime?: Date) => {
     setShowTimePicker(Platform.OS === "ios"); // keep open on iOS
     if (selectedTime) {
@@ -149,7 +171,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
       try {
         const config = {
           method: 'get',
-          url: "https://phixotech.com/igoepp/public/api/auth/general/country",
+          url: "https://igoeppms.com/igoepp/public/api/auth/general/country",
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${decryptData(token)}`,
@@ -172,7 +194,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
   const handleState = async (countryCode: string) => {
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/general/state/${countryCode}`,
+        `https://igoeppms.com/igoepp/public/api/auth/general/state/${countryCode}`,
         {
           headers: {
             Accept: 'application/json',
@@ -195,7 +217,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
   const handleCity = async (stateCode: string) => {
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/general/lga/${stateCode}`,
+        `https://igoeppms.com/igoepp/public/api/auth/general/lga/${stateCode}`,
         {
           headers: {
             Accept: 'application/json',
@@ -216,7 +238,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
   };
 
 
-  const captureAddressImage = async () => {
+  const captureImage = async () => {
     try {
       // ✅ Ask for camera permission properly
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -248,7 +270,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
     };
   
      
-  const pickAddressImage = async () => {
+  const pickImage = async () => {
     try {
       // ✅ Ask for media library permission properly
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -321,9 +343,9 @@ import { SafeAreaView } from 'react-native-safe-area-context'
     console.log(formData)
     try {
       setisloading(true)
-      const response = await  requestinfo(user?.customer_id, formData.interest, formData.addressfield, formData.countryName, formData.stateName, formData.cityName, formData.landmark, 
-        formData.helpsize, formData.vehiclerequest, formData.description, catid, subcatid, formData.helptime, formData.helpdate, formData.frequency, preassessment_flg,
-        request_type, helperid, formData.uploadUrl, enable_go_to_artisan, decryptData(token)
+      const response = await  requestinfo(user?.customer_id, formData.interest, formData.no_of_helper, formData.addressfield, formData.countryName, formData.stateName, formData.cityName, formData.landmark, 
+        formData.helpsize, formData.vehiclerequest, formData.description, catid, subcatid, formData.helptime, formData.helpdate, formData.frequency, formData.start_date, formData.end_date,
+        formData.payment_frequency, preassessment_flg, request_type, helperid, formData.uploadUrl, enable_go_to_artisan, decryptData(token)
       )
       console.log(response)
       return openPopup()
@@ -364,10 +386,10 @@ import { SafeAreaView } from 'react-native-safe-area-context'
             {data.map((item: any, key: any) => 
               <>
               <View style={{marginRight:10, flexDirection:'row'}}>
-                <TouchableOpacity style={[styles.outer, {marginRight:4} ]} onPress={() => setgotoArtisanLocation(item.id)}>
+                <TouchableOpacity style={[styles.outer, {marginRight:4, borderColor: color} ]} onPress={() => setgotoArtisanLocation(item.id)}>
                   {gotoArtisanLocation === item.id && <View style={styles.inner}/>} 
                 </TouchableOpacity>
-                <Text style={{marginTop:5}}> {item.name}</Text>
+                <ThemedText style={{marginTop:5}}> {item.name}</ThemedText>
               </View>
               </>
             )}
@@ -572,7 +594,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
           
           <View style={{margin:5}}/>
 
-          <ThemedText>Frequency</ThemedText>
+          <ThemedText>Task Frequency</ThemedText>
           <View style={{margin:5}}/>
 
           <CustomDropdown
@@ -590,8 +612,103 @@ import { SafeAreaView } from 'react-native-safe-area-context'
             value={formData.frequency}
             onChange={(value:any) => setFormData({ ...formData, frequency: value })}
             error={""}
-          
           />
+          <View style={{margin:5}}/>
+          
+          {
+            formData.frequency && formData.frequency !== "One-off" ? (
+              <>
+                <ThemedText>Start Date</ThemedText>
+
+                <TouchableOpacity onPress={() => setShowDatePickerStart(true)}>
+                  <Input
+                    placeholder="Please select"
+                    value={formData.start_date}
+                    editable={false}
+                    rightIcon={<MaterialIcons name="keyboard-arrow-down" size={18} color={Colors.gray9} />}
+                  />
+                </TouchableOpacity>
+
+                {showDatePickerStart && (
+                  <DateTimePicker
+                    value={formData.start_date ? new Date(formData.start_date) : new Date()}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={onChangeStartDate}
+                    minimumDate={new Date()}
+                  />
+                )}
+
+                {showDatePickerStart && Platform.OS === "ios" && (
+                  <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+                    <TouchableOpacity onPress={() => setShowDatePickerStart(false)}>
+                      <ThemedText>Close</ThemedText>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                <View style={{ margin: 5 }} />
+
+                <ThemedText>End Date</ThemedText>
+
+                <TouchableOpacity onPress={() => setShowDatePickerEnd(true)}>
+                  <Input
+                    placeholder="Please select"
+                    value={formData.end_date}
+                    editable={false}
+                    rightIcon={<MaterialIcons name="keyboard-arrow-down" size={18} color={Colors.gray9} />}
+                  />
+                </TouchableOpacity>
+
+                {showDatePickerEnd && (
+                  <DateTimePicker
+                    value={formData.end_date ? new Date(formData.end_date) : new Date()}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={onChangeEndDate}
+                    minimumDate={new Date()}
+                  />
+                )}
+
+                {showDatePickerEnd && Platform.OS === "ios" && (
+                  <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+                    <TouchableOpacity onPress={() => setShowDatePickerEnd(false)}>
+                      <ThemedText>Close</ThemedText>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                <View style={{ margin: 5 }} />
+
+                <ThemedText>Payment Frequency</ThemedText>
+
+                <View style={{ margin: 5 }} />
+
+                <CustomDropdown
+                  label=""
+                  data={[
+                    { label: "Daily", value: "Daily" },
+                    { label: "Weekly", value: "Weekly" },
+                    { label: "Monthly", value: "Monthly" },
+                  ]}
+                  value={formData.payment_frequency}
+                  onChange={(value: any) => setFormData({ ...formData, payment_frequency: value })}
+                  error={""}
+                />
+              </>
+            ) : null
+          }
+
+          <ThemedText>No of helper</ThemedText>
+          <Input
+            placeholder="No of helper"
+            keyboardType="default"
+            onUpdateValue={(text) => setFormData({...formData, no_of_helper: text})}
+            value={formData.no_of_helper}
+            // isInvalid={!!errors.description}
+            rightIcon={<Entypo name="address" size={20} color={Colors.gray9} />}
+          />
+  
           <View style={{margin:5}}/>
 
           <ThemedText>Additional info</ThemedText>
@@ -638,7 +755,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
         />
         <View style={{margin:10}}/>
 
-        <ThemedText>Samole Image:</ThemedText>
+        <ThemedText>Sample Image:</ThemedText>
         {
           !image ?
             <TouchableOpacity onPress={openPopup1} style={{backgroundColor: Colors.offwhite1, paddingHorizontal:18, paddingVertical:10, justifyContent:'space-between', flexDirection:'row', alignItems:'center', borderRadius:7}}>
@@ -682,7 +799,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
         <Animated.View
           style={[
             styles.popup1,
-            { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+            { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '10%' },
           ]}
         >     
           <ThemedText style={{textAlign:'center'}}>Choose Image Source</ThemedText>
@@ -690,13 +807,13 @@ import { SafeAreaView } from 'react-native-safe-area-context'
           <View style={{margin:10}}/>
           
           <View style={{flexDirection:'row', justifyContent:'space-evenly'}}>
-            <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor: Colors.gray7, width:'40%', padding:30, borderRadius:5}} onPress={captureAddressImage}>
+            <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor: Colors.gray7, width:'40%', padding:30, borderRadius:5}} onPress={captureImage}>
               <View style={{justifyContent:'center', alignItems:'center'}}>
                 <Text style={[{marginLeft:15, marginRight:10}]}>📸 Camera</Text>
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor:Colors.gray7, width:'40%', borderRadius:5}} onPress={pickAddressImage}>
+            <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor:Colors.gray7, width:'40%', borderRadius:5}} onPress={pickImage}>
               <View style={{justifyContent:'center', alignItems:'center'}}>
                 <Text style={[{marginLeft:15, marginRight:10}]}>🖼️ Libraries</Text>
               </View>
@@ -717,7 +834,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
         <Animated.View
           style={[
             styles.popup,
-            { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+            { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '15%' },
           ]}
         >
           <View style={{margin:15}}/>

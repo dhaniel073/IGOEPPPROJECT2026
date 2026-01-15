@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { validateComplaince } from '@/components/validateComplaince'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { customerinfocheck, customerupdateid, customeruploadAddressproof, customeruploadIdcard } from '@/hooks/AuthRoutes'
+import { customerinfocheck, customerupdateid, customeruploadAddressproof, customeruploadCAC, customeruploadIdcard } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Octicons } from '@expo/vector-icons'
 import axios from 'axios'
@@ -38,12 +38,15 @@ export default function complaince({
     const {user, token, logout} = useAuth()
     const [isloading, setIsLoading] = useState(false)
     const [isIdCardModalVisble, setIdCardModalVisible] = useState(false)
+    const [isCACModalVisble, setCACModalVisible] = useState(false)
     const [isAddressModalVisble, setIsAddressModalVisible] = useState(false)
     const [isIdCardNumberModalVisble, setIdCardNumberModalVisible] = useState(false)
     const slideAnim = React.useRef(new Animated.Value(height)).current;
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible1, setModalVisible1] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
+    const [modalVisible3, setModalVisible3] = useState(false);
+
     const [ids, setids] = useState<any>([])
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [formData, setFormData] = useState({
@@ -87,6 +90,23 @@ export default function complaince({
         useNativeDriver: true,
         }).start(() => setModalVisible1(false)); // Close after animation
     };
+
+    const openPopup2 = () => {
+        setModalVisible3(true);
+        Animated.timing(slideAnim, {
+        toValue: 0, // Slide to the screen
+        duration: 300,
+        useNativeDriver: true,
+        }).start();
+    };
+    
+    const closePopup2 = () => {
+        Animated.timing(slideAnim, {
+        toValue: height, // Slide back down
+        duration: 300,
+        useNativeDriver: true,
+        }).start(() => setModalVisible3(false)); // Close after animation
+    };
     
     const toggleAddressModal = () => {
         setIsAddressModalVisible(!isAddressModalVisble)
@@ -100,13 +120,17 @@ export default function complaince({
         setIdCardModalVisible(!isIdCardModalVisble)
     }
 
+    const toggleCACModal = () => {
+        setCACModalVisible(!isCACModalVisble)
+    }
+
     useEffect(() => {
         const fetchBillers = async () => {
         try {
             setIsLoading(true)
             const config = {
                 method: 'get',
-                url: `https://phixotech.com/igoepp/public/api/getid`,
+                url: `https://igoeppms.com/igoepp/public/api/getid`,
                 headers: {
                     Accept: 'application/json',
                     Authorization: `Bearer ${decryptData(token)}`,
@@ -173,12 +197,12 @@ export default function complaince({
             });
 
             if (result.canceled) {
-                toggleAddressModal();
+                closePopup();
                 return;
             }
 
             const image = result.assets[0];
-            toggleAddressModal();
+            closePopup();
             await uploadAddress(image.base64);
         } catch (error) {
             console.error('Camera error:', error);
@@ -204,12 +228,12 @@ export default function complaince({
             });
 
             if (result.canceled) {
-                toggleAddressModal();
+                closePopup();
                 return;
             }
 
             const image = result.assets[0];
-            toggleAddressModal();
+            closePopup();
             await uploadAddress(image.base64);
         } catch (error) {
             console.error('Image picker error:', error);
@@ -227,19 +251,19 @@ export default function complaince({
             }
 
             const result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ['images'],
                 allowsEditing: true,
                 quality: 0.75,
                 base64: true,
             });
 
             if (result.canceled) {
-                toggleIdCardModal();
+                closePopup1();
                 return;
             }
 
             const image = result.assets[0];
-            toggleIdCardModal();
+            closePopup1();
             uploadIdCard(image.base64);
         } catch (error) {
             console.error('Camera error:', error);
@@ -258,25 +282,88 @@ export default function complaince({
             }
 
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ['images'],
                 allowsEditing: true,
                 quality: 0.75,
                 base64: true,
             });
 
             if (result.canceled) {
-                toggleIdCardModal();
+                closePopup1();
                 return;
             }
 
             const image = result.assets[0];
-            toggleIdCardModal();
+            closePopup1();
             uploadIdCard(image.base64);
         } catch (error) {
             console.error('Image picker error:', error);
             Alert.alert('Error', 'Unable to select image.');
         }
     };
+
+
+    const captureCACImage = async () => {
+        try {
+            // ✅ Ask for camera permission properly
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Camera access is required to take a picture.');
+                return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                quality: 0.75,
+                base64: true,
+            });
+
+            if (result.canceled) {
+                closePopup2();
+                return;
+            }
+
+            const image = result.assets[0];
+            closePopup2();
+            await uploadCAC(image.base64);
+        } catch (error) {
+            console.error('Camera error:', error);
+            Alert.alert('Error', 'Unable to open camera.');
+        }
+    };
+
+   
+    const pickCACImage = async () => {
+        try {
+            // ✅ Ask for media library permission properly
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Photo library access is required to select an image.');
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                quality: 0.75,
+                base64: true,
+            });
+
+            if (result.canceled) {
+                closePopup2();
+                return;
+            }
+
+            const image = result.assets[0];
+            closePopup2();
+            await uploadCAC(image.base64);
+        } catch (error) {
+            console.error('Image picker error:', error);
+            Alert.alert('Error', 'Unable to select image.');
+        }
+    };
+
 
     const handleUpload = async ({
             image,
@@ -349,6 +436,14 @@ export default function complaince({
         }
     );
 
+    const uploadCAC = (image: any) =>
+        handleUpload({
+            image,
+            uploadFn: (url) => customeruploadCAC(url, user?.customer_id, decryptData(token)),
+            successMessage: "CAC document Uploaded Successfully",
+        }
+    );
+
     const uploadIdCard = (image: any) =>
         handleUpload({
             image,
@@ -393,22 +488,26 @@ export default function complaince({
 
             <View style={{ margin: 15 }} />
 
-            <TouchableOpacity onPress={() => fetchedInfo.identification_num ? null :setModalVisible2(prev => !prev)}  style={{padding:20, flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor: Colors.gray8, borderRadius:7}}>
-                <View>
-                    <ThemedText style={{color: '#000'}}>Identification number</ThemedText>
-                    <ThemedText style={{color:Colors.gray9}} type='small'>Click to upload file</ThemedText>
-                </View>
-                
-                {
-                    fetchedInfo.identification_num !== null ?
-                    <Image source={require("@/assets/images/Frame16.png")} style={{width:20, height:20}}/> 
-                    :
-                    <View style={{backgroundColor:'#fff', alignSelf:'flex-start', alignContent:'center', padding:10, borderRadius:6}}>
-                        <Octicons name="person-add" size={18} color={Colors.gray9} />
+            {
+                user?.account_type !== "B" ? 
+                <TouchableOpacity onPress={() => fetchedInfo.identification_num ? null :setModalVisible2(prev => !prev)}  style={{padding:20, flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor: Colors.gray8, borderRadius:7}}>
+                    <View>
+                        <ThemedText style={{color: '#000'}}>Identification number</ThemedText>
+                        <ThemedText style={{color:Colors.gray9}} type='small'>Click to upload file</ThemedText>
                     </View>
-                }
+                    
+                    {
+                        fetchedInfo.identification_num !== null ?
+                        <Image source={require("@/assets/images/Frame16.png")} style={{width:20, height:20}}/> 
+                        :
+                        <View style={{backgroundColor:'#fff', alignSelf:'flex-start', alignContent:'center', padding:10, borderRadius:6}}>
+                            <Octicons name="person-add" size={18} color={Colors.gray9} />
+                        </View>
+                    }
 
-            </TouchableOpacity>
+                </TouchableOpacity>
+                : null
+            }
             
             {
                 modalVisible2 &&
@@ -460,32 +559,57 @@ export default function complaince({
 
             <View style={{margin:7}}/>
 
-            <TouchableOpacity onPress={() => [fetchedInfo.identification_path === null ? openPopup1() : null]}  style={{padding:20, flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor: Colors.gray8, borderRadius:7}}>
-                <View>
-                    <ThemedText style={{color:'#000'}}>Identification card</ThemedText>
-                    <ThemedText style={{color:Colors.gray9}} type='small'>Click to upload file</ThemedText>
-                </View>
-
-                {
-                    fetchedInfo.identification_path !== null && fetchedInfo.verify_identification_date === null  && fetchedInfo.verify_identification === "N" ?
-                        <ThemedText type='small' style={{color:Colors.green}}>Pending...</ThemedText>
-
-                    :
-                    fetchedInfo.identification_path !== null && fetchedInfo.verify_identification_date !== null  && fetchedInfo.verify_identification === "Y" ?
-                        <Image source={require("@/assets/images/Frame16.png")} style={{width:20, height:20}}/> 
-                    :
-                    <View style={{backgroundColor:'#fff', alignSelf:'flex-start', alignContent:'center', padding:10, borderRadius:6}}>
-                        <Octicons name="person-add" size={18} color={Colors.gray9} />
+            {
+                user?.account_type !== "B" ? 
+                <TouchableOpacity onPress={() => [fetchedInfo.identification_path === null ? openPopup1() : null]}  style={{padding:20, flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor: Colors.gray8, borderRadius:7}}>
+                    <View>
+                        <ThemedText style={{color:'#000'}}>Identification card</ThemedText>
+                        <ThemedText style={{color:Colors.gray9}} type='small'>Click to upload file</ThemedText>
                     </View>
-                }
-            </TouchableOpacity>
+
+                    {
+                        fetchedInfo.identification_path !== null && fetchedInfo.verify_identification_date === null  && fetchedInfo.verify_identification === "N" ?
+                            <ThemedText type='small' style={{color:Colors.green}}>Pending...</ThemedText>
+
+                        :
+                        fetchedInfo.identification_path !== null && fetchedInfo.verify_identification_date !== null  && fetchedInfo.verify_identification === "Y" ?
+                            <Image source={require("@/assets/images/Frame16.png")} style={{width:20, height:20}}/> 
+                        :
+                        <View style={{backgroundColor:'#fff', alignSelf:'flex-start', alignContent:'center', padding:10, borderRadius:6}}>
+                            <Octicons name="person-add" size={18} color={Colors.gray9} />
+                        </View>
+                    }
+                </TouchableOpacity>
+                : null
+            }
 
             {
+                user?.account_type === "B" ? 
+                <TouchableOpacity onPress={() => [fetchedInfo.cac_path === null ? openPopup2() : null]}  style={{padding:20, flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor: Colors.gray8, borderRadius:7}}>
+                    <View>
+                        <ThemedText style={{color:'#000'}}>CAC document</ThemedText>
+                        <ThemedText style={{color:Colors.gray9}} type='small'>Click to upload file</ThemedText>
+                    </View>
 
+                    {
+                        fetchedInfo.cac_path !== null && fetchedInfo.verify_cac_date === null  && fetchedInfo.verify_cac === "N" ?
+                            <ThemedText type='small' style={{color:Colors.green}}>Pending...</ThemedText>
+
+                        :
+                        fetchedInfo.cac_path !== null && fetchedInfo.verify_cac_date !== null  && fetchedInfo.verify_cac === "Y" ?
+                            <Image source={require("@/assets/images/Frame16.png")} style={{width:20, height:20}}/> 
+                        :
+                        <View style={{backgroundColor:'#fff', alignSelf:'flex-start', alignContent:'center', padding:10, borderRadius:6}}>
+                            <Octicons name="person-add" size={18} color={Colors.gray9} />
+                        </View>
+                    }
+                </TouchableOpacity> 
+                : null
             }
 
             <View style={{margin:7}}/>
 
+           
             <TouchableOpacity onPress={() => [fetchedInfo.address_verification_path === null ? openPopup() : null]} style={{padding:20, flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor: Colors.gray8, borderRadius:7}}>
                 <View>
                     <ThemedText style={{color:'#000'}}>Proof of address</ThemedText>
@@ -504,7 +628,7 @@ export default function complaince({
                         </View>
                 }
             </TouchableOpacity>
-
+        
             <Modal
                 transparent
                 visible={modalVisible}
@@ -516,7 +640,7 @@ export default function complaince({
                 <Animated.View
                     style={[
                         styles.popup,
-                        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                        { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '10%' },
                     ]}
                 >     
                     <ThemedText style={{textAlign:'center'}}>Choose Image Source (Address)</ThemedText>
@@ -552,7 +676,7 @@ export default function complaince({
                 <Animated.View
                     style={[
                         styles.popup,
-                        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                        { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '10%' },
                     ]}
                 >     
                     <ThemedText style={{textAlign:'center'}}>Choose Image Source (ID Card)</ThemedText>
@@ -568,6 +692,42 @@ export default function complaince({
                         </TouchableOpacity>
 
                         <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor:Colors.gray7, width:'40%', borderRadius:5}} onPress={pickIdCardImage}>
+                            <View style={{justifyContent:'center', alignItems:'center'}}>
+                                <Text style={[{marginLeft:15, marginRight:10}]}>🖼️ Libraries</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    
+                    <View style={{margin:10}}/>
+                </Animated.View>
+            </Modal>
+
+            <Modal
+                transparent
+                visible={modalVisible3}
+                animationType="slide" 
+                onRequestClose={closePopup2}
+            >
+                <TouchableOpacity style={styles.overlay} onPress={closePopup2}/>
+    
+                <Animated.View
+                    style={[
+                        styles.popup,
+                        { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '10%' },
+                    ]}
+                >     
+                    <ThemedText style={{textAlign:'center'}}>Choose Image Source (CAC)</ThemedText>
+
+                    <View style={{margin:10}}/>
+                    
+                    <View style={{flexDirection:'row', justifyContent:'space-evenly'}}>
+                        <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor: Colors.gray7, width:'40%', padding:30, borderRadius:5}} onPress={captureCACImage}>
+                            <View style={{justifyContent:'center', alignItems:'center'}}>
+                                <Text style={[{marginLeft:15, marginRight:10}]}>📸 Camera</Text>
+                            </View>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor:Colors.gray7, width:'40%', borderRadius:5}} onPress={pickCACImage}>
                             <View style={{justifyContent:'center', alignItems:'center'}}>
                                 <Text style={[{marginLeft:15, marginRight:10}]}>🖼️ Libraries</Text>
                             </View>

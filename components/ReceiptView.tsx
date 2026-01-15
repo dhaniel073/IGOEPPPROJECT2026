@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/Colors";
+import { Colors, decryptData } from "@/constants/Colors";
+import { useAuth } from "@/hooks/AuthContext";
+import { customerinfocheck } from "@/hooks/AuthRoutes";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Entypo, Feather, Ionicons } from "@expo/vector-icons";
 import * as MediaLibrary from "expo-media-library";
@@ -66,6 +68,7 @@ export default function ReceiptView({
   );
 
   const viewShotRef = useRef<View>(null);
+  const {user, token, updateUser} = useAuth();
 
   // 📸 Save receipt image to gallery
   const saveReceipt = async () => {
@@ -124,6 +127,17 @@ export default function ReceiptView({
     Alert.alert("Error", "Failed to share receipt.");
   }
 };
+
+  const reload = async() => {
+    try {
+      const response = await customerinfocheck(user?.customer_id, decryptData(token))
+      updateUser(response);
+      console.log(response)
+    } catch (error: any) {
+        console.log(error.response)
+        return;
+    }
+  }
 
   console.log(imageuri)
 
@@ -226,8 +240,9 @@ export default function ReceiptView({
           </View>
 
           <ThemedButton style={styles.button} onPress={() => [onClose(), router.push("/payments")]}>
-            <ThemedText style={styles.buttonText}>Go To Home</ThemedText>
+            <ThemedText style={styles.buttonText1}>Go To Home</ThemedText>
           </ThemedButton>
+            <View style={{margin:15}}/> 
         </View>
       </ThemedView>
     </Modal>
@@ -262,6 +277,10 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
+    fontSize: 11,
+    textAlign: "center",
+  },
+  buttonText1: {
     fontSize: 11,
     textAlign: "center",
   },

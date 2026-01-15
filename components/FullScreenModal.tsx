@@ -47,6 +47,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between", // text in middle, button at bottom
     alignItems: "center",
     padding: 20,
+    paddingBottom:15
     // backgroundColor: "white",
   },
   textContainer: {

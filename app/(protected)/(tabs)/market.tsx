@@ -49,7 +49,7 @@ export default function Market() {
     return unsubscribe
   }, [])
 
-  useEffect(() => {
+   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
       try {
         setIsLoading(true)

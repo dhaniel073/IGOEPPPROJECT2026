@@ -195,7 +195,7 @@ export default function marketitems({
                   <Image
                     style={styles.image}
                     source={{
-                      uri: `https://phixotech.com/igoepp/public/products/${item.picture}`,
+                      uri: `https://igoeppms.com/igoepp/public/products/${item.picture}`,
                     }}
                   />
                   <View style={{ marginLeft: 8, flexShrink: 1 }}>

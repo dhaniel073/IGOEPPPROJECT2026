@@ -117,7 +117,7 @@ export default function billspaymentTv({
         setIsLoading(true)
         const config = {
           method: 'get',
-          url: `https://phixotech.com/igoepp/public/api/auth/billpayment/getAllBillersByCategory/${billid}`,
+          url: `https://igoeppms.com/igoepp/public/api/auth/billpayment/getAllBillersByCategory/${billid}`,
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${decryptData(token)}`,
@@ -144,7 +144,7 @@ export default function billspaymentTv({
     if (["DSTVR", "GOTVR"].includes(value)) return;
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/billpayment/getAllBouquetByBillerID/${billid}/${value}`,
+        `https://igoeppms.com/igoepp/public/api/auth/billpayment/getAllBouquetByBillerID/${billid}/${value}`,
         {
           headers: {
             Accept: 'application/json',
@@ -488,7 +488,7 @@ export default function billspaymentTv({
             <Animated.View
               style={[
                 styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%" },
               ]}
             >
               <View style={{margin:10}}/>

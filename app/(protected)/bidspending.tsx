@@ -32,9 +32,9 @@ const data = [
         icon: <FontAwesome5 name="money-bill-wave" size={14} color={Colors.wallet} />
     },
     {
-      id:"T",
-      name: 'Pay with transfer',
-      icon:  <FontAwesome name="bank" size={14} color={Colors.wallet} />
+        id:"T",
+        name: 'Pay with transfer',
+        icon:  <FontAwesome name="bank" size={14} color={Colors.wallet} />
 
     },
 ]
@@ -293,7 +293,7 @@ export default function bidspending({
     
           console.log(response);
     
-          closePopup1();        // close the PIN modal
+        //   closePopup2();        // close the PIN modal
           makepayment();        // start payment loading immediately
     
         } catch (error: any) {
@@ -477,7 +477,7 @@ export default function bidspending({
                                                 />
                                             :
                                                 <Image
-                                                    source={{uri: `https://phixotech.com/igoepp/public/handyman/${item.photo}`}}
+                                                    source={{uri: `https://igoeppms.com/igoepp/public/handyman/${item.photo}`}}
                                                     style={styles.sman}
                                                 />
                                         }
@@ -595,98 +595,105 @@ export default function bidspending({
             onRequestClose={closePopup}
         >
 
-            <TouchableOpacity style={styles.overlay} onPress={() => [closePopup()]} />
-
-            <Animated.View
-                style={[
-                    styles.popup,
-                    { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-                ]}
+            <KeyboardAvoidingView 
+                style={{ flex: 1 }} 
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
             >
 
+                <TouchableOpacity style={styles.overlay} onPress={() => [closePopup()]} />
 
-                <View style={{margin:5}}/>
-                
-                <ThemedView style={{flexDirection:'row', alignItems:'center'}}>
-                    <View style={{flex:1, alignItems:'center', marginLeft:15}}>
-                        <ThemedText type='titleMedium'>Renegotiate Offer</ThemedText>
-                    </View>
-                    <TouchableOpacity onPress={closePopup}>
-                        <MaterialIcons name="cancel" size={24} color={Colors.green} />
-                    </TouchableOpacity>
-                </ThemedView>
+                <Animated.View
+                    style={[
+                        styles.popup,
+                        { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%"  },
+                    ]}
+                >
 
-                <View style={{margin:6}}/>
 
-                <ThemedText style={{textAlign:'center', color: Colors.gray9}} type='titleLight'>Would you like to renegotiate an offer</ThemedText>
-                <ThemedText style={{textAlign:'center', color: Colors.gray9}} type='titleLight'>and proceed with this booking?</ThemedText>
+                    <View style={{margin:5}}/>
+                    
+                    <ThemedView style={{flexDirection:'row', alignItems:'center'}}>
+                        <View style={{flex:1, alignItems:'center', marginLeft:15}}>
+                            <ThemedText type='titleMedium'>Renegotiate Offer</ThemedText>
+                        </View>
+                        <TouchableOpacity onPress={closePopup}>
+                            <MaterialIcons name="cancel" size={24} color={Colors.green} />
+                        </TouchableOpacity>
+                    </ThemedView>
 
-                <View style={{margin:6}}/>
+                    <View style={{margin:6}}/>
 
-                <ThemedView style={{padding:20, backgroundColor:Colors.lightgray, flex:1, borderColor: Colors.gray9, borderWidth:0.5, borderRadius:15, marginBottom:15}}>
+                    <ThemedText style={{textAlign:'center', color: Colors.gray9}} type='titleLight'>Would you like to renegotiate an offer</ThemedText>
+                    <ThemedText style={{textAlign:'center', color: Colors.gray9}} type='titleLight'>and proceed with this booking?</ThemedText>
 
-                    <View style={{flexDirection:'row', justifyContent:'space-between', padding:10}}>
-                        <ThemedText style={{color: '#000'}}>Service Name</ThemedText>
-                        <ThemedText style={{color: Colors.wallet}}>{renegotiatedata.service_name}</ThemedText>
-                    </View>
+                    <View style={{margin:6}}/>
 
-                    <View style={{flexDirection:'row', justifyContent:'space-between',padding:10}}>
-                        <ThemedText style={{color: '#000'}}>Date</ThemedText>
-                        <ThemedText style={{color: Colors.wallet}}>{formatDate(renegotiatedata.date)}</ThemedText>
-                    </View>
+                    <ThemedView style={{padding:20, backgroundColor:Colors.lightgray, flex:1, borderColor: Colors.gray9, borderWidth:0.5, borderRadius:15, marginBottom:15}}>
 
-                    <View style={{flexDirection:'row', justifyContent:'space-between', padding:10}}>
-                        <ThemedText style={{color: '#000'}}>Time</ThemedText>
-                        <ThemedText style={{color: Colors.wallet}}>{renegotiatedata.time}</ThemedText>
-                    </View>
-                </ThemedView>   
+                        <View style={{flexDirection:'row', justifyContent:'space-between', padding:10}}>
+                            <ThemedText style={{color: '#000'}}>Service Name</ThemedText>
+                            <ThemedText style={{color: Colors.wallet}}>{renegotiatedata.service_name}</ThemedText>
+                        </View>
 
-                <ThemedText>Enter your new offer</ThemedText>
-                <View style={{margin:5}}/> 
-                <ThemedView style={[styles.container, {marginBottom:5, backgroundColor: Colors.offwhite1}]}>
-                    <View style={{flexDirection:'row', flex:1, justifyContent:'center', alignItems:'center'}}>
-                        {/* <MaterialCommunityIcons name="currency-ngn" size={20} color={'black'} /> */}
-                        <ThemedText style={{color:Colors.gray9, fontSize:16}}>NGN</ThemedText>
-                        <TextInput placeholder={'Amount'} 
-                            style={[styles.input, isInvalid && styles.invalid, {}]} 
-                            onFocus={() => setIsInvalid(false)}
-                            value={formattedamount}
-                            onChangeText={handleChange}
-                            placeholderTextColor={Colors.gray9}
-                            keyboardType='number-pad'
-                            maxLength={9}
-                        />
-                    </View>
-                    <Feather name="edit" size={20} color={Colors.wallet} />
-                </ThemedView>
+                        <View style={{flexDirection:'row', justifyContent:'space-between',padding:10}}>
+                            <ThemedText style={{color: '#000'}}>Date</ThemedText>
+                            <ThemedText style={{color: Colors.wallet}}>{formatDate(renegotiatedata.date)}</ThemedText>
+                        </View>
 
-                <View style={{margin:6}}/>
+                        <View style={{flexDirection:'row', justifyContent:'space-between', padding:10}}>
+                            <ThemedText style={{color: '#000'}}>Time</ThemedText>
+                            <ThemedText style={{color: Colors.wallet}}>{renegotiatedata.time}</ThemedText>
+                        </View>
+                    </ThemedView>   
 
-                <View style={{flexDirection:'row', alignItems:'center'}}>
-                    <View style={{marginRight:5}}>
-                        {data1.map((item: any, key: any) => 
-                            <View key={key}>
-                                <TouchableOpacity style={{padding: 15, borderRadius:10, flexDirection:'row', justifyContent:'space-between'}} onPress={() => setavail1(item)}>
-                                    <TouchableOpacity style={styles.outer} onPress={() => setavail1(item)}>
-                                        {avail1 === item && <View style={styles.inner}/>}
+                    <ThemedText>Enter your new offer</ThemedText>
+                    <View style={{margin:5}}/> 
+                    <ThemedView style={[styles.container, {marginBottom:5, backgroundColor: Colors.offwhite1}]}>
+                        <View style={{flexDirection:'row', flex:1, justifyContent:'center', alignItems:'center'}}>
+                            {/* <MaterialCommunityIcons name="currency-ngn" size={20} color={'black'} /> */}
+                            <ThemedText style={{color:Colors.gray9, fontSize:16}}>NGN</ThemedText>
+                            <TextInput placeholder={'Amount'} 
+                                style={[styles.input, isInvalid && styles.invalid, {}]} 
+                                onFocus={() => setIsInvalid(false)}
+                                value={formattedamount}
+                                onChangeText={handleChange}
+                                placeholderTextColor={Colors.gray9}
+                                keyboardType='number-pad'
+                                maxLength={9}
+                            />
+                        </View>
+                        <Feather name="edit" size={20} color={Colors.wallet} />
+                    </ThemedView>
+
+                    <View style={{margin:6}}/>
+
+                    <View style={{flexDirection:'row', alignItems:'center'}}>
+                        <View style={{marginRight:5}}>
+                            {data1.map((item: any, key: any) => 
+                                <View key={key}>
+                                    <TouchableOpacity style={{padding: 15, borderRadius:10, flexDirection:'row', justifyContent:'space-between'}} onPress={() => setavail1(item)}>
+                                        <TouchableOpacity style={styles.outer} onPress={() => setavail1(item)}>
+                                            {avail1 === item && <View style={styles.inner}/>}
+                                        </TouchableOpacity>
                                     </TouchableOpacity>
-                                </TouchableOpacity>
-                            </View>
-                        )}
+                                </View>
+                            )}
+                        </View>
+                        <View>
+                            <ThemedText>I have read an agreed to the <ThemedText style={{color: Colors.green}}>terms and</ThemedText></ThemedText>
+                            <ThemedText style={{color: Colors.green}}>conditons.</ThemedText>
+                        </View>
                     </View>
-                    <View>
-                        <ThemedText>I have read an agreed to the <ThemedText style={{color: Colors.green}}>terms and</ThemedText></ThemedText>
-                        <ThemedText style={{color: Colors.green}}>conditons.</ThemedText>
-                    </View>
-                </View>
 
-                <View style={{margin:4}}/>
+                    <View style={{margin:4}}/>
 
-                <ThemedButton onPress={renegotiatehandler} enabled={!avail1 ? false : true} style={{padding:15, backgroundColor:Colors.green, borderRadius:40, justifyContent:'center'}}>
-                    <ThemedText style={{textAlign:'center', color:"#fff"}}>Send to Artisan</ThemedText>
-                </ThemedButton>
-                
-            </Animated.View>
+                    <ThemedButton onPress={renegotiatehandler} enabled={!avail1 ? false : true} style={{padding:15, backgroundColor:Colors.green, borderRadius:40, justifyContent:'center'}}>
+                        <ThemedText style={{textAlign:'center', color:"#fff"}}>Send to Artisan</ThemedText>
+                    </ThemedButton>
+                    
+                </Animated.View>
+            </KeyboardAvoidingView>
         </Modal>
 
         <Modal
@@ -700,8 +707,8 @@ export default function bidspending({
 
             <Animated.View
                 style={[
-                    styles.popup,
-                    { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                    styles.popup, 
+                    { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%" },
                 ]}
             >
 
@@ -717,18 +724,15 @@ export default function bidspending({
                     </TouchableOpacity>
                 </ThemedView>
 
-                <View style={{margin:6}}/>
-
                 <ThemedText style={{textAlign:'center', color: Colors.green}} type='titleMedium'>
                     {!amount1 ? "0.00" : amount1.toLocaleString('en-NG', {
                         style: 'currency',
                         currency: 'NGN',
                     })}
                 </ThemedText>
-                <View style={{margin:8}}/>
 
                 {
-                    user?.account_type === "B" || user?.account_type === "E" ? 
+                    user?.account_type === "B" || user?.account_type === "E" && user.status === 'A'? 
                     <>
                     {dataBusiness.map((item: any, key: any) => 
                         <ThemedView key={item.id} style={{flexDirection:'row', justifyContent:'space-between', padding:12,
@@ -824,7 +828,7 @@ export default function bidspending({
             <Animated.View
                 style={[
                     styles.popup,
-                    { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                    { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%"  },
                 ]}
             >
 
@@ -846,7 +850,7 @@ export default function bidspending({
                     <View key={key}>
                     <TouchableOpacity style={{flexDirection:'row', justifyContent:'space-between', paddingBottom:10, paddingTop:10}} onPress={() => setavailbank(item.bank_name)}>
                     <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center',}}>
-                        <Image style={{height:30, borderRadius: 50, width:30}} source={{uri: `https://phixotech.com/igoepp/public/banks/${item.image}`}}/>
+                        <Image style={{height:30, borderRadius: 50, width:30}} source={{uri: `https://igoeppms.com/igoepp/public/banks/${item.image}`}}/>
                         <View style={{marginHorizontal:6}}/>
                         <Text style={{color: color}}>{item.bank_name}</Text>
                     </View>
@@ -877,13 +881,13 @@ export default function bidspending({
                 style={{ flex: 1 }} 
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
-                >
+            >
             <TouchableOpacity style={styles.overlay} onPress={() => [closePopup2()]} />
 
                 <Animated.View
                 style={[
                     styles.popup,
-                    { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                    { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "5%"  },
                 ]}
                 >
                 <ThemedText type='titleMedium' style={{textAlign:'center'}}>Enter Pin</ThemedText>

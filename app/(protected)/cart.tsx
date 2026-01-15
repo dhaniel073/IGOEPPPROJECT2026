@@ -129,7 +129,6 @@ export default function cart({
         }
     };
 
-
     const reload = async() => {
         try {
             setIsLoading(true)
@@ -147,18 +146,18 @@ export default function cart({
 
     const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
     const handleQuantityChange = (itemId: string | number, change: number) => {
-    const key = String(itemId); // Always use string keys
+        const key = String(itemId); // Always use string keys
 
-    setQuantities((prev) => {
-        // Get current quantity: either from state or cart items
-        const current =
-        prev[key] ??
-        cartitem.find((item: any) => String(item.product_id) === key)?.quantity ??
-        1;
+        setQuantities((prev) => {
+            // Get current quantity: either from state or cart items
+            const current =
+            prev[key] ??
+            cartitem.find((item: any) => String(item.product_id) === key)?.quantity ??
+            1;
 
-        const updated = Math.max(1, current + change); // Prevent 0 or negative
-        return { ...prev, [key]: updated };
-    });
+            const updated = Math.max(1, current + change); // Prevent 0 or negative
+            return { ...prev, [key]: updated };
+        });
     };
 
     if(isloading){
@@ -201,7 +200,7 @@ export default function cart({
                                     <Image
                                         style={styles.image}
                                         source={{
-                                            uri: `https://phixotech.com/igoepp/public/products/${item.product_picture}`,
+                                            uri: `https://igoeppms.com/igoepp/public/products/${item.product_picture}`,
                                         }}
                                     />
                                     <View style={{marginLeft:8, flexShrink:1}}>

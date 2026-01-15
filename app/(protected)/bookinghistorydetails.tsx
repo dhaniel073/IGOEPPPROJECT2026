@@ -108,7 +108,7 @@ export default function bookingshistorydetails({
                         {
                         item.image === null ? <Image source={require('@/assets/images/bookings.png')} style={{ width: '100%', height: 150, borderRadius: 10 }} /> 
                         : 
-                        <Image source={{ uri: `https://phixotech.com/igoepp/public/subcategory/${item.image}` }} style={{ width: '100%', height: 150, borderRadius: 10 }} />
+                        <Image source={{ uri: `https://igoeppms.com/igoepp/public/subcategory/${item.image}` }} style={{ width: '100%', height: 150, borderRadius: 10 }} />
                         }
                         
                         <View style={{ margin: 10 }} />
@@ -286,16 +286,92 @@ export default function bookingshistorydetails({
                 ]}
             >
 
-                <View style={{margin:25}}/>
+               <View style={{margin:10}}/>
+                <ThemedText type='subtitle' style={{textAlign:'center', flex:1}}>Request Details</ThemedText>
+                <FlatList
+                    data={fetchedRequest}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({item}) => (
 
-                <ThemedView style={{justifyContent:'center', alignSelf:'center'}}>
+                        <ThemedView style={{backgroundColor: Colors.gray6, marginHorizontal:10, paddingHorizontal:20, paddingVertical:20}}>
+                        
 
-                    <ThemedText>Details</ThemedText>
-                    
-                </ThemedView>
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Id</ThemedText>
+                                <ThemedText style={{color:Colors.wallet }} type='small'>{item.id}</ThemedText>
+                            </View>
 
-                <View style={{margin:25}}/>
-                
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Price</ThemedText>
+                                <ThemedText style={{color:Colors.wallet }} type='small'>{item.agreed_price === null ? '0.00' : item.agreed_price}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Description</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_desc}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Help Intervals</ThemedText>
+                                <ThemedText style={{color:Colors.wallet,  textAlign:'right', }} type='small'>{item.help_frequency}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Landmark</ThemedText>
+                                <ThemedText style={{color:Colors.wallet, textAlign:'right', }} type='small'>{item.help_landmark}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Request Type</ThemedText>
+                                <ThemedText style={{color:Colors.wallet, textAlign:'right', }} type='small'>{item.preassessment_flg === "N" ? "Normal Request" : "Preassessment Request"}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Address</ThemedText>
+                                <ThemedText style={{color:Colors.wallet, maxWidth:210, textAlign:'right', }} type='small'>{item.help_location}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Country</ThemedText>
+                                <ThemedText style={{color:Colors.wallet, textAlign:'right', }} type='small'>{item.help_country}</ThemedText>
+                            </View>
+                        
+                        <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>State</ThemedText>
+                                <ThemedText style={{color:Colors.wallet,  textAlign:'right', }} type='small'>{item.help_state}</ThemedText>
+                            </View>
+                            
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>L.G.A</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_lga}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Help Size</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_size}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Status</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_status === "A" ? "Active" : item.help_status === "N" ? "Negotiating" : item.help_status === "C" ? "Completed" : "Cancelled"}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Date</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_date}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Time</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_time}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Security Code</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.security_code}</ThemedText>
+                            </View>
+                        </ThemedView>
+                    )} />
             </Animated.View>
         </Modal>
     </SafeAreaView>

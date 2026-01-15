@@ -93,7 +93,7 @@ export default function bookinghistory({
                 />
             )
         }
-
+        <View style={{paddingBottom:'10%'}}/>
     </SafeAreaView>
   )
 }

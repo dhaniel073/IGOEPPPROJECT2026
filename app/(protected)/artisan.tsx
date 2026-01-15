@@ -110,7 +110,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
           !data.photo ? 
           <Image style={[styles.image, ]} source={require("@/assets/images/person-4.png")}/>
           :
-          <Image style={[styles.image, ]} source={{ uri: `https://phixotech.com/igoepp/public/handyman/${data.photo}` }} />
+          <Image style={[styles.image, ]} source={{ uri: `https://igoeppms.com/igoepp/public/handyman/${data.photo}` }} />
         }
 
         <View style={{margin:10}}/> 
@@ -120,7 +120,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
             !data.photo ? 
             <Image style={[styles.image1, ]} source={require("@/assets/images/person-4.png")}/>
             :
-            <Image style={[styles.image1, ]} source={{ uri: `https://phixotech.com/igoepp/public/handyman/${data.photo}` }} />
+            <Image style={[styles.image1, ]} source={{ uri: `https://igoeppms.com/igoepp/public/handyman/${data.photo}` }} />
           }
           {/* <Image
             source={require("@/assets/images/cleaning.jpg")}
@@ -182,31 +182,41 @@ import { SafeAreaView } from 'react-native-safe-area-context'
         <View style={{margin:5}}/> 
 
         {rating.map((item, index) => {
-          const rating = parseFloat(item.custom_rating);
-          const fullStars = Math.floor(rating);
-          const hasHalfStar = rating % 1 >= 0.5;
+          const rawRating = parseFloat(item.custom_rating) || 0;
+          const safeRating = Math.min(Math.max(rawRating, 0), 5);
+
+          const fullStars = Math.floor(safeRating);
+          const hasHalfStar = safeRating - fullStars >= 0.5;
           const totalStars = 5;
 
-          // Format date nicely (e.g. "02 Dec")
+          // ⭐ Derived rating from displayed stars
+          const displayedRating = fullStars + (hasHalfStar ? 0.5 : 0);
+
           const date = new Date(item.created_at);
-          const formattedDate = date.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
+          const formattedDate = date.toLocaleDateString('en-US', {
+            day: '2-digit',
+            month: 'short',
+          });
 
           return (
-            <ThemedView key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-              {
-                !item.picture ?
-                  <Image
-                    source={require("@/assets/images/img1.png")}
-                    style={styles.image2}
-                  />
-                :
-                  <Image
-                    source={{uri:`https://phixotech.com/igoepp/public/customers/${item.picture}`}}
-                    style={styles.image2}
-                  />
-              }
+            <ThemedView
+              key={item.id ?? index}
+              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}
+            >
+              {!item.picture ? (
+                <Image
+                  source={require('@/assets/images/img1.png')}
+                  style={styles.image2}
+                />
+              ) : (
+                <Image
+                  source={{ uri: `https://igoeppms.com/igoepp/public/customers/${item.picture}` }}
+                  style={styles.image2}
+                />
+              )}
+
               <View>
-                <ThemedText type='smallMedium'>
+                <ThemedText type="smallMedium">
                   {item.customer_name} • {formattedDate}
                 </ThemedText>
 
@@ -222,14 +232,15 @@ import { SafeAreaView } from 'react-native-safe-area-context'
                   )}
 
                   {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
-                    <AntDesign key={`empty-${i}`} name="star" size={16} color="#FFD700" />
-                  ))}{" "}
-                  {rating}
+                    <FontAwesome key={`empty-${i}`} name="star-o" size={16} color="#FFD700" />
+                  ))}{' '}
+                  {displayedRating.toFixed(1)}
                 </ThemedText>
               </View>
             </ThemedView>
           );
         })}
+
 
 
         <View style={{margin:10}}/> 

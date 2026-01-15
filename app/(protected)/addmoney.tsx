@@ -38,6 +38,15 @@ export default function addmoney({
         : "Y"
     );
 
+    // useEffect(() => {
+    //     const backHandler = BackHandler.addEventListener(
+    //         'hardwareBackPress',
+    //         () => true // ⛔ block back button
+    //         );
+
+    //     return () => backHandler.remove();
+    // }, []);
+
     const copyToClipboard = async (number: string) => {
         await Clipboard.setStringAsync(number);
         // Alert.alert('copied')

@@ -174,7 +174,7 @@ export default function notificationview({
                 <Animated.View
                     style={[
                         styles.popup,
-                        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                        { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '15%' },
                     ]}
                 >
                     <View style={{margin:5}}/>

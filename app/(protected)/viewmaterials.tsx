@@ -401,6 +401,8 @@ export default function viewmaterials({
             </View>
         </View>
 
+        <View style={{margin:'5%'}}/>
+        
         <Modal
             transparent
             visible={isModalVisible}
@@ -413,7 +415,7 @@ export default function viewmaterials({
             <Animated.View
                 style={[
                     styles.popup,
-                    { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                    { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '15%' },
                 ]}
             >
 
@@ -493,7 +495,7 @@ export default function viewmaterials({
             <Animated.View
                 style={[
                     styles.popup,
-                    { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                    { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '15%' },
                 ]}
             >
 
@@ -502,7 +504,7 @@ export default function viewmaterials({
                     <View key={key}>
                     <TouchableOpacity style={{flexDirection:'row', justifyContent:'space-between', paddingBottom:10, paddingTop:10}} onPress={() => setBankAvail(item.bank_name)}>
                     <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center',}}>
-                        <Image style={{height:30, borderRadius: 50, width:30}} source={{uri: `https://phixotech.com/igoepp/public/banks/${item.image}`}}/>
+                        <Image style={{height:30, borderRadius: 50, width:30}} source={{uri: `https://igoeppms.com/igoepp/public/banks/${item.image}`}}/>
                         <View style={{marginHorizontal:6}}/>
                         <View>
                             <ThemedText>{item.bank_name}</ThemedText>
@@ -546,7 +548,7 @@ export default function viewmaterials({
                 <Animated.ScrollView
                     style={[
                         styles.popup,
-                        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                        { transform: [{ translateY: slideAnim }], backgroundColor: color1},
                     ]}
                 >
                     <ThemedText type='titleMedium' style={{ textAlign: 'center' }}>Enter PIN</ThemedText>

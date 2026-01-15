@@ -198,7 +198,7 @@ export default function addmoneytf({
                 <View key={key}>
                 <TouchableOpacity style={{flexDirection:'row', justifyContent:'space-between', paddingBottom:10, paddingTop:10}} onPress={() => setavail(item.bank_name)}>
                 <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center',}}>
-                    <Image style={{height:30, borderRadius: 50, width:30}} source={{uri: `https://phixotech.com/igoepp/public/banks/${item.image}`}}/>
+                    <Image style={{height:30, borderRadius: 50, width:30}} source={{uri: `https://igoeppms.com/igoepp/public/banks/${item.image}`}}/>
                     <View style={{marginHorizontal:6}}/>
                     <Text style={{color: color}}>{item.bank_name}</Text>
                 </View>

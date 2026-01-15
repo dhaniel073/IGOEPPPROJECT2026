@@ -1,11 +1,13 @@
+import CustomDropdown from '@/components/CustomDropdown'
 import GoBack from '@/components/GoBack'
 import LogoSpinner from '@/components/LoadingScreen'
 import { ThemedButton } from '@/components/ThemedButton'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
+import { validateSatisfyRequest } from '@/components/validateSatisfyRequest'
 import { Colors, convertToReadableDateTime, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { cancelrequests, fetchrequestbyid } from '@/hooks/AuthRoutes'
+import { cancelrequests, customernotsatisfied, customersatisfied, fetchrequestbyid } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { AntDesign, FontAwesome5, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
@@ -35,6 +37,12 @@ export default function bookings1({
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible1, setModalVisible1] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
+    const [modalVisible3, setModalVisible3] = useState(false);
+    const [formData, setFormData] = useState({
+        id: "",
+        satisfy: "",
+        reason: ""
+    });
 
     
     const [fetchedRequest, setFetchedRequest] = useState<any[]>([])
@@ -93,6 +101,69 @@ export default function bookings1({
         setReason('');
     };
 
+
+    const [errors, setErrors] = useState<Record<string, string>>({});
+      
+      const handleRequest = () => {
+        console.log(formData)
+        const validationErrors = validateSatisfyRequest(formData);
+        setErrors(validationErrors);
+    
+        if (Object.keys(validationErrors).length > 0) {
+          // stop signup — show all errors
+          console.log("Validation Errors:", validationErrors);
+    
+          // Join all error messages together
+          const allErrors = Object.values(validationErrors).join("\n");
+    
+          Alert.alert("❌ Validation Errors", allErrors);
+          return;
+        }
+    
+        // proceed to API call, etc.
+        return satisfyhandle();
+      };
+    
+      const satisfyhandle = async () => {
+        try {
+          setIsFetching(true);
+    
+          let response;
+    
+          if (formData.satisfy === "Y") {
+            // Run satisfied API
+            response = await customersatisfied(
+              formData.id,
+              decryptData(token)
+            );
+          } else {
+            // Run NOT satisfied API
+            response = await customernotsatisfied(
+              formData.id,
+              formData.reason,
+              decryptData(token)
+            );
+          }
+    
+          console.log(response);
+          Alert.alert('Successful', 'You have successfully satisfied the handyman', [
+            {
+              text: "OK",
+              onPress: () => router.push('/(protected)/(tabs)')
+            }
+          ])
+    
+        } catch (error: any) {
+          alert(
+            "Booking failed. Please try again or contact support if the issue continues."
+          );
+          console.log(error.response);
+          return;
+        } finally {
+          setIsFetching(false);
+        }
+      };
+
     const slideAnim = React.useRef(new Animated.Value(height)).current; // Start below the screen
     const openPopup = () => {
         setModalVisible(true);
@@ -145,6 +216,24 @@ export default function bookings1({
         }).start(() => setModalVisible2(false)); // Close after animation
     };
 
+    const openPopup3 = () => {
+        setModalVisible3(true);
+        Animated.timing(slideAnim, {
+        toValue: 0, // Slide to the screen
+        duration: 300,
+        useNativeDriver: true,
+        }).start();
+      };
+    
+      const closePopup3 = () => {
+        Animated.timing(slideAnim, {
+        toValue: height, // Slide back down
+        duration: 300,
+        useNativeDriver: true,
+        }).start(() => setModalVisible3(false)); // Close after animation
+      };
+    
+
     console.log(fetchedRequest);
 
     if(isFetching){
@@ -169,7 +258,7 @@ export default function bookings1({
                         {
                         item.image === null ? <Image source={require('@/assets/images/bookings.png')} style={{ width: '100%', height: 150, borderRadius: 10 }} /> 
                         : 
-                        <Image source={{ uri: `https://phixotech.com/igoepp/public/subcategory/${item.image}` }} style={{ width: '100%', height: 150, borderRadius: 10 }} />
+                        <Image source={{ uri: `https://igoeppms.com/igoepp/public/subcategory/${item.image}` }} style={{ width: '100%', height: 150, borderRadius: 10 }} />
                         }
                         
                         <View style={{ margin: 10 }} />
@@ -387,12 +476,30 @@ export default function bookings1({
                         ""
                     }
 
+                    {fetchedRequest.length > 0 && fetchedRequest[0].help_status === 'C' && fetchedRequest[0].customer_statisfy === null ?
+                        <>
+                            <View style={{margin:10}}/>
+                            <ThemedButton
+                                style={{
+                                    backgroundColor: Colors.wallet,
+                                    padding: 15, borderRadius:30, alignItems:'center'
+                                }}
+                                onPress={() => [setFormData(prev => ({...prev, id: fetchedRequest[0].id})),openPopup3()]}
+                            >
+                                <ThemedText style={{ color: '#fff' }} type="defaultSemiBold">
+                                    Satisfy Request
+                                </ThemedText>
+                            </ThemedButton>
+                        </>
+                        : ""
+                    }
+
                     <View style={{margin:5}}/>
 
                     <ThemedButton style={{ padding: 15, borderRadius:30, alignItems:'center'}} onPress={openPopup1}>
-                        <ThemedText style={{color: color}}>Check Details</ThemedText>
+                        <ThemedText>Check Details</ThemedText>
                     </ThemedButton>
-                    <View style={{margin:10}}/>
+                    <View style={{margin:'8%'}}/>
                 </>
             }
         />
@@ -410,7 +517,7 @@ export default function bookings1({
             <Animated.View
                 style={[
                     styles.popup,
-                    { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                    { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%" },
                 ]}
             >
 
@@ -449,21 +556,97 @@ export default function bookings1({
 
             <Animated.View
                 style={[
-                    styles.popup,
-                    { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                    styles.popup1,
+                    { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%" },
                 ]}
             >
 
-                <View style={{margin:25}}/>
+                <View style={{margin:10}}/>
+                <ThemedText type='subtitle' style={{textAlign:'center', flex:1}}>Request Details</ThemedText>
+                <FlatList
+                  data={fetchedRequest}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({item}) => (
 
-                <ThemedView style={{justifyContent:'center', alignSelf:'center'}}>
+                        <ThemedView style={{backgroundColor: Colors.gray6, marginHorizontal:10, paddingHorizontal:20, paddingVertical:20, borderRadius:10}}>
+                        
 
-                    <ThemedText>Details</ThemedText>
-                    
-                </ThemedView>
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Id</ThemedText>
+                                <ThemedText style={{color:Colors.wallet }} type='small'>{item.id}</ThemedText>
+                            </View>
 
-                <View style={{margin:25}}/>
-                
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Price</ThemedText>
+                                <ThemedText style={{color:Colors.wallet }} type='small'>{item.agreed_price === null ? '0.00' : item.agreed_price}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Description</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_desc}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Help Intervals</ThemedText>
+                                <ThemedText style={{color:Colors.wallet,  textAlign:'right', }} type='small'>{item.help_frequency}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Landmark</ThemedText>
+                                <ThemedText style={{color:Colors.wallet, textAlign:'right', }} type='small'>{item.help_landmark}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Request Type</ThemedText>
+                                <ThemedText style={{color:Colors.wallet, textAlign:'right', }} type='small'>{item.preassessment_flg === "N" ? "Normal Request" : "Preassessment Request"}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Address</ThemedText>
+                                <ThemedText style={{color:Colors.wallet, maxWidth:210, textAlign:'right', }} type='small'>{item.help_location}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Country</ThemedText>
+                                <ThemedText style={{color:Colors.wallet, textAlign:'right', }} type='small'>{item.help_country}</ThemedText>
+                            </View>
+                        
+                        <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>State</ThemedText>
+                                <ThemedText style={{color:Colors.wallet,  textAlign:'right', }} type='small'>{item.help_state}</ThemedText>
+                            </View>
+                            
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>L.G.A</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_lga}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Help Size</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_size}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Status</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_status === "A" ? "Active" : item.help_status === "N" ? "Negotiating" : item.help_status === "C" ? "Completed" : "Cancelled"}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Date</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_date}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Time</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.help_time}</ThemedText>
+                            </View>
+
+                            <View style={{justifyContent:'space-between', flexDirection:'row'}}>
+                                <ThemedText style={{color: '#000'}} type='small'>Security Code</ThemedText>
+                                <ThemedText style={{color:Colors.wallet}} type='small'>{item.security_code}</ThemedText>
+                            </View>
+                        </ThemedView>
+                  )} />
             </Animated.View>
         </Modal>
 
@@ -482,17 +665,17 @@ export default function bookings1({
                 }}
             >
                 <ThemedView
-                style={{
-                    width: '85%',
-                    backgroundColor: '#fff',
-                    borderRadius: 15,
-                    padding: 20,
-                    shadowColor: '#000',
-                    shadowOpacity: 0.2,
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowRadius: 4,
-                    elevation: 5,
-                }}
+                    style={{
+                        width: '85%',
+                        backgroundColor: '#fff',
+                        borderRadius: 15,
+                        padding: 20,
+                        shadowColor: '#000',
+                        shadowOpacity: 0.2,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowRadius: 4,
+                        elevation: 5,
+                    }}
                 >
                 <ThemedText type="title" style={{ marginBottom: 10 }}>
                     Cancel Request
@@ -523,25 +706,25 @@ export default function bookings1({
 
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10 }}>
                     <TouchableOpacity
-                    onPress={closePopup2}
-                    style={{
-                        paddingVertical: 10,
-                        paddingHorizontal: 15,
-                        borderRadius: 8,
-                        backgroundColor: Colors.gray9,
-                    }}
+                        onPress={closePopup2}
+                        style={{
+                            paddingVertical: 10,
+                            paddingHorizontal: 15,
+                            borderRadius: 8,
+                            backgroundColor: Colors.gray9,
+                        }}
                     >
                     <ThemedText style={{ color: '#fff' }}>Cancel</ThemedText>
                     </TouchableOpacity>
 
                     <ThemedButton
-                    style={{
-                        backgroundColor: Colors.red,
-                        paddingVertical: 10,
-                        paddingHorizontal: 15,
-                        borderRadius: 8,
-                    }}
-                    onPress={handleSubmit}
+                        style={{
+                            backgroundColor: Colors.red,
+                            paddingVertical: 10,
+                            paddingHorizontal: 15,
+                            borderRadius: 8,
+                        }}
+                        onPress={handleSubmit}
                     >
                     <ThemedText style={{ color: '#fff' }}>Submit</ThemedText>
                     </ThemedButton>
@@ -550,28 +733,107 @@ export default function bookings1({
             </View>
         </Modal>
 
-        {/* <Modal
-            transparent
-            visible={modalVisible}
-            animationType="slide" 
-            onRequestClose={closePopup}
+
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible3}
+            onRequestClose={closePopup3}
         >
-
-            <TouchableOpacity style={styles.overlay} onPress={() => [closePopup()]} />
-
-            <Animated.View
-                style={[
-                    styles.popup,
-                    { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-                ]}
+            <View
+                style={{
+                flex: 1,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                }}
             >
+                <ThemedView
+                    style={{
+                        width: '85%',
+                        backgroundColor: '#fff',
+                        borderRadius: 15,
+                        padding: 20,
+                        shadowColor: '#000',
+                        shadowOpacity: 0.2,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowRadius: 4,
+                        elevation: 5,
+                    }}
+                >
+                <ThemedText type="title" style={{ marginBottom: 10, color:"#000" }}>
+                    Satisfy  Request
+                </ThemedText>
 
+                <ThemedText style={{color: "#000"}}>Satisfied</ThemedText>
+                <View style={{margin:5}}/>
+                <CustomDropdown
+                label=""
+                data={[
+                    {label: 'Yes', value: 'Y'},
+                    {label: 'No', value: 'N'},
+                ]}
+                value={formData.satisfy}
+                onChange={(value:any) => setFormData({ ...formData, satisfy: value })}
+                error={""}
+                />
 
-                <View style={{margin:25}}/>
+                {
+                formData.satisfy === 'N' &&
+                <>
+                    <ThemedText style={{ color: Colors.blacktext, marginBottom: 10 }}>
+                    Please provide a reason for not being satisfied:
+                    </ThemedText>
 
-            </Animated.View>
-        </Modal> */}
+                    <TextInput
+                    style={{
+                    height: 100,
+                    borderColor: Colors.gray9,
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    padding: 10,
+                    textAlignVertical: 'top',
+                    color: Colors.blacktext,
+                    marginBottom: 20,
+                    }}
+                    multiline
+                    numberOfLines={4}
+                    placeholder="Enter reason..."
+                    placeholderTextColor={Colors.gray9}
+                    value={formData.reason}
+                    onChangeText={(value:any) => setFormData({ ...formData, reason: value })}
+                    />
+                </>
+                }
 
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10 }}>
+                <TouchableOpacity
+                    onPress={() => [closePopup3(), setFormData(prev => ({...prev, reason: "", satisfy:""}))]}
+                    style={{
+                    paddingVertical: 10,
+                    paddingHorizontal: 15,
+                    borderRadius: 8,
+                    backgroundColor: Colors.gray9,
+                    }}
+                    >
+                    <ThemedText style={{ color: '#fff' }}>Cancel</ThemedText>
+                </TouchableOpacity>
+
+                <ThemedButton
+                    style={{
+                    backgroundColor: Colors.red,
+                    paddingVertical: 10,
+                    paddingHorizontal: 15,
+                    borderRadius: 8,
+                    }}
+                    onPress={() => [handleRequest(), closePopup3()]}
+                >
+                    <ThemedText style={{ color: '#fff' }}>Submit</ThemedText>
+                </ThemedButton>
+                </View>
+            </ThemedView>
+            </View>
+        </Modal>
     </SafeAreaView>
   )
 }
@@ -600,6 +862,16 @@ const styles = StyleSheet.create({
         // borderRadius: 12,
         justifyContent:'center',
         alignItems:'center'
+    },
+
+    popup1: {
+         position: 'absolute',
+        bottom:0,
+        width: '100%',
+        backgroundColor: '#fff',
+        padding: 10,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
     },
     overlay: {
         flex: 1,

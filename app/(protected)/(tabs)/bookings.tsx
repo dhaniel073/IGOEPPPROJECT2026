@@ -78,31 +78,28 @@ export default function bookings({
 
   return (
     <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-            <View style={{margin:6}}/> 
-            <ThemedText type="titleMedium">Bookings</ThemedText>
-            <ThemedText style={{color: Colors.gray9}}>View bookings</ThemedText>
-
-            <View style={{margin:6}}/>
-            
-            {
-                fetchedRequest.length === 0 ? (
-                    <Animated.ScrollView showsVerticalScrollIndicator={false}>  
-                        <EmptyScreen
-                            mainText="You have no booking yet"
-                            subText="Your booking will appear once you add a new booking."
-                            imageSource={require('@/assets/images/history.png')}
-                        />
-                    </Animated.ScrollView>
-                ) : (
-                    <FlatList
-                        data={fetchedRequest}
-                        renderItem={({ item }) => <BookingCard item={item} />}
-                        keyExtractor={(item: any) => item.id.toString()}
-                        showsVerticalScrollIndicator={false}
+        <View style={{margin:6}}/> 
+        <ThemedText type="titleMedium">Bookings</ThemedText>
+        <ThemedText style={{color: Colors.gray9}}>View bookings</ThemedText>
+        <View style={{margin:6}}/>
+        {
+            fetchedRequest.length === 0 ? (
+                <Animated.ScrollView showsVerticalScrollIndicator={false}>  
+                    <EmptyScreen
+                        mainText="You have no booking yet"
+                        subText="Your booking will appear once you add a new booking."
+                        imageSource={require('@/assets/images/history.png')}
                     />
-                )
-            }
-
+                </Animated.ScrollView>
+            ) : (
+                <FlatList
+                    data={fetchedRequest}
+                    renderItem={({ item }) => <BookingCard item={item} />}
+                    keyExtractor={(item: any) => item.id.toString()}
+                    showsVerticalScrollIndicator={false}
+                />
+            )
+        }
     </SafeAreaView>
   )
 }
