@@ -43,13 +43,13 @@ export default function TabLayout() {
         options={{
           title: 'Bookings',
           tabBarIcon: ({ color, focused }) => (
-              <View>
-                {
-                  focused ?
+            <View>
+              {
+                focused ?
                   <FontAwesome6 name="ticket-simple" size={18} color={color} />
                   :
                   <MaterialCommunityIcons name="ticket-outline" size={23} color={color} />
-                } 
+              }
             </View>
           )
         }}
@@ -82,4 +82,3 @@ export default function TabLayout() {
   );
 }
 
-     

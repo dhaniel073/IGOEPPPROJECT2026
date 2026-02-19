@@ -3,7 +3,7 @@ import LogoSpinner from '@/components/LoadingScreen'
 import { ThemedText } from '@/components/ThemedText'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { viewalertsetup } from '@/hooks/AuthRoutes'
+import { viewalertsetup, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import axios from 'axios'
 import { useRouter } from 'expo-router'
@@ -25,7 +25,7 @@ export default function NotificationSetup({
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text')
   const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background')
   const router = useRouter()
-  const {user, token, logout} = useAuth()
+  const { user, token, logout } = useAuth()
   const [isloading, setIsLoading] = useState(false)
 
   const [emailEnabled, setEmailEnabled] = useState(false)
@@ -48,7 +48,7 @@ export default function NotificationSetup({
         } else {
           Alert.alert('Error', 'Unable to load notification settings.')
         }
-      }finally{
+      } finally {
         setIsLoading(false)
       }
     }
@@ -56,60 +56,60 @@ export default function NotificationSetup({
     fetchSettings()
   }, [])
 
-    const updateNotification = async (type: 'SA' | 'EA' | 'PA', alert_type: 'S' | 'E' | 'P',  enabled: boolean) => {
-        const action = enabled ? 'custalertsetups' : 'removecustalertsetups';
+  const updateNotification = async (type: 'SA' | 'EA' | 'PA', alert_type: 'S' | 'E' | 'P', enabled: boolean) => {
+    const action = enabled ? 'custalertsetups' : 'removecustalertsetups';
 
-        const url =
-            action === 'custalertsetups'
-            ? `https://phixotech.com/igoepp/public/api/auth/customer/custalertsetups`
-            : `https://phixotech.com/igoepp/public/api/auth/customer/removecustalertsetups/${user?.customer_id}/${type}/${alert_type}`;
-
-
-        const method = action === 'custalertsetups' ? 'post' : 'get';
-
-        try {
-            // ✅ build common payload and headers
-            const payload = {
-                customer_id: user?.customer_id,
-                event_type: type,
-                alert_type: alert_type,
-            };
-
-            const headers = {
-                Accept: 'application/json',
-                Authorization: `Bearer ${decryptData(token)}`,
-            };
-
-            // ✅ dynamic axios call
-            const res = await axios({
-                method,
-                url,
-                data: payload,
-                headers,
-            });
-
-            console.log('Response:', res.data);
-        } catch (err:any) {
-            console.log(err.response.data);
-            Alert.alert('Error', `Unable to set  ${type === 'EA' ? 'email' : type === 'PA' ? "push" : 'sms'} notifications.`);
-
-            // revert state since request failed
-            if (type === 'EA') setEmailEnabled((prev) => !prev);
-            if (type === 'SA') setSmsEnabled((prev) => !prev);
-            if (type === 'PA') setPushEnabled((prev) => !prev);
-        }
-    };
+    const url =
+      action === 'custalertsetups'
+        ? `${YOUR_API_BASE_URL}auth/customer/custalertsetups`
+        : `${YOUR_API_BASE_URL}auth/customer/removecustalertsetups/${user?.customer_id}/${type}/${alert_type}`;
 
 
-    if(isloading){
-        return <LogoSpinner lightColor='' darkColor=''/>
+    const method = action === 'custalertsetups' ? 'post' : 'get';
+
+    try {
+      // ✅ build common payload and headers
+      const payload = {
+        customer_id: user?.customer_id,
+        event_type: type,
+        alert_type: alert_type,
+      };
+
+      const headers = {
+        Accept: 'application/json',
+        Authorization: `Bearer ${decryptData(token)}`,
+      };
+
+      // ✅ dynamic axios call
+      const res = await axios({
+        method,
+        url,
+        data: payload,
+        headers,
+      });
+
+      console.log('Response:', res.data);
+    } catch (err: any) {
+      console.log(err.response.data);
+      Alert.alert('Error', `Unable to set  ${type === 'EA' ? 'email' : type === 'PA' ? "push" : 'sms'} notifications.`);
+
+      // revert state since request failed
+      if (type === 'EA') setEmailEnabled((prev) => !prev);
+      if (type === 'SA') setSmsEnabled((prev) => !prev);
+      if (type === 'PA') setPushEnabled((prev) => !prev);
     }
+  };
+
+
+  if (isloading) {
+    return <LogoSpinner lightColor='' darkColor='' />
+  }
 
 
   return (
     <SafeAreaView
       style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }}
-      edges={['top']}
+      edges={['top', 'bottom']}
     >
       <Animated.ScrollView showsVerticalScrollIndicator={false}>
         <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>

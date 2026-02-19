@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { cartitem, cartitemstore, cartshow } from '@/hooks/AuthRoutes'
+import { cartitem, cartitemstore, cartshow, PUBLIC_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
@@ -47,9 +47,9 @@ export default function marketitems({
 
   const handleQuantityChange = (itemId: string | number, change: number) => {
     setQuantities((prev) => {
-        const current = prev[itemId] || 1;
-        const updated = Math.max(1, current + change); // never below 1
-        return { ...prev, [itemId]: updated };
+      const current = prev[itemId] || 1;
+      const updated = Math.max(1, current + change); // never below 1
+      return { ...prev, [itemId]: updated };
     });
   };
 
@@ -75,10 +75,10 @@ export default function marketitems({
       try {
         setIsLoading(true)
         const response = await cartshow(user?.customer_id, decryptData(token))
-        updateUserFields({cartcount: response.length})
+        updateUserFields({ cartcount: response.length })
       } catch (error: any) {
         console.log(error.response)
-      }finally{
+      } finally {
         setIsLoading(false)
       }
     })
@@ -91,13 +91,13 @@ export default function marketitems({
     // You can handle the actual cart logic here:
     console.log('Adding to cart:', { id: itemId, quantity });
     try {
-      setIsLoading(true) 
-      const response = await cartitemstore(itemId,quantity,user?.customer_id,supplier_id,decryptData(token))  
+      setIsLoading(true)
+      const response = await cartitemstore(itemId, quantity, user?.customer_id, supplier_id, decryptData(token))
       console.log(response)
       Alert.alert('Success', `Added ${quantity} item(s) to your cart`, [
         {
           text: 'Continue',
-          onPress: () => {},
+          onPress: () => { },
         },
         {
           text: 'Go to cart',
@@ -107,20 +107,20 @@ export default function marketitems({
     } catch (error: any) {
       console.log(error.response)
       Alert.alert("Error", "Error Purchasing Item, Please Try Again Later")
-    }finally{
+    } finally {
       setIsLoading(false)
     }
   };
 
-    
 
-    if(isLoading){
-        return <LogoSpinner lightColor='' darkColor=''/>
-    }
+
+  if (isLoading) {
+    return <LogoSpinner lightColor='' darkColor='' />
+  }
   return (
     <SafeAreaView
       style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }}
-      edges={['top']}
+      edges={['top', 'bottom']}
     >
       {/* Header */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -195,7 +195,7 @@ export default function marketitems({
                   <Image
                     style={styles.image}
                     source={{
-                      uri: `https://phixotech.com/igoepp/public/products/${item.picture}`,
+                      uri: `${PUBLIC_API_BASE_URL}products/${item.picture}`,
                     }}
                   />
                   <View style={{ marginLeft: 8, flexShrink: 1 }}>

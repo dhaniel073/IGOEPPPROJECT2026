@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "igoepp",
+    "name": "igoepptest",
     "slug": "igoeppCus",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -28,8 +28,7 @@
         "RECORD_AUDIO",
         "NOTIFICATIONS"
       ],
-      "package": "com.cdhaniel.igoeppCus",
-      "googleServicesFile": "./google-services.json",
+      "package": "com.dhanieldcoder.igoeppCus",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
@@ -50,18 +49,21 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-build-properties",
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
     "extra": {
+      "aesBase64Key": "kVGlKQ72B2OIRvc9UyTXyGMCiZF3cpA72fC8CKKL7S0=",
       "router": {},
       "eas": {
-        "projectId": "014b50f4-d447-4b64-a58c-4d6b29fba0d9"
+        "projectId": "2c75ad4c-ecdd-4966-b765-1f5024bd5212"
       }
-    },
-    "owner": "cdhaniel"
+    }
   }
 }

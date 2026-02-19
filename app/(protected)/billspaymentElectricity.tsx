@@ -10,7 +10,7 @@ import { ThemedView } from '@/components/ThemedView'
 import { validateElectricity } from '@/components/validateElectricity'
 import { Colors, decryptData, encryptData, extractInsideParentheses } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { customerbillercommission, discopayment, validatedisco, validatepin } from '@/hooks/AuthRoutes'
+import { customerbillercommission, discopayment, validatedisco, validatepin, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import axios from 'axios'
@@ -37,7 +37,7 @@ const numbers = [
     amount: "5000"
   },
   {
-    amount:"6000"
+    amount: "6000"
   },
   {
     amount: "7000"
@@ -49,26 +49,26 @@ const { height } = Dimensions.get('window');
 export type Props = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  headerBackgroundColor:{ dark: string; light: string };
+  headerBackgroundColor: { dark: string; light: string };
 };
 
 
 export default function billspaymentElectricity({
-    lightColor,
-    darkColor,
-    headerBackgroundColor,
-  }: Props){
+  lightColor,
+  darkColor,
+  headerBackgroundColor,
+}: Props) {
 
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const router = useRouter()
-  const {user, token} = useAuth()
+  const { user, token } = useAuth()
   const [isloading, setIsLoading] = useState(false)
   const [visible, setVisible] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [electricityPlatform, setElectricityPlatform] = useState<any>([])
-  const {billid} = useLocalSearchParams()
+  const { billid } = useLocalSearchParams()
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible1, setModalVisible1] = useState(false);
@@ -81,11 +81,11 @@ export default function billspaymentElectricity({
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
   const [formData, setFormData] = useState({
     platform: "",
-    platformName:"",
+    platformName: "",
     meternumber: "",
     amount: "",
-    address:"",
-    customername:"",
+    address: "",
+    customername: "",
     commission: "",
     reference: "",
     token: "",
@@ -100,45 +100,45 @@ export default function billspaymentElectricity({
   const openPopup = () => {
     setModalVisible(true);
     Animated.timing(slideAnim, {
-    toValue: 0, // Slide to the screen
-    duration: 300,
-    useNativeDriver: true,
+      toValue: 0, // Slide to the screen
+      duration: 300,
+      useNativeDriver: true,
     }).start();
   };
-      
+
   const closePopup = () => {
     Animated.timing(slideAnim, {
-    toValue: height, // Slide back down
-    duration: 300,
-    useNativeDriver: true,
+      toValue: height, // Slide back down
+      duration: 300,
+      useNativeDriver: true,
     }).start(() => setModalVisible(false)); // Close after animation
   };
 
   const openPopup1 = () => {
     setModalVisible1(true);
     Animated.timing(slideAnim, {
-    toValue: 0, // Slide to the screen
-    duration: 300,
-    useNativeDriver: true,
+      toValue: 0, // Slide to the screen
+      duration: 300,
+      useNativeDriver: true,
     }).start();
   };
-        
+
   const closePopup1 = () => {
     Animated.timing(slideAnim, {
-    toValue: height, // Slide back down
-    duration: 300,
-    useNativeDriver: true,
+      toValue: height, // Slide back down
+      duration: 300,
+      useNativeDriver: true,
     }).start(() => setModalVisible1(false)); // Close after animation
   };
 
-  const formatNumber = (text:any) => {
+  const formatNumber = (text: any) => {
     // Remove any non-numeric characters
     let cleanText = text.replace(/[^0-9]/g, '');
     // Format the number with commas
     return cleanText.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
-  const formatNumber2 = (text:any) => {
+  const formatNumber2 = (text: any) => {
     // Remove any non-numeric characters
     let cleanText = text.replace(/[^0-9]/g, '');
     // Format the number with commas
@@ -154,12 +154,12 @@ export default function billspaymentElectricity({
 
     // Make sure it's a valid number (not NaN)
     setAmount(isNaN(newNumber) ? 0 : newNumber);
-    setFormData({ ...formData, amount: text,})
+    setFormData({ ...formData, amount: text, })
 
     setFormattedAmount(formattedValue);
   };
 
- useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
       if (user?.transaction_pin_setup === "N") {
         setModalVisible2(true);
@@ -173,7 +173,7 @@ export default function billspaymentElectricity({
         setIsLoading(true)
         const config = {
           method: 'get',
-          url: `https://phixotech.com/igoepp/public/api/auth/billpayment/getAllBillersByCategory/${billid}`,
+          url: `${YOUR_API_BASE_URL}auth/billpayment/getAllBillersByCategory/${billid}`,
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${decryptData(token)}`,
@@ -189,7 +189,7 @@ export default function billspaymentElectricity({
         setElectricityPlatform(countryArray);
       } catch (error) {
         console.error("Country fetch error:", error);
-      }finally{
+      } finally {
         setIsLoading(false)
       }
     };
@@ -228,11 +228,11 @@ export default function billspaymentElectricity({
     }
   };
 
-  const validatehandler = async() => { 
+  const validatehandler = async () => {
     console.log(formData)
     try {
       setIsLoading(true)
-      const response = await validatedisco(user?.customer_id, formData.platform, formData.meternumber, formData.meter_type, formData.imagepath, decryptData(token) );
+      const response = await validatedisco(user?.customer_id, formData.platform, formData.meternumber, formData.meter_type, formData.imagepath, decryptData(token));
       // setFormData({...formData, reference: response.data.requestID})
       console.log(response.data)
       setFormData(prev => ({
@@ -242,19 +242,19 @@ export default function billspaymentElectricity({
         address: response.data.customerAddress
       }));
       Alert.alert("Confirm Payment", "You are about to recharge your meter number", [
-      {
-        text: "Cancel",
-        style: "cancel"
-      },
-      {
-        text: "Proceed",
-        onPress: () => openPopup()
-      }
-    ]); 
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Proceed",
+          onPress: () => openPopup()
+        }
+      ]);
     } catch (error: any) {
       console.log("Failed to validate betting details:", error.response?.data || error);
-      Alert.alert("Error", error.response?.data.message ||"Failed to validate meter number.");
-    }finally{
+      Alert.alert("Error", error.response?.data.message || "Failed to validate meter number.");
+    } finally {
       setIsLoading(false)
     }
   }
@@ -315,35 +315,35 @@ export default function billspaymentElectricity({
       setIsPaymentLoading(false);
     }
   };
-  
+
   const handleSubmit = (pin: any) => {
     console.log("Entered PIN:", pin);
     // handle verification here
   };
-  
-  if(isloading || isPinLoading || isPaymentLoading){
-    return <LogoSpinner lightColor='' darkColor=''/>
+
+  if (isloading || isPinLoading || isPaymentLoading) {
+    return <LogoSpinner lightColor='' darkColor='' />
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-      <KeyboardAvoidingView 
-        style={{ flex: 1 }} 
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
       >
-        <Animated.ScrollView showsVerticalScrollIndicator={false}>  
-          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}> 
+        <Animated.ScrollView showsVerticalScrollIndicator={false}>
+          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
             <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
           </GoBack>
-          <View style={{margin:6}}/> 
+          <View style={{ margin: 6 }} />
           <ThemedText type="titleMedium">Buy Electricity</ThemedText>
-          <ThemedText style={{color: Colors.gray9}}>Select disco and enter meter number</ThemedText>
-          <View style={{margin:10}}/>
+          <ThemedText style={{ color: Colors.gray9 }}>Select disco and enter meter number</ThemedText>
+          <View style={{ margin: 10 }} />
 
           <ThemedText>Select Disco</ThemedText>
-          <View style={{margin:2}}/>
-          <View style={{ flex: 1, margin:1 }}>
+          <View style={{ margin: 2 }} />
+          <View style={{ flex: 1, margin: 1 }}>
             <Dropdown
               style={styles.dropdown}
               placeholderStyle={{ color: Colors.gray9 }}
@@ -377,7 +377,7 @@ export default function billspaymentElectricity({
                 <View style={{ flexDirection: "row", alignItems: "center", padding: 10 }}>
                   <Image
                     source={{ uri: item.flag }}  // your API flag field
-                    style={{ width: 24, height: 24, marginRight: 10, borderRadius:4 }}
+                    style={{ width: 24, height: 24, marginRight: 10, borderRadius: 4 }}
                     resizeMode="contain"
                   />
                   <Text style={{ color: "#000" }}>{item.label}</Text>
@@ -393,7 +393,7 @@ export default function billspaymentElectricity({
                 return selected ? (
                   <Image
                     source={{ uri: selected.flag }}
-                    style={{ width: 20, height: 20, marginRight: 8, borderRadius:4 }}
+                    style={{ width: 20, height: 20, marginRight: 8, borderRadius: 4 }}
                     resizeMode="contain"
                   />
                 ) : null;
@@ -405,7 +405,7 @@ export default function billspaymentElectricity({
               )}
             />
           </View>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
           <ThemedText>Meter Number</ThemedText>
 
@@ -414,19 +414,19 @@ export default function billspaymentElectricity({
               placeholder="Please enter"
               keyboardType="number-pad"
               value={formData.meternumber}
-              onUpdateValue={(text) => setFormData({...formData, meternumber: text})}
+              onUpdateValue={(text) => setFormData({ ...formData, meternumber: text })}
             />
           </View>
 
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
           <ThemedText>Enter Amount</ThemedText>
-          <View style={{margin:5}}/> 
-          <ThemedView style={[styles.container, {marginBottom:5, backgroundColor: Colors.offwhite1}]}>
-            <View style={{flexDirection:'row', flex:1, justifyContent:'center', alignItems:'center'}}>
+          <View style={{ margin: 5 }} />
+          <ThemedView style={[styles.container, { marginBottom: 5, backgroundColor: Colors.offwhite1 }]}>
+            <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.gray9} />
-              <TextInput placeholder={'Amount'} 
-                style={[styles.input, {color:Colors.gray9, }]} 
+              <TextInput placeholder={'Amount'}
+                style={[styles.input, { color: Colors.gray9, }]}
                 onFocus={() => setIsInvalid(false)}
                 value={formattedamount}
                 onChangeText={handleChange}
@@ -435,33 +435,33 @@ export default function billspaymentElectricity({
                 maxLength={9}
               />
             </View>
-            <TouchableOpacity onPress={() => [setFormattedAmount(null), setAmount(null)]} style={{padding:10}}>
+            <TouchableOpacity onPress={() => [setFormattedAmount(null), setAmount(null)]} style={{ padding: 10 }}>
               <AntDesign name="close-circle" size={20} color={Colors.gray9} />
             </TouchableOpacity>
           </ThemedView>
 
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
-            <ThemedView style={{flexDirection:'row', justifyContent:'space-evenly'}}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {numbers.map((item, key) => (
-                  <TouchableOpacity key={key} style={{backgroundColor:Colors.offwhite,paddingLeft: 5, margin: 5,paddingRight:5, borderRadius:15, padding:5}} onPress={() => handleChange(item.amount)}>
-                    <ThemedText style={{color: Colors.green8}} type='smallBold'><MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.green8} /> {item.amount.toLocaleString()+"."+"00"}</ThemedText>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </ThemedView>
+          <ThemedView style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {numbers.map((item, key) => (
+                <TouchableOpacity key={key} style={{ backgroundColor: Colors.offwhite, paddingLeft: 5, margin: 5, paddingRight: 5, borderRadius: 15, padding: 5 }} onPress={() => handleChange(item.amount)}>
+                  <ThemedText style={{ color: Colors.green8 }} type='smallBold'><MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.green8} /> {item.amount.toLocaleString() + "." + "00"}</ThemedText>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </ThemedView>
 
-          <View style={{margin:15}}/>
-          
-          <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}} onPress={() => {handleValidation()}}>
-            <ThemedText style={{color:'#fff'}}>Continue</ThemedText>
+          <View style={{ margin: 15 }} />
+
+          <ThemedButton style={{ backgroundColor: Colors.green, padding: 15, borderRadius: 30, alignItems: 'center' }} onPress={() => { handleValidation() }}>
+            <ThemedText style={{ color: '#fff' }}>Continue</ThemedText>
           </ThemedButton>
 
           <Modal
             transparent
             visible={modalVisible}
-            animationType="slide" 
+            animationType="slide"
             onRequestClose={closePopup}
           >
             <TouchableOpacity style={styles.overlay} onPress={() => [closePopup()]} />
@@ -469,62 +469,62 @@ export default function billspaymentElectricity({
             <Animated.View
               style={[
                 styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%" },
               ]}
             >
-              <View style={{margin:10}}/>
+              <View style={{ margin: 10 }} />
 
-              <View  style={{flexDirection:'row', justifyContent:'center'}}> 
-                <ThemedText type='subtitle' style={{textAlign:'center', flex:1}}>Transaction Review</ThemedText>
-                <TouchableOpacity onPress={closePopup} style={{alignSelf:'flex-end'}}>
-                  <MaterialIcons name="cancel" size={24} color={Colors.green}/>
+              <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                <ThemedText type='subtitle' style={{ textAlign: 'center', flex: 1 }}>Transaction Review</ThemedText>
+                <TouchableOpacity onPress={closePopup} style={{ alignSelf: 'flex-end' }}>
+                  <MaterialIcons name="cancel" size={24} color={Colors.green} />
                 </TouchableOpacity>
               </View>
 
-              <View style={{margin:10}}/>
-              <ThemedView style={{backgroundColor: Colors.gray7, marginHorizontal:10}}>
-                <View style={{margin:10}}/>
-                <ThemedText style={{color:Colors.blacktext, textAlign:'center'}}>Amount</ThemedText>
-                <ThemedText style={{color: Colors.green8, textAlign:'center'}} type='subtitle'>NGN {Number(formData.amount).toLocaleString()}</ThemedText>
-                <View style={{margin:10}}/>
+              <View style={{ margin: 10 }} />
+              <ThemedView style={{ backgroundColor: Colors.gray7, marginHorizontal: 10 }}>
+                <View style={{ margin: 10 }} />
+                <ThemedText style={{ color: Colors.blacktext, textAlign: 'center' }}>Amount</ThemedText>
+                <ThemedText style={{ color: Colors.green8, textAlign: 'center' }} type='subtitle'>NGN {Number(formData.amount).toLocaleString()}</ThemedText>
+                <View style={{ margin: 10 }} />
               </ThemedView>
 
-              <View style={{margin:10}}/>
+              <View style={{ margin: 10 }} />
 
-              <ThemedView style={{backgroundColor: Colors.gray7, marginHorizontal:10, paddingHorizontal:20, paddingVertical:20}}>
-                <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                  <ThemedText style={{color: '#000'}}>From</ThemedText>
-                  <ThemedText style={{color:Colors.wallet }}>Wallet</ThemedText>
+              <ThemedView style={{ backgroundColor: Colors.gray7, marginHorizontal: 10, paddingHorizontal: 20, paddingVertical: 20 }}>
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                  <ThemedText style={{ color: '#000' }}>From</ThemedText>
+                  <ThemedText style={{ color: Colors.wallet }}>Wallet</ThemedText>
                 </View>
-                <View style={{margin:7}}/>
+                <View style={{ margin: 7 }} />
 
-                <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                  <ThemedText style={{color: '#000'}}>Meter Number</ThemedText>
-                  <ThemedText style={{color:Colors.wallet }}>{formData.meternumber}</ThemedText>
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                  <ThemedText style={{ color: '#000' }}>Meter Number</ThemedText>
+                  <ThemedText style={{ color: Colors.wallet }}>{formData.meternumber}</ThemedText>
                 </View>
-                <View style={{margin:7}}/>
+                <View style={{ margin: 7 }} />
 
-                <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                  <ThemedText style={{color: '#000'}}>Name</ThemedText>
-                  <ThemedText style={{color:Colors.wallet }}>{formData.customername}</ThemedText>
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                  <ThemedText style={{ color: '#000' }}>Name</ThemedText>
+                  <ThemedText style={{ color: Colors.wallet }}>{formData.customername}</ThemedText>
                 </View>
-                <View style={{margin:7}}/>
+                <View style={{ margin: 7 }} />
 
-                <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                  <ThemedText style={{color: '#000'}}>Address</ThemedText>
-                  <ThemedText style={{color:Colors.wallet }}>{formData.address}</ThemedText>
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                  <ThemedText style={{ color: '#000' }}>Address</ThemedText>
+                  <ThemedText style={{ color: Colors.wallet }}>{formData.address}</ThemedText>
                 </View>
-                <View style={{margin:7}}/>
+                <View style={{ margin: 7 }} />
 
-                <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                  <ThemedText style={{color: '#000'}}>Disco</ThemedText>
-                  <ThemedText style={{color:Colors.wallet }}>{formData.platform}</ThemedText>
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                  <ThemedText style={{ color: '#000' }}>Disco</ThemedText>
+                  <ThemedText style={{ color: Colors.wallet }}>{formData.platform}</ThemedText>
                 </View>
               </ThemedView>
-              <View style={{margin:15}}/>
+              <View style={{ margin: 15 }} />
 
-              <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, marginHorizontal:10, alignItems:'center'}} onPress={() => [closePopup(), openPopup1()]}>
-                <ThemedText style={{color:'#fff'}}>Proceed</ThemedText>
+              <ThemedButton style={{ backgroundColor: Colors.green, padding: 15, borderRadius: 30, marginHorizontal: 10, alignItems: 'center' }} onPress={() => [closePopup(), openPopup1()]}>
+                <ThemedText style={{ color: '#fff' }}>Proceed</ThemedText>
               </ThemedButton>
             </Animated.View>
           </Modal>
@@ -533,108 +533,116 @@ export default function billspaymentElectricity({
           <Modal
             transparent
             visible={modalVisible1}
-            animationType="slide" 
+            animationType="slide"
             onRequestClose={closePopup1}
           >
-            <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
-
-            <Animated.View
-              style={[
-                styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-              ]}
+            <KeyboardAvoidingView
+              style={{ flex: 1 }}
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
             >
-              <ThemedText type='titleMedium' style={{textAlign:'center'}}>Enter Pin</ThemedText>
-              <View style={{margin:8}}/> 
+              <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
 
-              <ThemedText style={{textAlign:'center', color: Colors.gray9}}>Enter Transaction PIN</ThemedText>
-              <View style={{margin:10}}/>
-              <View style={{margin:5}}/>
-              <PinInput length={4} secure={true} onSubmit={(pin) => {closePopup1(), pinvalidation(pin)}}/>
-              <View style={{margin:10}}/>
-            </Animated.View>
+              <Animated.View
+                style={[
+                  styles.popup,
+                  { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                ]}
+              >
+                <ThemedText type='titleMedium' style={{ textAlign: 'center' }}>Enter Pin</ThemedText>
+                <View style={{ margin: 8 }} />
+
+                <ThemedText style={{ textAlign: 'center', color: Colors.gray9 }}>Enter Transaction PIN</ThemedText>
+                <View style={{ margin: 10 }} />
+                <View style={{ margin: 5 }} />
+
+
+                <PinInput length={4} secure={true} onSubmit={(pin) => { closePopup1(), pinvalidation(pin) }} />
+                <View style={{ margin: 10 }} />
+              </Animated.View>
+            </KeyboardAvoidingView>
           </Modal>
 
           <ReceiptView visible={visible} onClose={() => setVisible(false)} watermarkText="IGOEPP" imageuri={formData.imagepath}>
-            <ThemedView style={{backgroundColor: Colors.gray6, marginHorizontal:10, paddingHorizontal:20, paddingVertical:20}}>
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>From</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>Wallet</ThemedText>
+            <ThemedView style={{ backgroundColor: Colors.gray6, marginHorizontal: 10, paddingHorizontal: 20, paddingVertical: 20 }}>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>From</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>Wallet</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Meter Number</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.meternumber}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Meter Number</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.meternumber}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Meter Type</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.meter_type}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Meter Type</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.meter_type}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Customer Name</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.customername}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Customer Name</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.customername}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Disco</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.platform}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Disco</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.platform}</ThemedText>
               </View>
 
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Amount</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.amount}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Amount</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.amount}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Units Purchased</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.unit_purchased}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Units Purchased</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.unit_purchased}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Receipt Number</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.receipt_number}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Receipt Number</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.receipt_number}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Bonus</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.bonus}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Bonus</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.bonus}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Token</ThemedText>
-                <ThemedText style={{color:Colors.wallet, maxWidth:'50%' }} type='small'>{formData.token}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Token</ThemedText>
+                <ThemedText style={{ color: Colors.wallet, maxWidth: '50%' }} type='small'>{formData.token}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Reference Id</ThemedText>
-                <ThemedText style={{color:Colors.wallet, maxWidth:'50%' }} type='small'>{formData.reference_id}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Reference Id</ThemedText>
+                <ThemedText style={{ color: Colors.wallet, maxWidth: '50%' }} type='small'>{formData.reference_id}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Date</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{dayjs().format("MMMM D, YYYY")}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Date</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{dayjs().format("MMMM D, YYYY")}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Time</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{dayjs().format("h:mm A")}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Time</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{dayjs().format("h:mm A")}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
             </ThemedView>
           </ReceiptView>
 
@@ -655,25 +663,25 @@ export default function billspaymentElectricity({
 const styles = StyleSheet.create({
   popup: {
     position: 'absolute',
-    bottom:0,
+    bottom: 0,
     width: '100%',
     backgroundColor: '#fff',
     padding: 10,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
+    // boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
   },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   input: {
-    fontSize:15,
+    fontSize: 15,
     paddingLeft: 6,
-    padding:12,
-    borderRadius:10,
+    padding: 12,
+    borderRadius: 10,
     backgroundColor: Colors.offwhite1,
-    flex:1
+    flex: 1
   },
   dropdown: {
     height: 60,

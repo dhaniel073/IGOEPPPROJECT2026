@@ -11,7 +11,7 @@ import { validateTv } from '@/components/validateTv'
 import { validateTvRenewal } from '@/components/validateTvRenewal'
 import { Colors, decryptData, encryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { customerbillercommission, tvpay, tvrenewalpay, validatepin, validatetelevision } from '@/hooks/AuthRoutes'
+import { customerbillercommission, tvpay, tvrenewalpay, validatepin, validatetelevision, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialIcons } from '@expo/vector-icons'
 import axios from 'axios'
@@ -26,82 +26,82 @@ const height = Dimensions.get('window').height;
 export type Props = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  headerBackgroundColor:{ dark: string; light: string };
+  headerBackgroundColor: { dark: string; light: string };
 };
 
 
 export default function billspaymentTv({
-    lightColor,
-    darkColor,
-    headerBackgroundColor,
-  }: Props){
+  lightColor,
+  darkColor,
+  headerBackgroundColor,
+}: Props) {
 
-    const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-    const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
-    const router = useRouter()
-    const [isloading, setIsLoading] = useState(false)
-    const [isPinLoading, setIsPinLoading] = useState(false);
-    const [isPaymentLoading, setIsPaymentLoading] = useState(false);
-    const [visible, setVisible] = useState(false);
-    const {billid} = useLocalSearchParams()
-    
-    const [modalVisible, setModalVisible] = useState(false);
-    const [modalVisible1, setModalVisible1] = useState(false);
-    const [modalVisible2, setModalVisible2] = useState(false);
-    const {user, token} = useAuth()
-    const [tvPlatform, setTvPlatform] = useState<any>([])
-    const [bouquets, setBouquets] = useState<any>([])
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const [formData, setFormData] = useState({
-      platform: "",
-      platformName:"",
-      bouquets: "",
-      amount: "",
-      commission: "",
-      reference: "",
-      smartcard:"",
-      customername:"",
-      imagepath: "",
-      rprice: "",
-      accountStatus:"",
-      currentSubscription: ""
-    });
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+  const router = useRouter()
+  const [isloading, setIsLoading] = useState(false)
+  const [isPinLoading, setIsPinLoading] = useState(false);
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const { billid } = useLocalSearchParams()
 
-    const slideAnim = React.useRef(new Animated.Value(height)).current; // Start below the screen
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible1, setModalVisible1] = useState(false);
+  const [modalVisible2, setModalVisible2] = useState(false);
+  const { user, token } = useAuth()
+  const [tvPlatform, setTvPlatform] = useState<any>([])
+  const [bouquets, setBouquets] = useState<any>([])
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formData, setFormData] = useState({
+    platform: "",
+    platformName: "",
+    bouquets: "",
+    amount: "",
+    commission: "",
+    reference: "",
+    smartcard: "",
+    customername: "",
+    imagepath: "",
+    rprice: "",
+    accountStatus: "",
+    currentSubscription: ""
+  });
 
-    const openPopup = () => {
-      setModalVisible(true);
-      Animated.timing(slideAnim, {
+  const slideAnim = React.useRef(new Animated.Value(height)).current; // Start below the screen
+
+  const openPopup = () => {
+    setModalVisible(true);
+    Animated.timing(slideAnim, {
       toValue: 0, // Slide to the screen
       duration: 300,
       useNativeDriver: true,
-      }).start();
-    };
-        
-    const closePopup = () => {
-      Animated.timing(slideAnim, {
+    }).start();
+  };
+
+  const closePopup = () => {
+    Animated.timing(slideAnim, {
       toValue: height, // Slide back down
       duration: 300,
       useNativeDriver: true,
-      }).start(() => setModalVisible(false)); // Close after animation
-    };
+    }).start(() => setModalVisible(false)); // Close after animation
+  };
 
-    const openPopup1 = () => {
-      setModalVisible1(true);
-      Animated.timing(slideAnim, {
+  const openPopup1 = () => {
+    setModalVisible1(true);
+    Animated.timing(slideAnim, {
       toValue: 0, // Slide to the screen
       duration: 300,
       useNativeDriver: true,
-      }).start();
-    };
-        
-    const closePopup1 = () => {
-      Animated.timing(slideAnim, {
+    }).start();
+  };
+
+  const closePopup1 = () => {
+    Animated.timing(slideAnim, {
       toValue: height, // Slide back down
       duration: 300,
       useNativeDriver: true,
-      }).start(() => setModalVisible1(false)); // Close after animation
-    };
+    }).start(() => setModalVisible1(false)); // Close after animation
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -110,14 +110,14 @@ export default function billspaymentTv({
       }
     }, [user?.transaction_pin_setup])
   );
-    
-   useEffect(() => {
+
+  useEffect(() => {
     const fetchBillers = async () => {
       try {
         setIsLoading(true)
         const config = {
           method: 'get',
-          url: `https://phixotech.com/igoepp/public/api/auth/billpayment/getAllBillersByCategory/${billid}`,
+          url: `${YOUR_API_BASE_URL}auth/billpayment/getAllBillersByCategory/${billid}`,
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${decryptData(token)}`,
@@ -133,7 +133,7 @@ export default function billspaymentTv({
         setTvPlatform(countryArray);
       } catch (error) {
         console.error("Country fetch error:", error);
-      }finally{
+      } finally {
         setIsLoading(false)
       }
     };
@@ -144,7 +144,7 @@ export default function billspaymentTv({
     if (["DSTVR", "GOTVR"].includes(value)) return;
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/billpayment/getAllBouquetByBillerID/${billid}/${value}`,
+        `${YOUR_API_BASE_URL}auth/billpayment/getAllBouquetByBillerID/${billid}/${value}`,
         {
           headers: {
             Accept: 'application/json',
@@ -195,13 +195,13 @@ export default function billspaymentTv({
     return validatehandler();
   };
 
-  const validatehandler = async() => { 
+  const validatehandler = async () => {
     console.log(formData)
     try {
       setIsLoading(true)
-      const response = await validatetelevision(user?.customer_id, formData.platform, formData.smartcard, formData.imagepath, decryptData(token) );
+      const response = await validatetelevision(user?.customer_id, formData.platform, formData.smartcard, formData.imagepath, decryptData(token));
       // setFormData({...formData, reference: response.data.requestID})
-      console.log(response.data)
+      console.log(response)
       setFormData(prev => ({
         ...prev,
         reference: response.data.requestID,
@@ -211,19 +211,19 @@ export default function billspaymentTv({
         currentSubscription: response.data.currentSubscription
       }));
       Alert.alert("Confirm Payment", "You are about to recharge your meter number", [
-      {
-        text: "Cancel",
-        style: "cancel"
-      },
-      {
-        text: "Proceed",
-        onPress: () => openPopup()
-      }
-    ]); 
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Proceed",
+          onPress: () => openPopup()
+        }
+      ]);
     } catch (error: any) {
       console.log("Failed to validate betting details:", error.response?.data || error);
-      Alert.alert("Error", error.response?.data.message ||"Failed to validate meter number.");
-    }finally{
+      Alert.alert("Error", error.response?.data.message || "Failed to validate meter number.");
+    } finally {
       setIsLoading(false)
     }
   }
@@ -314,36 +314,36 @@ export default function billspaymentTv({
   };
 
 
-    
+
   const handleSubmit = (pin: any) => {
     console.log("Entered PIN:", pin);
     // handle verification here
   };
 
-  if(isloading || isPinLoading || isPaymentLoading){
-    return <LogoSpinner lightColor='' darkColor=''/>
+  if (isloading || isPinLoading || isPaymentLoading) {
+    return <LogoSpinner lightColor='' darkColor='' />
   }
-        
+
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-      <KeyboardAvoidingView 
-        style={{ flex: 1 }} 
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
       >
-        <Animated.ScrollView showsVerticalScrollIndicator={false}>  
-          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}> 
+        <Animated.ScrollView showsVerticalScrollIndicator={false}>
+          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
             <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
           </GoBack>
-          <View style={{margin:6}}/> 
+          <View style={{ margin: 6 }} />
           <ThemedText type="titleMedium">Buy Cable TV</ThemedText>
-          <ThemedText style={{color: Colors.gray9}}>Renew your TV subscription effortlessly</ThemedText>
-          <View style={{margin:10}}/> 
+          <ThemedText style={{ color: Colors.gray9 }}>Renew your TV subscription effortlessly</ThemedText>
+          <View style={{ margin: 10 }} />
 
           <ThemedText>Select Satellite Network</ThemedText>
-          <View style={{margin:2}}/>
-          <View style={{ flex: 1 , margin:1}}>
+          <View style={{ margin: 2 }} />
+          <View style={{ flex: 1, margin: 1 }}>
             <Dropdown
               style={styles.dropdown}
               placeholderStyle={{ color: Colors.gray9 }}
@@ -376,7 +376,7 @@ export default function billspaymentTv({
                 <View style={{ flexDirection: "row", alignItems: "center", padding: 10 }}>
                   <Image
                     source={{ uri: item.flag }}  // your API flag field
-                    style={{ width: 24, height: 24, marginRight: 10, borderRadius:4 }}
+                    style={{ width: 24, height: 24, marginRight: 10, borderRadius: 4 }}
                     resizeMode="contain"
                   />
                   <Text style={{ color: "#000" }}>{item.label}</Text>
@@ -392,7 +392,7 @@ export default function billspaymentTv({
                 return selected ? (
                   <Image
                     source={{ uri: selected.flag }}
-                    style={{ width: 20, height: 20, marginRight: 8, borderRadius:4 }}
+                    style={{ width: 20, height: 20, marginRight: 8, borderRadius: 4 }}
                     resizeMode="contain"
                   />
                 ) : null;
@@ -404,14 +404,14 @@ export default function billspaymentTv({
               )}
             />
           </View>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
-          
+
           {
-            ["DSTVR", "GOTVR"].includes(formData.platform)  ? null : <>
+            ["DSTVR", "GOTVR"].includes(formData.platform) ? null : <>
               <ThemedText>Select Plan</ThemedText>
-              <View style={{margin:2}}/>
-              <View style={{ flex: 1, margin:1 }}>
+              <View style={{ margin: 2 }} />
+              <View style={{ flex: 1, margin: 1 }}>
                 <Dropdown
                   style={styles.dropdown}
                   placeholderStyle={{ color: Colors.gray9 }}
@@ -437,8 +437,8 @@ export default function billspaymentTv({
                 />
               </View>
 
-              <View style={{margin:5}}/>
-            </> 
+              <View style={{ margin: 5 }} />
+            </>
           }
 
           <ThemedText>Smart Card Number </ThemedText>
@@ -448,39 +448,39 @@ export default function billspaymentTv({
               placeholder="Please enter"
               keyboardType="phone-pad"
               value={formData.smartcard}
-              onUpdateValue={(text) => setFormData({...formData, smartcard: text})}
+              onUpdateValue={(text) => setFormData({ ...formData, smartcard: text })}
             />
           </View>
 
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
           {
-            ["DSTVR", "GOTVR"].includes(formData.platform)  ? 
+            ["DSTVR", "GOTVR"].includes(formData.platform) ?
               null
-            : <>
-              <ThemedText>Amount</ThemedText>
-              <View style={{ flex: 1 }}>
-                <Input
-                  placeholder="NGN 0.00"
-                  keyboardType="number-pad"
-                  value={formData.amount && Number(formData.amount).toLocaleString()}
-                  editable={false}
-                  onUpdateValue={(text) => setFormData({...formData, amount: text})}
-                />
-              </View>
-              </> 
+              : <>
+                <ThemedText>Amount</ThemedText>
+                <View style={{ flex: 1 }}>
+                  <Input
+                    placeholder="NGN 0.00"
+                    keyboardType="number-pad"
+                    value={formData.amount && Number(formData.amount).toLocaleString()}
+                    editable={false}
+                    onUpdateValue={(text) => setFormData({ ...formData, amount: text })}
+                  />
+                </View>
+              </>
           }
 
-          <View style={{margin:15}}/>
+          <View style={{ margin: 15 }} />
 
-          <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}} onPress={() => {handleValidation()}} disabled={isloading}>
-            <ThemedText style={{color:'#fff'}}>Continue</ThemedText>
+          <ThemedButton style={{ backgroundColor: Colors.green, padding: 15, borderRadius: 30, alignItems: 'center' }} onPress={() => { handleValidation() }} disabled={isloading}>
+            <ThemedText style={{ color: '#fff' }}>Continue</ThemedText>
           </ThemedButton>
 
           <Modal
             transparent
             visible={modalVisible}
-            animationType="slide" 
+            animationType="slide"
             onRequestClose={closePopup}
           >
             <TouchableOpacity style={styles.overlay} onPress={() => [closePopup()]} />
@@ -488,66 +488,66 @@ export default function billspaymentTv({
             <Animated.View
               style={[
                 styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%" },
               ]}
             >
-              <View style={{margin:10}}/>
+              <View style={{ margin: 10 }} />
 
-              <View  style={{flexDirection:'row', justifyContent:'center'}}> 
-                <ThemedText type='subtitle' style={{textAlign:'center', flex:1}}>Transaction Review</ThemedText>
-                <TouchableOpacity onPress={closePopup} style={{alignSelf:'flex-end'}}>
-                  <MaterialIcons name="cancel" size={24} color={Colors.green}/>
+              <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                <ThemedText type='subtitle' style={{ textAlign: 'center', flex: 1 }}>Transaction Review</ThemedText>
+                <TouchableOpacity onPress={closePopup} style={{ alignSelf: 'flex-end' }}>
+                  <MaterialIcons name="cancel" size={24} color={Colors.green} />
                 </TouchableOpacity>
               </View>
 
-              <View style={{margin:10}}/>
-              <ThemedView style={{backgroundColor: Colors.gray7, marginHorizontal:10}}>
-                <View style={{margin:10}}/>
-                <ThemedText style={{color:Colors.blacktext, textAlign:'center'}}>Amount</ThemedText>
-                <ThemedText style={{color: Colors.green8, textAlign:'center'}} type='subtitle'>NGN{formData.platform === "DSTVR" || formData.platform === "GOTVR"
+              <View style={{ margin: 10 }} />
+              <ThemedView style={{ backgroundColor: Colors.gray7, marginHorizontal: 10 }}>
+                <View style={{ margin: 10 }} />
+                <ThemedText style={{ color: Colors.blacktext, textAlign: 'center' }}>Amount</ThemedText>
+                <ThemedText style={{ color: Colors.green8, textAlign: 'center' }} type='subtitle'>NGN{formData.platform === "DSTVR" || formData.platform === "GOTVR"
                   ? Number(formData.rprice).toLocaleString() : Number(formData.amount).toLocaleString()
-                  }</ThemedText>
-                <View style={{margin:10}}/> 
+                }</ThemedText>
+                <View style={{ margin: 10 }} />
               </ThemedView>
 
-              <View style={{margin:10}}/>
+              <View style={{ margin: 10 }} />
 
-              <ThemedView style={{backgroundColor: Colors.gray7, marginHorizontal:10, paddingHorizontal:20, paddingVertical:20}}>
-                <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                  <ThemedText style={{color: '#000'}}>From</ThemedText>
-                  <ThemedText style={{color:Colors.wallet }}>Wallet</ThemedText>
+              <ThemedView style={{ backgroundColor: Colors.gray7, marginHorizontal: 10, paddingHorizontal: 20, paddingVertical: 20 }}>
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                  <ThemedText style={{ color: '#000' }}>From</ThemedText>
+                  <ThemedText style={{ color: Colors.wallet }}>Wallet</ThemedText>
                 </View>
-                <View style={{margin:7}}/>
+                <View style={{ margin: 7 }} />
 
-                <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                  <ThemedText style={{color: '#000'}}>Smart Card Number</ThemedText>
-                  <ThemedText style={{color:Colors.wallet }}>{formData.smartcard}</ThemedText>
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                  <ThemedText style={{ color: '#000' }}>Smart Card Number</ThemedText>
+                  <ThemedText style={{ color: Colors.wallet }}>{formData.smartcard}</ThemedText>
                 </View>
-                <View style={{margin:7}}/>
+                <View style={{ margin: 7 }} />
 
-                <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                  <ThemedText style={{color: '#000'}}>Biller</ThemedText>
-                  <ThemedText style={{color:Colors.wallet }} >{formData.platform}</ThemedText>
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                  <ThemedText style={{ color: '#000' }}>Biller</ThemedText>
+                  <ThemedText style={{ color: Colors.wallet }} >{formData.platform}</ThemedText>
                 </View>
-                <View style={{margin:7}}/>
+                <View style={{ margin: 7 }} />
 
-                <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                  <ThemedText style={{color: '#000'}}>Name</ThemedText>
-                  <ThemedText style={{color:Colors.wallet }} >{formData.customername}</ThemedText>
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                  <ThemedText style={{ color: '#000' }}>Name</ThemedText>
+                  <ThemedText style={{ color: Colors.wallet }} >{formData.customername}</ThemedText>
                 </View>
-                <View style={{margin:7}}/>
+                <View style={{ margin: 7 }} />
 
-                <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                  <ThemedText style={{color: '#000'}}>Package</ThemedText>
-                  <ThemedText style={{color:Colors.wallet }}>{
-                    ['DSTVR', 'GOTVR'].includes(formData.platform) ? formData.currentSubscription: formData.bouquets}
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                  <ThemedText style={{ color: '#000' }}>Package</ThemedText>
+                  <ThemedText style={{ color: Colors.wallet }}>{
+                    ['DSTVR', 'GOTVR'].includes(formData.platform) ? formData.currentSubscription : formData.bouquets}
                   </ThemedText>
                 </View>
               </ThemedView>
-              <View style={{margin:15}}/>
+              <View style={{ margin: 15 }} />
 
-              <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, marginHorizontal:10, alignItems:'center'}} onPress={() => [closePopup(), openPopup1()]} disabled={isloading}>
-                <ThemedText style={{color:'#fff'}}>Proceed</ThemedText>
+              <ThemedButton style={{ backgroundColor: Colors.green, padding: 15, borderRadius: 30, marginHorizontal: 10, alignItems: 'center' }} onPress={() => [closePopup(), openPopup1()]} disabled={isloading}>
+                <ThemedText style={{ color: '#fff' }}>Proceed</ThemedText>
               </ThemedButton>
             </Animated.View>
           </Modal>
@@ -556,84 +556,92 @@ export default function billspaymentTv({
           <Modal
             transparent
             visible={modalVisible1}
-            animationType="slide" 
+            animationType="slide"
             onRequestClose={closePopup1}
           >
-            <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
-
-            <Animated.View
-              style={[
-                styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-              ]}
+            <KeyboardAvoidingView
+              style={{ flex: 1 }}
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
             >
-              <ThemedText type='titleMedium' style={{textAlign:'center'}}>Enter Pin</ThemedText>
-              <View style={{margin:8}}/> 
+              <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
 
-              <ThemedText style={{textAlign:'center', color: Colors.gray9}}>Enter Transaction PIN</ThemedText>
-              <View style={{margin:10}}/>
-              <View style={{margin:5}}/>
-              <PinInput length={4} secure={true} onSubmit={(pin) => {closePopup1(), pinvalidation(pin)}}/>
-              <View style={{margin:10}}/>
-            </Animated.View>
+              <Animated.View
+                style={[
+                  styles.popup,
+                  { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                ]}
+              >
+                <ThemedText type='titleMedium' style={{ textAlign: 'center' }}>Enter Pin</ThemedText>
+                <View style={{ margin: 8 }} />
+
+                <ThemedText style={{ textAlign: 'center', color: Colors.gray9 }}>Enter Transaction PIN</ThemedText>
+                <View style={{ margin: 10 }} />
+                <View style={{ margin: 5 }} />
+
+
+                <PinInput length={4} secure={true} onSubmit={(pin) => { closePopup1(), pinvalidation(pin) }} />
+                <View style={{ margin: 10 }} />
+              </Animated.View>
+            </KeyboardAvoidingView>
           </Modal>
 
           <ReceiptView visible={visible} onClose={() => setVisible(false)} watermarkText="IGOEPP">
-            <ThemedView style={{backgroundColor: Colors.gray6, marginHorizontal:10, paddingHorizontal:20, paddingVertical:20}}>
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>From</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>Wallet</ThemedText>
+            <ThemedView style={{ backgroundColor: Colors.gray6, marginHorizontal: 10, paddingHorizontal: 20, paddingVertical: 20 }}>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>From</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>Wallet</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Smartcard number</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.smartcard}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Smartcard number</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.smartcard}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Customer name</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.customername}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Customer name</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.customername}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}}  type='small'>Multichoice</ThemedText>
-                <ThemedText style={{color:Colors.wallet }}  type='small'>{formData.platform.split("-")[0]}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Multichoice</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.platform.split("-")[0]}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Package</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.bouquets}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Package</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.bouquets}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Amount</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Amount</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{
                   ['DTSVR', 'GOTVR'].includes(formData.platform) ?
-                  formData.rprice : formData.amount}
+                    formData.rprice : formData.amount}
                 </ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Request id</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.reference}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Request id</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.reference}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Date</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{dayjs().format("MMMM D, YYYY")}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Date</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{dayjs().format("MMMM D, YYYY")}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
+              <View style={{ margin: 2 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Time</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{dayjs().format("h:mm A")}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Time</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{dayjs().format("h:mm A")}</ThemedText>
               </View>
             </ThemedView>
           </ReceiptView>
@@ -655,13 +663,13 @@ export default function billspaymentTv({
 const styles = StyleSheet.create({
   popup: {
     position: 'absolute',
-    bottom:0,
+    bottom: 0,
     width: '100%',
     backgroundColor: '#fff',
     padding: 10,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
+    // boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
   },
   overlay: {
     flex: 1,

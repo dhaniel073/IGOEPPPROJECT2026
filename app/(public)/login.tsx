@@ -8,24 +8,24 @@ import { useAuth } from '@/hooks/AuthContext'
 import { authenticateLogin, loginwithbiometric } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Octicons } from '@expo/vector-icons'
+import Constants from 'expo-constants'
 import * as LocalAuthentication from "expo-local-authentication"
 import { useRouter } from 'expo-router'
 import * as SecureStore from "expo-secure-store"
 import React, { useEffect, useState } from 'react'
 import { Alert, Animated, Image, KeyboardAvoidingView, Platform, StyleSheet, TextProps, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
 export type Props = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
-  headerBackgroundColor:{ dark: string; light: string };
+    lightColor?: string;
+    darkColor?: string;
+    headerBackgroundColor: { dark: string; light: string };
 };
 
 export default function login({
     lightColor,
     darkColor,
     headerBackgroundColor,
-  }: Props){
+}: Props) {
 
     const { login, isLoading } = useAuth();
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
@@ -34,7 +34,7 @@ export default function login({
     const [isloading, setIsLoading] = useState(false)
     const [email, setemail] = useState<any>("")
     const [password, setpassword] = useState<any>("")
-    const isValidEmail = (email: any) =>  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const isValidEmail = (email: any) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     const [supported, setSupported] = useState(false);
 
     const loginHandler = async () => {
@@ -66,6 +66,7 @@ export default function login({
             setIsLoading(true);
             const encryptedPassword = encryptData(password);
             const response = await authenticateLogin(email, encryptedPassword);
+            console.log('aesBase64Key =', Constants.expoConfig?.extra?.aesBase64Key);
             console.log("Login Response:", response);
 
             if (response) {
@@ -75,6 +76,7 @@ export default function login({
                 Alert.alert("Login Failed", response?.message || "Invalid credentials.");
             }
         } catch (error: any) {
+            console.log('aesBase64Key =', Constants.expoConfig?.extra?.aesBase64Key);
             console.log("Login Error:", error.response);
             Alert.alert("Error", error.response.data.message || "An error occurred during login.");
         } finally {
@@ -125,7 +127,7 @@ export default function login({
             setIsLoading(true);
             const encryptedBiometric = encryptData(deviceToken);
             const response = await loginwithbiometric(encryptedBiometric);
-            console.log("Auth Loading: "+ isLoading)
+            console.log("Auth Loading: " + isLoading)
             console.log("Login Response:", response);
 
             if (response) {
@@ -143,108 +145,108 @@ export default function login({
         console.log(deviceToken);
     }
 
-    if(isloading){
-        return <LogoSpinner lightColor='' darkColor=''/>
+    if (isloading) {
+        return <LogoSpinner lightColor='' darkColor='' />
     }
-  return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-        <KeyboardAvoidingView 
-            style={{ flex: 1 }} 
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
-        >
-            <Animated.ScrollView showsVerticalScrollIndicator={false}>  
-                <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}> 
-                    <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
-                </GoBack>
-                
-                <View style={{margin:10}}/> 
+    return (
+        <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
+            >
+                <Animated.ScrollView showsVerticalScrollIndicator={false}>
+                    <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
+                        <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
+                    </GoBack>
 
-                <View style={{padding:15, borderWidth:1, alignSelf:'flex-start', borderRadius:100, borderColor: Colors.green}}>
-                    <Image
-                        source={require("@/assets/images/avatar1.png")}
-                        style={styles.image}
-                    />
-                </View>
+                    <View style={{ margin: 10 }} />
 
-                <View style={{margin:5}}/> 
-
-                <ThemedText type='title'>Login</ThemedText>
-                <View style={{margin:2}}/> 
-                <ThemedText style={{fontSize:11}}>Login to see our top picks for you.</ThemedText>
-
-                <View style={{margin:15}}/>
-
-                <ThemedText type='small'>Email Address</ThemedText>
-                <Input
-                    keyboardType='email-address'
-                    placeholder='Enter Email'
-                    value={email}
-                    onUpdateValue={setemail}
-                    isInvalid={email && !email.includes('@')}
-                    rightIcon={<Octicons name="person" size={22} color={Colors.gray9} />}
-                    />
-
-                <View style={{margin:5}}/>
-                <ThemedText type='small'>Password</ThemedText>
-                <Input
-                    value={password}
-                    onUpdateValue={setpassword}
-                    isInvalid={!password.trim() || password.length < 6}
-                    keyboardType='default'
-                    placeholder='Enter Password'
-                    secure
-                    />
-                <View style={{margin:3}}/>
-
-                <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                    <ThemedText type='small' style={{color: Colors.green}}>Remember me</ThemedText>
-                    <ThemedButton>
-                        <ThemedText type='small' style={{color: Colors.green}}>Forgot password</ThemedText>
-                    </ThemedButton>
-                </View>
-                <View style={{margin:10}}/>
-
-                <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}} onPress={() => {loginHandler()}}>
-                    <ThemedText style={{color:'#fff'}}>Proceed</ThemedText>
-                </ThemedButton>
-
-                <View style={{margin:7}}/>
-
-                <TouchableOpacity activeOpacity={0.6} onPress={handleToggle}>
-                    <Image
-                        source={require("@/assets/images/fingerprint.png")}
-                        style={styles.image1}
+                    <View style={{ padding: 15, borderWidth: 1, alignSelf: 'flex-start', borderRadius: 100, borderColor: Colors.green }}>
+                        <Image
+                            source={require("@/assets/images/avatar1.png")}
+                            style={styles.image}
                         />
-                </TouchableOpacity>
+                    </View>
 
-                <View style={{margin:5}}/>
-                <View style={{flexDirection:'row', justifyContent:'center'}}>
-                    <ThemedText type='small'>Don't have an account? </ThemedText>
-                    <ThemedButton  onPress={() => router.push("/signup")}><ThemedText type='small' style={{color: Colors.green}}>SignUp</ThemedText></ThemedButton>
-                </View>
+                    <View style={{ margin: 5 }} />
 
-            </Animated.ScrollView>
-        </KeyboardAvoidingView>
-    </SafeAreaView>
+                    <ThemedText type='title'>Login</ThemedText>
+                    <View style={{ margin: 2 }} />
+                    <ThemedText style={{ fontSize: 11 }}>Login to see our top picks for you.</ThemedText>
 
-  )
+                    <View style={{ margin: 15 }} />
+
+                    <ThemedText type='small'>Email Address</ThemedText>
+                    <Input
+                        keyboardType='email-address'
+                        placeholder='Enter Email'
+                        value={email}
+                        onUpdateValue={setemail}
+                        isInvalid={email && !email.includes('@')}
+                        rightIcon={<Octicons name="person" size={22} color={Colors.gray9} />}
+                    />
+
+                    <View style={{ margin: 5 }} />
+                    <ThemedText type='small'>Password</ThemedText>
+                    <Input
+                        value={password}
+                        onUpdateValue={setpassword}
+                        isInvalid={!password.trim() || password.length < 6}
+                        keyboardType='default'
+                        placeholder='Enter Password'
+                        secure
+                    />
+                    <View style={{ margin: 3 }} />
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <ThemedText type='small' style={{ color: Colors.green }}>Remember me</ThemedText>
+                        <ThemedButton onPress={() => router.push('/(public)/forgotpassword')}>
+                            <ThemedText type='small' style={{ color: Colors.green }}>Forgot password</ThemedText>
+                        </ThemedButton>
+                    </View>
+                    <View style={{ margin: 10 }} />
+
+                    <ThemedButton style={{ backgroundColor: Colors.green, padding: 15, borderRadius: 30, alignItems: 'center' }} onPress={() => { loginHandler() }}>
+                        <ThemedText style={{ color: '#fff' }}>Proceed</ThemedText>
+                    </ThemedButton>
+
+                    <View style={{ margin: 7 }} />
+
+                    <TouchableOpacity activeOpacity={0.6} onPress={handleToggle}>
+                        <Image
+                            source={require("@/assets/images/fingerprint.png")}
+                            style={styles.image1}
+                        />
+                    </TouchableOpacity>
+
+                    <View style={{ margin: 5 }} />
+                    <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                        <ThemedText type='small'>Don't have an account? </ThemedText>
+                        <ThemedButton onPress={() => router.push("/signup")}><ThemedText type='small' style={{ color: Colors.green }}>SignUp</ThemedText></ThemedButton>
+                    </View>
+
+                </Animated.ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
+
+    )
 }
 
 const styles = StyleSheet.create({
-    image:{
+    image: {
         width: 90,
         height: 90,
         borderRadius: 100,
-        alignSelf:'flex-start',
-        borderWidth:1,
+        alignSelf: 'flex-start',
+        borderWidth: 1,
         borderColor: Colors.green
     },
 
-    image1:{
+    image1: {
         width: 35,
         height: 45,
-        alignSelf:'center',
+        alignSelf: 'center',
         borderColor: Colors.green
     },
 })

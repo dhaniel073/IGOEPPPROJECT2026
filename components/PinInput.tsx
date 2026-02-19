@@ -64,7 +64,7 @@ export default function PinInput({
         ))}
       </Pressable>
 
-      <View style={{margin:3}}/>
+      <View style={{ margin: 3 }} />
       {/* Full-width Submit Button */}
       <TouchableOpacity
         style={[

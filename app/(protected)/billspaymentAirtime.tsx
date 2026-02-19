@@ -11,7 +11,7 @@ import { validateAirtime } from '@/components/validateAirtime'
 import { validateData } from '@/components/validateData'
 import { Colors, decryptData, DIMENSION, encryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { customerbillercommission, validatecustomerself, validatecustomerthirdparty, validatepin, vtupayairtime, vtupaydata } from '@/hooks/AuthRoutes'
+import { customerbillercommission, validatecustomerself, validatecustomerthirdparty, validatepin, vtupayairtime, vtupaydata, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import axios from 'axios'
@@ -42,7 +42,7 @@ const numbers = [
     amount: "5000"
   },
   {
-    amount:"6000"
+    amount: "6000"
   },
   {
     amount: "7000"
@@ -54,15 +54,15 @@ const { height } = Dimensions.get('window');
 export type Props = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  headerBackgroundColor:{ dark: string; light: string };
+  headerBackgroundColor: { dark: string; light: string };
 };
 
 
 export default function billspaymentAirtime({
-    lightColor,
-    darkColor,
-    headerBackgroundColor,
-  }: Props){
+  lightColor,
+  darkColor,
+  headerBackgroundColor,
+}: Props) {
 
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
@@ -70,8 +70,8 @@ export default function billspaymentAirtime({
   const [isloading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'self' | 'thirdparty'>('self');
   const [isInvalid, setIsInvalid] = useState(false)
-  const {billid} = useLocalSearchParams()
-  const {user, token} = useAuth()
+  const { billid } = useLocalSearchParams()
+  const { user, token } = useAuth()
   const [modalVisible2, setModalVisible2] = useState(false);
   const [tvPlatform, setTvPlatform] = useState<any>([])
   const [bouquets, setBouquets] = useState<any>([])
@@ -84,29 +84,29 @@ export default function billspaymentAirtime({
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
   const [formData, setFormData] = useState({
     platform: "",
-    platformName:"",
-    phone: "",
+    platformName: "",
+    phone: user?.phone,
     amount: "",
-    bosquetsamount:"",
+    bosquetsamount: "",
     commission: "",
     reference: "",
     imagepath: "",
-    bouquets:"",
-    thirdparty:"",
-    mode: ""
+    bouquets: "",
+    thirdparty: "",
+    mode: "self"
   });
-  
+
 
   const [formattedamount, setFormattedAmount] = useState<any>('')
   const [amount, setAmount] = useState<any>()
-  const formatNumber = (text:any) => {
+  const formatNumber = (text: any) => {
     // Remove any non-numeric characters
     let cleanText = text.replace(/[^0-9]/g, '');
     // Format the number with commas
     return cleanText.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
-  const formatNumber2 = (text:any) => {
+  const formatNumber2 = (text: any) => {
     // Remove any non-numeric characters
     let cleanText = text.replace(/[^0-9]/g, '');
     // Format the number with commas
@@ -122,7 +122,7 @@ export default function billspaymentAirtime({
 
     // Make sure it's a valid number (not NaN)
     setAmount(isNaN(newNumber) ? 0 : newNumber);
-    setFormData({ ...formData, amount: text,})
+    setFormData({ ...formData, amount: text, })
 
     setFormattedAmount(formattedValue);
   };
@@ -130,34 +130,34 @@ export default function billspaymentAirtime({
   const openPopup = () => {
     setModalVisible(true);
     Animated.timing(slideAnim, {
-    toValue: 0, // Slide to the screen
-    duration: 300,
-    useNativeDriver: true,
+      toValue: 0, // Slide to the screen
+      duration: 300,
+      useNativeDriver: true,
     }).start();
   };
-      
+
   const closePopup = () => {
     Animated.timing(slideAnim, {
-    toValue: height, // Slide back down
-    duration: 300,
-    useNativeDriver: true,
+      toValue: height, // Slide back down
+      duration: 300,
+      useNativeDriver: true,
     }).start(() => setModalVisible(false)); // Close after animation
   };
 
   const openPopup1 = () => {
     setModalVisible1(true);
     Animated.timing(slideAnim, {
-    toValue: 0, // Slide to the screen
-    duration: 300,
-    useNativeDriver: true,
+      toValue: 0, // Slide to the screen
+      duration: 300,
+      useNativeDriver: true,
     }).start();
   };
-      
+
   const closePopup1 = () => {
     Animated.timing(slideAnim, {
-    toValue: height, // Slide back down
-    duration: 300,
-    useNativeDriver: true,
+      toValue: height, // Slide back down
+      duration: 300,
+      useNativeDriver: true,
     }).start(() => setModalVisible1(false)); // Close after animation
   };
 
@@ -175,7 +175,7 @@ export default function billspaymentAirtime({
         setIsLoading(true)
         const config = {
           method: 'get',
-          url: `https://phixotech.com/igoepp/public/api/auth/billpayment/getAllBillersByCategory/${billid}`,
+          url: `${YOUR_API_BASE_URL}auth/billpayment/getAllBillersByCategory/${billid}`,
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${decryptData(token)}`,
@@ -193,7 +193,7 @@ export default function billspaymentAirtime({
         setTvPlatform(countryArray);
       } catch (error) {
         console.error("Country fetch error:", error);
-      }finally{
+      } finally {
         setIsLoading(false)
       }
     };
@@ -212,7 +212,7 @@ export default function billspaymentAirtime({
 
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/billpayment/getAllBouquetByBillerID/${billid}/${value}`,
+        `${YOUR_API_BASE_URL}auth/billpayment/getAllBouquetByBillerID/${billid}/${value}`,
         {
           headers: {
             Accept: "application/json",
@@ -237,6 +237,7 @@ export default function billspaymentAirtime({
     }
   };
 
+  console.log(formData)
   const handleValidation = () => {
     let validationErrors = {};
 
@@ -263,7 +264,7 @@ export default function billspaymentAirtime({
     return validatehandler();
   };
 
-  const validatehandler = async () => { 
+  const validatehandler = async () => {
     console.log(formData);
 
     let response: any; // <-- use let instead of const
@@ -273,13 +274,15 @@ export default function billspaymentAirtime({
 
       if (formData.mode.toLowerCase() === "self") {
         response = await validatecustomerself(
-          user?.customer_id, 
+          user?.customer_id,
+          formData.imagepath,
           decryptData(token)
         );
       } else {
         response = await validatecustomerthirdparty(
-          user?.customer_id, 
-          formData.thirdparty, 
+          user?.customer_id,
+          formData.imagepath,
+          formData.thirdparty,
           decryptData(token)
         );
       }
@@ -305,7 +308,7 @@ export default function billspaymentAirtime({
     } catch (error: any) {
       console.log("Validation failed:", error.response?.data || error);
       Alert.alert(
-        "Error", 
+        "Error",
         error.response?.data.message || "Failed to validate phone number."
       );
     } finally {
@@ -359,7 +362,7 @@ export default function billspaymentAirtime({
         response = await vtupaydata(
           formData.reference,
           formData.platform,
-          encryptData(formData.amount),
+          encryptData(formData.bosquetsamount),
           formData.bouquets,
           decryptData(token),
           formData.commission
@@ -398,479 +401,478 @@ export default function billspaymentAirtime({
       console.log(error.response);
     }
   };
-  
-  if(isloading || isPinLoading || isPaymentLoading){
-    return <LogoSpinner lightColor='' darkColor=''/>
+
+  if (isloading || isPinLoading || isPaymentLoading) {
+    return <LogoSpinner lightColor='' darkColor='' />
   }
-        
+
   const handleSubmit = (pin: any) => {
     console.log("Entered PIN:", pin);
     // handle verification here
   };
-        
+
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-      <KeyboardAvoidingView 
-        style={{ flex: 1 }} 
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
       >
-        <Animated.ScrollView showsVerticalScrollIndicator={false}>  
-          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}> 
-              <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
+        <Animated.ScrollView showsVerticalScrollIndicator={false}>
+          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
+            <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
           </GoBack>
-          <View style={{margin:6}}/> 
+          <View style={{ margin: 6 }} />
           <ThemedText type="titleMedium">Buy Airtime</ThemedText>
-          <ThemedText style={{color: Colors.gray9}}>Select network and enter phone number</ThemedText>
-          <ThemedText style={{color: Colors.gray9}}>to purchase airtime</ThemedText>
-          <View style={{margin:10}}/> 
+          <ThemedText style={{ color: Colors.gray9 }}>Select network and enter phone number</ThemedText>
+          <ThemedText style={{ color: Colors.gray9 }}>to purchase airtime</ThemedText>
+          <View style={{ margin: 10 }} />
 
           <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'self' && styles.activeTab]}
-            onPress={() => [setActiveTab('self'), 
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'self' && styles.activeTab]}
+              onPress={() => [setActiveTab('self'),
               setFormData(prev => ({
                 ...prev,
                 platform: "",
-                platformName:"",
-                phone: "",
+                platformName: "",
                 amount: "",
-                bosquetsamount:"",
+                bosquetsamount: "",
                 commission: "",
                 reference: "",
                 imagepath: "",
-                bouquets:"",
-                thirdparty:"",
+                bouquets: "",
+                thirdparty: "",
                 mode: "self"
-              }))]
-            }
-          >
-            <Text style={[styles.tabText, activeTab === 'self' && styles.activeTabText]}>
-              For Self
-            </Text>
-          </TouchableOpacity>
-  
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'thirdparty' && styles.activeTab]}
-            onPress={() => [setActiveTab('thirdparty'), 
+              })), setAmount(null), setFormattedAmount(null)]
+              }
+            >
+              <Text style={[styles.tabText, activeTab === 'self' && styles.activeTabText]}>
+                For Self
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'thirdparty' && styles.activeTab]}
+              onPress={() => [setActiveTab('thirdparty'),
               setFormData(prev => ({
                 ...prev,
                 platform: "",
-                platformName:"",
-                phone: "",
+                platformName: "",
                 amount: "",
-                bosquetsamount:"",
+                bosquetsamount: "",
                 commission: "",
                 reference: "",
                 imagepath: "",
-                bouquets:"",
-                thirdparty:"",
+                bouquets: "",
+                thirdparty: "",
                 mode: "thirdparty"
-              }))
-            ]}
-          >
-            <Text style={[styles.tabText, activeTab === 'thirdparty' && styles.activeTabText]}>
-              For Third Party
-            </Text>
-          </TouchableOpacity>
-        </View>
+              })),
+              setAmount(null), setFormattedAmount(null)
+              ]}
+            >
+              <Text style={[styles.tabText, activeTab === 'thirdparty' && styles.activeTabText]}>
+                For Third Party
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-        <View style={{margin:10}}/> 
+          <View style={{ margin: 10 }} />
 
-        <View>
-          {activeTab === 'self' ? (
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <ThemedText>Phone Number</ThemedText>
-              <View style={{ flexDirection: "row", alignItems: "center"}}>
-                {/* Country Code Box */}
-                <ThemedView
-                  style={{
-                    paddingHorizontal: 12,
-                    paddingVertical: 14,
-                    borderRadius: 8,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    borderWidth: 1,
-                    borderColor: Colors.gray9,
-                    marginRight: 10, // space between code box and input
-                  }}
-                >
-                  <Image
-                    source={require("@/assets/images/flag.png")}
-                    style={{ width: 20, height: 15, resizeMode: "contain" }}
-                  />
-                  <ThemedText style={{ marginLeft: 6, fontSize: 16 }}>+234</ThemedText>
-                </ThemedView>
+          <View>
+            {activeTab === 'self' ? (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <ThemedText>Phone Number</ThemedText>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  {/* Country Code Box */}
+                  <ThemedView
+                    style={{
+                      paddingHorizontal: 12,
+                      paddingVertical: 14,
+                      borderRadius: 8,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      borderWidth: 1,
+                      borderColor: Colors.gray9,
+                      marginRight: 10, // space between code box and input
+                    }}
+                  >
+                    <Image
+                      source={require("@/assets/images/flag.png")}
+                      style={{ width: 20, height: 15, resizeMode: "contain" }}
+                    />
+                    <ThemedText style={{ marginLeft: 6, fontSize: 16 }}>+234</ThemedText>
+                  </ThemedView>
 
-                {/* Phone Number Input */}
-                <View style={{ flex: 1 }}>
-                  <Input
-                    placeholder="Enter phone number"
-                    keyboardType="phone-pad"
-                    value={user?.phone}
-                    editable={false}
-                    onUpdateValue={(text) => setFormData({...formData, phone: text})}
-                  />
-                </View>
-              </View>
-
-              <View style={{margin:5}}/> 
-
-              <ThemedText>Choose Network</ThemedText>
-              <View style={{ flex: 1, margin:1 }}>
-                <Dropdown
-                  style={styles.dropdown}
-                  placeholderStyle={{ color: Colors.gray9 }}
-                  selectedTextStyle={{ color: "#000" }}
-                  data={tvPlatform}
-                  labelField="label"
-                  valueField="value"
-                  placeholder="Please Select"
-                  maxHeight={300}
-                  value={formData.platform}
-                  search
-                  searchPlaceholder="Search..."
-                  inputSearchStyle={{ color: Colors.gray9 }}
-
-                  // When selecting a country
-                  onChange={(item) => {
-                    commissionget(item.value);
-                    getBouquets(item.value, item.service)
-                    setFormData(prev => ({
-                      ...prev,
-                      platform: String(item.value),
-                      platformName: item.label,
-                      imagepath: item.flag,
-                    }));
-                  }}
-
-
-                  // ▼▼ IMAGE + TEXT INSIDE DROPDOWN ITEMS ▼▼
-                  renderItem={(item: any) => (
-                    <View style={{ flexDirection: "row", alignItems: "center", padding: 10 }}>
-                      <Image
-                        source={{ uri: item.flag }}  // your API flag field
-                        style={{ width: 24, height: 24, marginRight: 10, borderRadius:4 }}
-                        resizeMode="contain"
-                      />
-                      <Text style={{ color: "#000" }}>{item.label}</Text>
-                    </View>
-                  )}
-
-                  // ▼▼ IMAGE + TEXT WHEN SELECTED ▼▼
-                  renderLeftIcon={() => {
-                    const selected = tvPlatform.find(
-                      (c: any) => c.value === formData.platform
-                    );
-
-                    return selected ? (
-                      <Image
-                        source={{ uri: selected.flag }}
-                        style={{ width: 20, height: 20, marginRight: 8, borderRadius:4 }}
-                        resizeMode="contain"
-                      />
-                    ) : null;
-                  }}
-
-                  // ▼▼ ICON ▼▼
-                  renderRightIcon={() => (
-                    <MaterialIcons name="keyboard-arrow-down" size={20} color={Colors.gray9} />
-                  )}
-                />
-              </View> 
-              <View style={{margin:5}}/> 
-
-              {
-                formData.platform?.toLowerCase().includes("airtime")  ? null : <>
-                  <ThemedText>Select Plan</ThemedText>
-    
-                  <View style={{ flex: 1, margin:1 }}>
-                    <Dropdown
-                      style={styles.dropdown}
-                      placeholderStyle={{ color: Colors.gray9 }}
-                      selectedTextStyle={{ color: "#000" }}
-                      data={bouquets}
-                      labelField="label"
-                      valueField="value"
-                      placeholder="Please Select"
-                      maxHeight={300}
-                      value={formData.bouquets}
-                      search
-                      searchPlaceholder="Search..."
-                      inputSearchStyle={{ color: Colors.gray9 }}
-    
-                      // When selecting a country
-                      onChange={(item) => {
-                        setFormData(prev => ({
-                          ...prev,
-                          bouquets: item.value,
-                          amount: item.price,
-                        }));
-                      }}
+                  {/* Phone Number Input */}
+                  <View style={{ flex: 1 }}>
+                    <Input
+                      placeholder="Enter phone number"
+                      keyboardType="phone-pad"
+                      value={user?.phone}
+                      editable={false}
+                      onUpdateValue={(text) => setFormData({ ...formData, phone: text })}
                     />
                   </View>
-    
-                  <View style={{margin:5}}/>
-                </> 
-              }
+                </View>
 
-              {
-                formData.platform?.toLowerCase().includes("airtime") ? 
-                  <>
-                    <ThemedText>Enter Amount</ThemedText>
-                    <View style={{margin:5}}/> 
-                    <ThemedView style={[styles.container, {marginBottom:5, backgroundColor: Colors.offwhite1}]}>
-                      <View style={{flexDirection:'row', flex:1, justifyContent:'center', alignItems:'center'}}>
-                        <MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.gray9} />
-                        <TextInput placeholder={'Amount'} 
-                          style={[styles.input, isInvalid && styles.invalid, {color:Colors.gray9, }]} 
-                          onFocus={() => setIsInvalid(false)}
-                          value={formattedamount}
-                          onChangeText={handleChange}
-                          placeholderTextColor={Colors.gray9}
-                          keyboardType='number-pad'
-                          maxLength={9}
+                <View style={{ margin: 5 }} />
+
+                <ThemedText>Choose Network</ThemedText>
+                <View style={{ flex: 1, margin: 1 }}>
+                  <Dropdown
+                    style={styles.dropdown}
+                    placeholderStyle={{ color: Colors.gray9 }}
+                    selectedTextStyle={{ color: "#000" }}
+                    data={tvPlatform}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Please Select"
+                    maxHeight={300}
+                    value={formData.platform}
+                    search
+                    searchPlaceholder="Search..."
+                    inputSearchStyle={{ color: Colors.gray9 }}
+
+                    // When selecting a country
+                    onChange={(item) => {
+                      commissionget(item.value);
+                      getBouquets(item.value, item.service)
+                      setFormData(prev => ({
+                        ...prev,
+                        platform: String(item.value),
+                        platformName: item.label,
+                        imagepath: item.flag,
+                      }));
+                    }}
+
+
+                    // ▼▼ IMAGE + TEXT INSIDE DROPDOWN ITEMS ▼▼
+                    renderItem={(item: any) => (
+                      <View style={{ flexDirection: "row", alignItems: "center", padding: 10 }}>
+                        <Image
+                          source={{ uri: item.flag }}  // your API flag field
+                          style={{ width: 24, height: 24, marginRight: 10, borderRadius: 4 }}
+                          resizeMode="contain"
                         />
+                        <Text style={{ color: "#000" }}>{item.label}</Text>
                       </View>
-                      <TouchableOpacity onPress={() => [setFormattedAmount(null), setAmount(null)]} style={{padding:10}}>
-                        <AntDesign name="close-circle" size={20} color={Colors.gray9} />
-                      </TouchableOpacity>
-                    </ThemedView>
-      
-                    <View style={{margin:5}}/>
-                    <ThemedView style={{flexDirection:'row', justifyContent:'space-evenly'}}>
-                      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        {numbers.map((item, key) => (
-                          <TouchableOpacity key={key} style={{backgroundColor:Colors.offwhite,paddingLeft: 5, margin: 5,paddingRight:5, borderRadius:15, padding:5}} onPress={() => handleChange(item.amount)}>
-                            <ThemedText style={{color: Colors.green8}} type='smallBold'><MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.green8} /> {item.amount.toLocaleString()+"."+"00"}</ThemedText>
-                          </TouchableOpacity>
-                        ))}
-                      </ScrollView>
-                    </ThemedView>
-                  </>
-                :
-                  <>
-                   <ThemedText>Amount</ThemedText>
-                    <View style={{ flex: 1 }}>
-                      <Input
-                        placeholder="NGN 0.00"
-                        keyboardType="number-pad"
-                        value={formData.bosquetsamount && Number(formData.bosquetsamount).toLocaleString()}
-                        editable={false}
-                        onUpdateValue={(text) => setFormData({...formData, bosquetsamount: text})}
+                    )}
+
+                    // ▼▼ IMAGE + TEXT WHEN SELECTED ▼▼
+                    renderLeftIcon={() => {
+                      const selected = tvPlatform.find(
+                        (c: any) => c.value === formData.platform
+                      );
+
+                      return selected ? (
+                        <Image
+                          source={{ uri: selected.flag }}
+                          style={{ width: 20, height: 20, marginRight: 8, borderRadius: 4 }}
+                          resizeMode="contain"
+                        />
+                      ) : null;
+                    }}
+
+                    // ▼▼ ICON ▼▼
+                    renderRightIcon={() => (
+                      <MaterialIcons name="keyboard-arrow-down" size={20} color={Colors.gray9} />
+                    )}
+                  />
+                </View>
+                <View style={{ margin: 5 }} />
+
+                {
+                  formData.platform?.toLowerCase().includes("airtime") ? null : <>
+                    <ThemedText>Select Plan</ThemedText>
+
+                    <View style={{ flex: 1, margin: 1 }}>
+                      <Dropdown
+                        style={styles.dropdown}
+                        placeholderStyle={{ color: Colors.gray9 }}
+                        selectedTextStyle={{ color: "#000" }}
+                        data={bouquets}
+                        labelField="label"
+                        valueField="value"
+                        placeholder="Please Select"
+                        maxHeight={300}
+                        value={formData.bouquets}
+                        search
+                        searchPlaceholder="Search..."
+                        inputSearchStyle={{ color: Colors.gray9 }}
+
+                        // When selecting a country
+                        onChange={(item) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            bouquets: item.value,
+                            bosquetsamount: item.price
+                          }));
+                        }}
                       />
                     </View>
-                  </> 
-              }
+
+                    <View style={{ margin: 5 }} />
+                  </>
+                }
+
+                {
+                  formData.platform?.toLowerCase().includes("airtime") ?
+                    <>
+                      <ThemedText>Enter Amount</ThemedText>
+                      <View style={{ margin: 5 }} />
+                      <ThemedView style={[styles.container, { marginBottom: 5, backgroundColor: Colors.offwhite1 }]}>
+                        <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                          <MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.gray9} />
+                          <TextInput placeholder={'Amount'}
+                            style={[styles.input, isInvalid && styles.invalid, { color: Colors.gray9, }]}
+                            onFocus={() => setIsInvalid(false)}
+                            value={formattedamount}
+                            onChangeText={handleChange}
+                            placeholderTextColor={Colors.gray9}
+                            keyboardType='number-pad'
+                            maxLength={9}
+                          />
+                        </View>
+                        <TouchableOpacity onPress={() => [setFormattedAmount(null), setAmount(null)]} style={{ padding: 10 }}>
+                          <AntDesign name="close-circle" size={20} color={Colors.gray9} />
+                        </TouchableOpacity>
+                      </ThemedView>
+
+                      <View style={{ margin: 5 }} />
+                      <ThemedView style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                          {numbers.map((item, key) => (
+                            <TouchableOpacity key={key} style={{ backgroundColor: Colors.offwhite, paddingLeft: 5, margin: 5, paddingRight: 5, borderRadius: 15, padding: 5 }} onPress={() => handleChange(item.amount)}>
+                              <ThemedText style={{ color: Colors.green8 }} type='smallBold'><MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.green8} /> {item.amount.toLocaleString() + "." + "00"}</ThemedText>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+                      </ThemedView>
+                    </>
+                    :
+                    <>
+                      <ThemedText>Amount</ThemedText>
+                      <View style={{ flex: 1 }}>
+                        <Input
+                          placeholder="NGN 0.00"
+                          keyboardType="number-pad"
+                          value={formData.bosquetsamount && Number(formData.bosquetsamount).toLocaleString()}
+                          editable={false}
+                          onUpdateValue={(text) => setFormData({ ...formData, bosquetsamount: text })}
+                        />
+                      </View>
+                    </>
+                }
 
 
-                <View style={{margin:15}}/>
+                <View style={{ margin: 15 }} />
 
-                <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}} onPress={() => {handleValidation()}} disabled={isloading}>
-                  <ThemedText style={{color:'#fff'}}>Continue</ThemedText>
+                <ThemedButton style={{ backgroundColor: Colors.green, padding: 15, borderRadius: 30, alignItems: 'center' }} onPress={() => { handleValidation() }} disabled={isloading}>
+                  <ThemedText style={{ color: '#fff' }}>Continue</ThemedText>
                 </ThemedButton>
-             </ScrollView>
+              </ScrollView>
             ) : (
               <ScrollView showsVerticalScrollIndicator={false}>
                 <ThemedText>Phone Number</ThemedText>
-              <View style={{ flexDirection: "row", alignItems: "center"}}>
-                {/* Country Code Box */}
-                <ThemedView
-                  style={{
-                    paddingHorizontal: 12,
-                    paddingVertical: 14,
-                    borderRadius: 8,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    borderWidth: 1,
-                    borderColor: Colors.gray9,
-                    marginRight: 10, // space between code box and input
-                  }}
-                >
-                  <Image
-                    source={require("@/assets/images/flag.png")}
-                    style={{ width: 20, height: 15, resizeMode: "contain" }}
-                  />
-                  <ThemedText style={{ marginLeft: 6, fontSize: 16 }}>+234</ThemedText>
-                </ThemedView>
-
-                {/* Phone Number Input */}
-                <View style={{ flex: 1 }}>
-                  <Input
-                    placeholder="Enter phone number"
-                    keyboardType="phone-pad"
-                    value={formData.thirdparty}
-                    onUpdateValue={(text) => setFormData({...formData, thirdparty: text})}
-                  />
-                </View>
-              </View>
-
-              <View style={{margin:5}}/> 
-
-              <ThemedText>Choose Network</ThemedText>
-              <View style={{ flex: 1, margin:1 }}>
-                <Dropdown
-                  style={styles.dropdown}
-                  placeholderStyle={{ color: Colors.gray9 }}
-                  selectedTextStyle={{ color: "#000" }}
-                  data={tvPlatform}
-                  labelField="label"
-                  valueField="value"
-                  placeholder="Please Select"
-                  maxHeight={300}
-                  value={formData.platform}
-                  search
-                  searchPlaceholder="Search..."
-                  inputSearchStyle={{ color: Colors.gray9 }}
-
-                  // When selecting a country
-                  onChange={(item) => {
-                    commissionget(item.value);
-                    getBouquets(item.value, item.service)
-                    setFormData(prev => ({
-                      ...prev,
-                      platform: String(item.value),
-                      platformName: item.label,
-                      imagepath: item.flag,
-                    }));
-                  }}
-
-
-                  // ▼▼ IMAGE + TEXT INSIDE DROPDOWN ITEMS ▼▼
-                  renderItem={(item: any) => (
-                    <View style={{ flexDirection: "row", alignItems: "center", padding: 10 }}>
-                      <Image
-                        source={{ uri: item.flag }}  // your API flag field
-                        style={{ width: 24, height: 24, marginRight: 10, borderRadius:4 }}
-                        resizeMode="contain"
-                      />
-                      <Text style={{ color: "#000" }}>{item.label}</Text>
-                    </View>
-                  )}
-
-                  // ▼▼ IMAGE + TEXT WHEN SELECTED ▼▼
-                  renderLeftIcon={() => {
-                    const selected = tvPlatform.find(
-                      (c: any) => c.value === formData.platform
-                    );
-
-                    return selected ? (
-                      <Image
-                        source={{ uri: selected.flag }}
-                        style={{ width: 20, height: 20, marginRight: 8, borderRadius:4 }}
-                        resizeMode="contain"
-                      />
-                    ) : null;
-                  }}
-
-                  // ▼▼ ICON ▼▼
-                  renderRightIcon={() => (
-                    <MaterialIcons name="keyboard-arrow-down" size={20} color={Colors.gray9} />
-                  )}
-                />
-              </View> 
-              <View style={{margin:5}}/> 
-
-              {
-                formData.platform?.toLowerCase().includes("airtime")  ? null : <>
-                  <ThemedText>Select Plan</ThemedText>
-    
-                  <View style={{ flex: 1, margin:1 }}>
-                    <Dropdown
-                      style={styles.dropdown}
-                      placeholderStyle={{ color: Colors.gray9 }}
-                      selectedTextStyle={{ color: "#000" }}
-                      data={bouquets}
-                      labelField="label"
-                      valueField="value"
-                      placeholder="Please Select"
-                      maxHeight={300}
-                      value={formData.bouquets}
-                      search
-                      searchPlaceholder="Search..."
-                      inputSearchStyle={{ color: Colors.gray9 }}
-    
-                      // When selecting a country
-                      onChange={(item) => {
-                        setFormData(prev => ({
-                          ...prev,
-                          bouquets: item.value,
-                          amount: item.price,
-                        }));
-                      }}
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  {/* Country Code Box */}
+                  <ThemedView
+                    style={{
+                      paddingHorizontal: 12,
+                      paddingVertical: 14,
+                      borderRadius: 8,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      borderWidth: 1,
+                      borderColor: Colors.gray9,
+                      marginRight: 10, // space between code box and input
+                    }}
+                  >
+                    <Image
+                      source={require("@/assets/images/flag.png")}
+                      style={{ width: 20, height: 15, resizeMode: "contain" }}
                     />
-                  </View>
-    
-                  <View style={{margin:5}}/>
-                </> 
-              }
-
-              {
-                formData.platform?.toLowerCase().includes("airtime") ? 
-                <>
-                  <ThemedText>Enter Amount</ThemedText>
-                  <View style={{margin:5}}/> 
-                  <ThemedView style={[styles.container, {marginBottom:5, backgroundColor: Colors.offwhite1}]}>
-                    <View style={{flexDirection:'row', flex:1, justifyContent:'center', alignItems:'center'}}>
-                      <MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.gray9} />
-                      <TextInput placeholder={'Amount'} 
-                        style={[styles.input, isInvalid && styles.invalid, {color:Colors.gray9, }]} 
-                        onFocus={() => setIsInvalid(false)}
-                        value={formattedamount}
-                        onChangeText={handleChange}
-                        placeholderTextColor={Colors.gray9}
-                        keyboardType='number-pad'
-                        maxLength={9}
-                      />
-                    </View>
-                    <TouchableOpacity onPress={() => [setFormattedAmount(null), setAmount(null)]} style={{padding:10}}>
-                      <AntDesign name="close-circle" size={20} color={Colors.gray9} />
-                    </TouchableOpacity>
+                    <ThemedText style={{ marginLeft: 6, fontSize: 16 }}>+234</ThemedText>
                   </ThemedView>
-                  <View style={{margin:5}}/>
 
-                  <ThemedView style={{flexDirection:'row', justifyContent:'space-evenly'}}>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                      {numbers.map((item, key) => (
-                        <TouchableOpacity key={key} style={{backgroundColor:Colors.offwhite,paddingLeft: 5, margin: 5,paddingRight:5, borderRadius:15, padding:5}} onPress={() => handleChange(item.amount)}>
-                          <ThemedText style={{color: Colors.green8}} type='smallBold'><MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.green8} /> {item.amount.toLocaleString()+"."+"00"}</ThemedText>
-                        </TouchableOpacity>
-                      ))}
-                    </ScrollView>
-                  </ThemedView>
-                </>  
-                :
-                <>
-                  <ThemedText>Amount</ThemedText>
+                  {/* Phone Number Input */}
                   <View style={{ flex: 1 }}>
                     <Input
-                      placeholder="NGN 0.00"
-                      keyboardType="number-pad"
-                      value={formData.bosquetsamount && Number(formData.bosquetsamount).toLocaleString()}
-                      editable={false}
-                      onUpdateValue={(text) => setFormData({...formData, bosquetsamount: text})}
+                      placeholder="Enter phone number"
+                      keyboardType="phone-pad"
+                      value={formData.thirdparty}
+                      onUpdateValue={(text) => setFormData({ ...formData, thirdparty: text })}
                     />
                   </View>
-                </> 
-              }
+                </View>
+
+                <View style={{ margin: 5 }} />
+
+                <ThemedText>Choose Network</ThemedText>
+                <View style={{ flex: 1, margin: 1 }}>
+                  <Dropdown
+                    style={styles.dropdown}
+                    placeholderStyle={{ color: Colors.gray9 }}
+                    selectedTextStyle={{ color: "#000" }}
+                    data={tvPlatform}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Please Select"
+                    maxHeight={300}
+                    value={formData.platform}
+                    search
+                    searchPlaceholder="Search..."
+                    inputSearchStyle={{ color: Colors.gray9 }}
+
+                    // When selecting a country
+                    onChange={(item) => {
+                      commissionget(item.value);
+                      getBouquets(item.value, item.service)
+                      setFormData(prev => ({
+                        ...prev,
+                        platform: String(item.value),
+                        platformName: item.label,
+                        imagepath: item.flag,
+                      }));
+                    }}
 
 
-                <View style={{margin:15}}/>
+                    // ▼▼ IMAGE + TEXT INSIDE DROPDOWN ITEMS ▼▼
+                    renderItem={(item: any) => (
+                      <View style={{ flexDirection: "row", alignItems: "center", padding: 10 }}>
+                        <Image
+                          source={{ uri: item.flag }}  // your API flag field
+                          style={{ width: 24, height: 24, marginRight: 10, borderRadius: 4 }}
+                          resizeMode="contain"
+                        />
+                        <Text style={{ color: "#000" }}>{item.label}</Text>
+                      </View>
+                    )}
 
-                <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}} onPress={() => {handleValidation()}} disabled={isloading}>
-                  <ThemedText style={{color:'#fff'}}>Continue</ThemedText>
+                    // ▼▼ IMAGE + TEXT WHEN SELECTED ▼▼
+                    renderLeftIcon={() => {
+                      const selected = tvPlatform.find(
+                        (c: any) => c.value === formData.platform
+                      );
+
+                      return selected ? (
+                        <Image
+                          source={{ uri: selected.flag }}
+                          style={{ width: 20, height: 20, marginRight: 8, borderRadius: 4 }}
+                          resizeMode="contain"
+                        />
+                      ) : null;
+                    }}
+
+                    // ▼▼ ICON ▼▼
+                    renderRightIcon={() => (
+                      <MaterialIcons name="keyboard-arrow-down" size={20} color={Colors.gray9} />
+                    )}
+                  />
+                </View>
+                <View style={{ margin: 5 }} />
+
+                {
+                  formData.platform?.toLowerCase().includes("airtime") ? null : <>
+                    <ThemedText>Select Plan</ThemedText>
+
+                    <View style={{ flex: 1, margin: 1 }}>
+                      <Dropdown
+                        style={styles.dropdown}
+                        placeholderStyle={{ color: Colors.gray9 }}
+                        selectedTextStyle={{ color: "#000" }}
+                        data={bouquets}
+                        labelField="label"
+                        valueField="value"
+                        placeholder="Please Select"
+                        maxHeight={300}
+                        value={formData.bouquets}
+                        search
+                        searchPlaceholder="Search..."
+                        inputSearchStyle={{ color: Colors.gray9 }}
+
+                        // When selecting a country
+                        onChange={(item) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            bouquets: item.value,
+                            amount: item.price,
+                          }));
+                        }}
+                      />
+                    </View>
+
+                    <View style={{ margin: 5 }} />
+                  </>
+                }
+
+                {
+                  formData.platform?.toLowerCase().includes("airtime") ?
+                    <>
+                      <ThemedText>Enter Amount</ThemedText>
+                      <View style={{ margin: 5 }} />
+                      <ThemedView style={[styles.container, { marginBottom: 5, backgroundColor: Colors.offwhite1 }]}>
+                        <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                          <MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.gray9} />
+                          <TextInput placeholder={'Amount'}
+                            style={[styles.input, isInvalid && styles.invalid, { color: Colors.gray9, }]}
+                            onFocus={() => setIsInvalid(false)}
+                            value={formattedamount}
+                            onChangeText={handleChange}
+                            placeholderTextColor={Colors.gray9}
+                            keyboardType='number-pad'
+                            maxLength={9}
+                          />
+                        </View>
+                        <TouchableOpacity onPress={() => [setFormattedAmount(null), setAmount(null)]} style={{ padding: 10 }}>
+                          <AntDesign name="close-circle" size={20} color={Colors.gray9} />
+                        </TouchableOpacity>
+                      </ThemedView>
+                      <View style={{ margin: 5 }} />
+
+                      <ThemedView style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                          {numbers.map((item, key) => (
+                            <TouchableOpacity key={key} style={{ backgroundColor: Colors.offwhite, paddingLeft: 5, margin: 5, paddingRight: 5, borderRadius: 15, padding: 5 }} onPress={() => [handleChange(item.amount)]}>
+                              <ThemedText style={{ color: Colors.green8 }} type='smallBold'><MaterialCommunityIcons name="currency-ngn" size={15} color={Colors.green8} /> {item.amount.toLocaleString() + "." + "00"}</ThemedText>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+                      </ThemedView>
+                    </>
+                    :
+                    <>
+                      <ThemedText>Amount</ThemedText>
+                      <View style={{ flex: 1 }}>
+                        <Input
+                          placeholder="NGN 0.00"
+                          keyboardType="number-pad"
+                          value={formData.bosquetsamount && Number(formData.bosquetsamount).toLocaleString()}
+                          editable={false}
+                          onUpdateValue={(text) => setFormData({ ...formData, bosquetsamount: text })}
+                        />
+                      </View>
+                    </>
+                }
+
+
+                <View style={{ margin: 15 }} />
+
+                <ThemedButton style={{ backgroundColor: Colors.green, padding: 15, borderRadius: 30, alignItems: 'center' }} onPress={() => { handleValidation() }} disabled={isloading}>
+                  <ThemedText style={{ color: '#fff' }}>Continue</ThemedText>
                 </ThemedButton>
               </ScrollView>
             )
-          }
-        </View>
+            }
+          </View>
 
-        
-      </Animated.ScrollView>
+
+        </Animated.ScrollView>
         <Modal
           transparent
           visible={modalVisible}
-          animationType="slide" 
+          animationType="slide"
           onRequestClose={closePopup}
         >
           <TouchableOpacity style={styles.overlay} onPress={() => [closePopup()]} />
@@ -878,61 +880,61 @@ export default function billspaymentAirtime({
           <Animated.View
             style={[
               styles.popup,
-              { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+              { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%" },
             ]}
           >
-            <View style={{margin:10}}/>
+            <View style={{ margin: 10 }} />
 
-            <View  style={{flexDirection:'row', justifyContent:'center'}}> 
-              <ThemedText type='subtitle' style={{textAlign:'center', flex:1}}>Transaction Review</ThemedText>
-              <TouchableOpacity onPress={closePopup} style={{alignSelf:'flex-end'}}>
-                <MaterialIcons name="cancel" size={24} color={Colors.green}/>
+            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+              <ThemedText type='subtitle' style={{ textAlign: 'center', flex: 1 }}>Transaction Review</ThemedText>
+              <TouchableOpacity onPress={closePopup} style={{ alignSelf: 'flex-end' }}>
+                <MaterialIcons name="cancel" size={24} color={Colors.green} />
               </TouchableOpacity>
             </View>
 
-            <View style={{margin:10}}/>
-            <ThemedView style={{backgroundColor: Colors.gray7, marginHorizontal:10}}>
-              <View style={{margin:10}}/>
-              <ThemedText style={{color:Colors.blacktext, textAlign:'center'}}>Amount</ThemedText>
-              <ThemedText style={{color: Colors.green8, textAlign:'center'}} type='subtitle'>NGN {Number(formData.amount).toLocaleString()}</ThemedText>
-              <View style={{margin:10}}/>
+            <View style={{ margin: 10 }} />
+            <ThemedView style={{ backgroundColor: Colors.gray7, marginHorizontal: 10 }}>
+              <View style={{ margin: 10 }} />
+              <ThemedText style={{ color: Colors.blacktext, textAlign: 'center' }}>Amount</ThemedText>
+              <ThemedText style={{ color: Colors.green8, textAlign: 'center' }} type='subtitle'>NGN {formData.platform.toLowerCase().includes('airtime') ? Number(formData.amount).toLocaleString() : Number(formData.bosquetsamount).toLocaleString()}</ThemedText>
+              <View style={{ margin: 10 }} />
             </ThemedView>
 
-            <View style={{margin:10}}/>
+            <View style={{ margin: 10 }} />
 
-            <ThemedView style={{backgroundColor: Colors.gray7, marginHorizontal:10, paddingHorizontal:20, paddingVertical:20}}>
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}}>From</ThemedText>
-                <ThemedText style={{color:Colors.wallet }}>Wallet</ThemedText>
+            <ThemedView style={{ backgroundColor: Colors.gray7, marginHorizontal: 10, paddingHorizontal: 20, paddingVertical: 20 }}>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }}>From</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }}>Wallet</ThemedText>
               </View>
-              <View style={{margin:7}}/>
+              <View style={{ margin: 7 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}}>Phone Number</ThemedText>
-                <ThemedText style={{color:Colors.wallet }}>{formData.mode.toLowerCase() === "self" ? formData.phone : formData.thirdparty}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }}>Phone Number</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }}>{formData.mode.toLowerCase() === "self" ? formData.phone : formData.thirdparty}</ThemedText>
               </View>
-              <View style={{margin:7}}/>
+              <View style={{ margin: 7 }} />
 
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}}>Network</ThemedText>
-                <ThemedText style={{color:Colors.wallet }}>{formData.platform}</ThemedText>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }}>Network</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }}>{formData.platform}</ThemedText>
               </View>
 
-              <View style={{margin:7}}/>
+              <View style={{ margin: 7 }} />
 
               {
-                formData.platform.toLowerCase().includes('airtime') ? null : 
-                <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                  <ThemedText style={{color: '#000'}}>Bosquet</ThemedText>
-                  <ThemedText style={{color:Colors.wallet }}>{formData.bouquets}</ThemedText>
-                </View>
+                formData.platform.toLowerCase().includes('airtime') ? null :
+                  <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                    <ThemedText style={{ color: '#000' }}>Bosquet</ThemedText>
+                    <ThemedText style={{ color: Colors.wallet }}>{formData.bouquets}</ThemedText>
+                  </View>
               }
             </ThemedView>
-            
-            <View style={{margin:15}}/>
 
-            <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, marginHorizontal:10, alignItems:'center'}} onPress={() => [closePopup(), openPopup1()]}>
-              <ThemedText style={{color:'#fff'}}>Proceed</ThemedText>
+            <View style={{ margin: 15 }} />
+
+            <ThemedButton style={{ backgroundColor: Colors.green, padding: 15, borderRadius: 30, marginHorizontal: 10, alignItems: 'center' }} onPress={() => [closePopup(), openPopup1()]}>
+              <ThemedText style={{ color: '#fff' }}>Proceed</ThemedText>
             </ThemedButton>
           </Animated.View>
         </Modal>
@@ -940,26 +942,34 @@ export default function billspaymentAirtime({
         <Modal
           transparent
           visible={modalVisible1}
-          animationType="slide" 
+          animationType="slide"
           onRequestClose={closePopup1}
         >
-          <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
-
-          <Animated.View
-            style={[
-              styles.popup,
-              { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-            ]}
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
           >
-            <ThemedText type='titleMedium' style={{textAlign:'center'}}>Enter Pin</ThemedText>
-            <View style={{margin:8}}/> 
+            <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
 
-            <ThemedText style={{textAlign:'center', color: Colors.gray9}}>Enter Transaction PIN</ThemedText>
-            <View style={{margin:10}}/>
-            <View style={{margin:5}}/>
-            <PinInput length={4} secure={true} onSubmit={(pin) => {closePopup1(), pinvalidation(pin)}}/>
-            <View style={{margin:10}}/>
-          </Animated.View>
+            <Animated.View
+              style={[
+                styles.popup,
+                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+              ]}
+            >
+              <ThemedText type='titleMedium' style={{ textAlign: 'center' }}>Enter Pin</ThemedText>
+              <View style={{ margin: 8 }} />
+
+              <ThemedText style={{ textAlign: 'center', color: Colors.gray9 }}>Enter Transaction PIN</ThemedText>
+              <View style={{ margin: 10 }} />
+              <View style={{ margin: 5 }} />
+
+
+              <PinInput length={4} secure={true} onSubmit={(pin) => { closePopup1(), pinvalidation(pin) }} />
+              <View style={{ margin: 10 }} />
+            </Animated.View>
+          </KeyboardAvoidingView>
         </Modal>
 
         <ReceiptView
@@ -969,76 +979,76 @@ export default function billspaymentAirtime({
           showIcon={true}
           imageuri={formData.imagepath}
         >
-        <ThemedView style={{backgroundColor: Colors.gray6, marginHorizontal:10, paddingHorizontal:20, paddingVertical:20}}>
-          <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-            <ThemedText style={{color: '#000'}} type='small'>From</ThemedText>
-            <ThemedText style={{color:Colors.wallet }} type='small'>Wallet</ThemedText>
-          </View>
-          <View style={{margin:2}}/>
+          <ThemedView style={{ backgroundColor: Colors.gray6, marginHorizontal: 10, paddingHorizontal: 20, paddingVertical: 20 }}>
+            <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+              <ThemedText style={{ color: '#000' }} type='small'>From</ThemedText>
+              <ThemedText style={{ color: Colors.wallet }} type='small'>Wallet</ThemedText>
+            </View>
+            <View style={{ margin: 2 }} />
 
-          <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-            <ThemedText style={{color: '#000'}} type='small'>Network</ThemedText>
-            <ThemedText style={{color:Colors.wallet }} type='small'>{formData.platform.split("-")[0]}</ThemedText>
-          </View>
-          <View style={{margin:2}}/>
+            <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+              <ThemedText style={{ color: '#000' }} type='small'>Network</ThemedText>
+              <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.platform.split("-")[0]}</ThemedText>
+            </View>
+            <View style={{ margin: 2 }} />
 
-          <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-            <ThemedText style={{color: '#000'}}type='small' >Phone number</ThemedText>
-            <ThemedText style={{color:Colors.wallet }}type='small' >{formData.mode.toLowerCase() === 'self' ? formData.phone : formData.thirdparty}</ThemedText>
-          </View>
-          <View style={{margin:2}}/>
+            <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+              <ThemedText style={{ color: '#000' }} type='small' >Phone number</ThemedText>
+              <ThemedText style={{ color: Colors.wallet }} type='small' >{formData.mode.toLowerCase() === 'self' ? formData.phone : formData.thirdparty}</ThemedText>
+            </View>
+            <View style={{ margin: 2 }} />
 
-          <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-            <ThemedText style={{color: '#000'}} type='small'>Topup amount</ThemedText>
-            <ThemedText style={{color:Colors.wallet }} type='small'>{formData.amount}</ThemedText>
-          </View>
-          <View style={{margin:2}}/>
+            <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+              <ThemedText style={{ color: '#000' }} type='small'>Topup amount</ThemedText>
+              <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.platform.toLowerCase().includes("airtime") ? formData.amount : formData.bosquetsamount}</ThemedText>
+            </View>
+            <View style={{ margin: 2 }} />
 
-          <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-            <ThemedText style={{color: '#000'}} type='small'>Type</ThemedText>
-            <ThemedText style={{color:Colors.wallet }} type='small'>{formData.platform.toLowerCase().includes("airtime") ? "Airtime" : "Data"}</ThemedText>
-          </View>
-          <View style={{margin:2}}/>
-          
-          {
-            formData.platform.toLowerCase().includes('data') &&
-            <>
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Bouquet</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.bouquets}</ThemedText>
-              </View>
-              <View style={{margin:2}}/>
-            </>
-          }
+            <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+              <ThemedText style={{ color: '#000' }} type='small'>Type</ThemedText>
+              <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.platform.toLowerCase().includes("airtime") ? "Airtime" : "Data"}</ThemedText>
+            </View>
+            <View style={{ margin: 2 }} />
 
-          <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-            <ThemedText style={{color: '#000'}} type='small'>Reference</ThemedText>
-            <ThemedText style={{color:Colors.wallet }} type='small'>{formData.reference}</ThemedText>
-          </View>
-          <View style={{margin:2}}/>
+            {
+              formData.platform.toLowerCase().includes('data') &&
+              <>
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                  <ThemedText style={{ color: '#000' }} type='small'>Bouquet</ThemedText>
+                  <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.bouquets}</ThemedText>
+                </View>
+                <View style={{ margin: 2 }} />
+              </>
+            }
 
-          <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-            <ThemedText style={{color: '#000'}} type='small'>Date</ThemedText>
-            <ThemedText style={{color:Colors.wallet }} type='small'>{dayjs().format("MMMM D, YYYY")}</ThemedText>
-          </View>
-          <View style={{margin:2}}/>
+            <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+              <ThemedText style={{ color: '#000' }} type='small'>Reference</ThemedText>
+              <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.reference}</ThemedText>
+            </View>
+            <View style={{ margin: 2 }} />
 
-          <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-            <ThemedText style={{color: '#000'}} type='small'>Time</ThemedText>
-            <ThemedText style={{color:Colors.wallet }} type='small'>{dayjs().format("h:mm A")}</ThemedText>
-          </View>
-        </ThemedView>
-      </ReceiptView>
+            <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+              <ThemedText style={{ color: '#000' }} type='small'>Date</ThemedText>
+              <ThemedText style={{ color: Colors.wallet }} type='small'>{dayjs().format("MMMM D, YYYY")}</ThemedText>
+            </View>
+            <View style={{ margin: 2 }} />
 
-      <StatusModal
-        visible={modalVisible2}
-        onClose={() => setModalVisible2(false)}
-        title="No Transaction PIn"
-        message="Please create your transaction PIN to secure your account and enable transactions."
-        navigateTo="/transactionpin"
-        close={true}
-      />
-        
+            <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+              <ThemedText style={{ color: '#000' }} type='small'>Time</ThemedText>
+              <ThemedText style={{ color: Colors.wallet }} type='small'>{dayjs().format("h:mm A")}</ThemedText>
+            </View>
+          </ThemedView>
+        </ReceiptView>
+
+        <StatusModal
+          visible={modalVisible2}
+          onClose={() => setModalVisible2(false)}
+          title="No Transaction PIn"
+          message="Please create your transaction PIN to secure your account and enable transactions."
+          navigateTo="/transactionpin"
+          close={true}
+        />
+
       </KeyboardAvoidingView>
     </SafeAreaView>
   )
@@ -1054,7 +1064,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
     backgroundColor: Colors.offwhite
-  },  
+  },
   contentContainer: {
     flex: 1,
     // backgroundColor: '#3E6B34',
@@ -1069,36 +1079,36 @@ const styles = StyleSheet.create({
     marginTop: 5,
     borderRadius: 100,
     width: DIMENSION.WIDTH * 0.8,
-    alignSelf:'center',
+    alignSelf: 'center',
     backgroundColor: Colors.gray11,
-    paddingHorizontal:5,
+    paddingHorizontal: 5,
   },
   tab: {
     flex: 1,
-    marginVertical:10,
-    marginHorizontal:10,
+    marginVertical: 10,
+    marginHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 50,
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
   activeTab: {
-    backgroundColor: Colors.wallet  ,
+    backgroundColor: Colors.wallet,
   },
   tabText: {
-    color: Colors.blacktext ,
+    color: Colors.blacktext,
     fontWeight: '500',
   },
   activeTabText: {
     color: '#fff',
   },
   input: {
-    fontSize:15,
+    fontSize: 15,
     paddingLeft: 6,
-    padding:12,
-    borderRadius:10,
+    padding: 12,
+    borderRadius: 10,
     backgroundColor: Colors.offwhite1,
-    flex:1
+    flex: 1
   },
   inputInvalid: {
     backgroundColor: Colors.error100,
@@ -1115,13 +1125,13 @@ const styles = StyleSheet.create({
   },
   popup: {
     position: 'absolute',
-    bottom:0,
+    bottom: 0,
     width: '100%',
     backgroundColor: '#fff',
     padding: 10,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
+    // boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
   },
   overlay: {
     flex: 1,

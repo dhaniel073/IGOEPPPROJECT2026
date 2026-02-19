@@ -4,17 +4,17 @@ import LogoSpinner from '@/components/LoadingScreen'
 import { ThemedText } from '@/components/ThemedText'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { showpendingrequestbycustomerid } from '@/hooks/AuthRoutes'
+import { showpendingrequestbycustomerid, walletbal } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { useNavigation, useRouter } from 'expo-router'
-import React, { useLayoutEffect } from 'react'
+import React, { useEffect, useLayoutEffect } from 'react'
 import { Alert, Animated, FlatList, StyleSheet, TextProps, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export type Props = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
-  headerBackgroundColor:{ dark: string; light: string };
+    lightColor?: string;
+    darkColor?: string;
+    headerBackgroundColor: { dark: string; light: string };
 };
 
 
@@ -22,7 +22,7 @@ export default function bookings({
     lightColor,
     darkColor,
     headerBackgroundColor,
-  }: Props){
+}: Props) {
 
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
     const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
@@ -30,15 +30,18 @@ export default function bookings({
     const [isFetching, setIsFetching] = React.useState(false);
     const [fetchedRequest, setFetchedRequest] = React.useState<any[]>([]);
     const navigation = useNavigation();
-    const {user, token, updateUserFields, logout} = useAuth();
+    const { user, token, updateUserFields, logout } = useAuth();
+    const [refreshing, setRefreshing] = React.useState(false);
+
+
 
     useLayoutEffect(() => {
         const fetchPendingRequests = async () => {
             try {
-            setIsFetching(true);
-            const response = await showpendingrequestbycustomerid(user?.customer_id, decryptData(token));
-            console.log(response)
-            setFetchedRequest(response);
+                setIsFetching(true);
+                const response = await showpendingrequestbycustomerid(user?.customer_id, decryptData(token));
+                console.log(response)
+                setFetchedRequest(response);
             } catch (error: any) {
                 console.log(user)
                 console.log(error)
@@ -50,7 +53,7 @@ export default function bookings({
                     Alert.alert('Error', 'Unable to load requests.')
                 }
             } finally {
-            setIsFetching(false);
+                setIsFetching(false);
             }
         };
 
@@ -59,21 +62,39 @@ export default function bookings({
         return unsubscribe;
     }, [navigation, user?.customer_id, token]);
 
-    if(isFetching){
-        return <LogoSpinner lightColor='' darkColor=''/>
+    const fetchData = async () => {
+        setRefreshing(true);
+        const response = await showpendingrequestbycustomerid(user?.customer_id, decryptData(token)); // your API call
+        setFetchedRequest(response);
+        setRefreshing(false);
+    };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await walletbal(user?.customer_id, decryptData(token));
+                updateUserFields({ wallet_balance: response.wallet_balance })
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        fetchData();
+    }, [])
+
+    if (isFetching) {
+        return <LogoSpinner lightColor='' darkColor='' />
     }
 
-  return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-            <View style={{margin:6}}/> 
+    return (
+        <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+            <View style={{ margin: 6 }} />
             <ThemedText type="titleMedium">Bookings</ThemedText>
-            <ThemedText style={{color: Colors.gray9}}>View bookings</ThemedText>
-
-            <View style={{margin:6}}/>
-            
+            <ThemedText style={{ color: Colors.gray9 }}>View bookings</ThemedText>
+            <View style={{ margin: 6 }} />
             {
                 fetchedRequest.length === 0 ? (
-                    <Animated.ScrollView showsVerticalScrollIndicator={false}>  
+                    <Animated.ScrollView showsVerticalScrollIndicator={false}>
                         <EmptyScreen
                             mainText="You have no booking yet"
                             subText="Your booking will appear once you add a new booking."
@@ -86,24 +107,25 @@ export default function bookings({
                         renderItem={({ item }) => <BookingCard item={item} />}
                         keyExtractor={(item: any) => item.id.toString()}
                         showsVerticalScrollIndicator={false}
+                        refreshing={refreshing}
+                        onRefresh={fetchData}
                     />
                 )
             }
-
-    </SafeAreaView>
-  )
+        </SafeAreaView>
+    )
 }
 
 const styles = StyleSheet.create({
-    image:{
+    image: {
         width: "100%",
         height: 150,
         borderRadius: 8,
-        alignSelf:'center'
+        alignSelf: 'center'
     },
     line1: {
-        marginTop:15,
-        borderTopWidth:0.5,
+        marginTop: 15,
+        borderTopWidth: 0.5,
         borderTopColor: Colors.gray9
     },
 })

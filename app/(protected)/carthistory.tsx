@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { cartpurchase } from '@/hooks/AuthRoutes'
+import { cartpurchase, PUBLIC_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { useNavigation, useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
@@ -16,22 +16,22 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 export type Props = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  headerBackgroundColor:{ dark: string; light: string };
+  headerBackgroundColor: { dark: string; light: string };
 };
 export default function carthistory({
-    lightColor,
-    darkColor,
-    headerBackgroundColor,
-}: Props){
+  lightColor,
+  darkColor,
+  headerBackgroundColor,
+}: Props) {
 
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const router = useRouter()
   const navigation = useNavigation()
   const [cartitem, setCartItems] = useState<any>([])
-  const {user, token, logout} = useAuth()
+  const { user, token, logout } = useAuth()
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  
+
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
@@ -49,86 +49,97 @@ export default function carthistory({
           Alert.alert('Error', 'Unable to load categories.')
         }
         console.log(error.response)
-      }finally{
+      } finally {
         setIsLoading(false)
       }
     })
     return unsubscribe
   }, [])
 
-  if(isLoading){
-    return <LogoSpinner lightColor='' darkColor=''/>
+  if (isLoading) {
+    return <LogoSpinner lightColor='' darkColor='' />
   }
 
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-      <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}> 
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+      <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
         <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
       </GoBack>
-      <View style={{margin:6}}/> 
+      <View style={{ margin: 6 }} />
       <ThemedText type="titleMedium">Cart History</ThemedText>
-      <ThemedText style={{color: Colors.gray9}}>View your cart history</ThemedText>
+      <ThemedText style={{ color: Colors.gray9 }}>View your cart history</ThemedText>
 
-      <View style={{margin:6}}/> 
+      <View style={{ margin: 6 }} />
 
       {cartitem.length === 0 ? (
         <View style={styles.emptyContainer}>
-        <EmptyScreen
-          mainText="No history"
-          subText="Your cart items will appear here after purchase."
-          imageSource={require('@/assets/images/cart.png')} // your local image
-        />
+          <EmptyScreen
+            mainText="No history"
+            subText="Your cart items will appear here after purchase."
+            imageSource={require('@/assets/images/cart.png')} // your local image
+          />
         </View>
-        ) : (
+      ) : (
         <>
-        <FlatList
+          <FlatList
             keyExtractor={(item: any) => item.id.toString()}
             data={cartitem}
             showsVerticalScrollIndicator={false}
             numColumns={1}
             renderItem={({ item }) => (
-              <ThemedView style={[styles.shadow, {flexDirection:'row', padding:10, borderRadius:10, marginBottom:8, justifyContent:'space-between'}]}>
+              <ThemedView style={[styles.shadow, { flexDirection: 'row', padding: 10, borderRadius: 10, marginBottom: 8, justifyContent: 'space-between' }]}>
                 {/* Left Side: Image + Details */}
-                <View style={{flexDirection:'row', flex:1}}>
+                <View style={{ flexDirection: 'row', flex: 1 }}>
                   {
-                    !item.picture ? 
+                    !item.picture ?
                       <Image
                         style={styles.image}
                         source={require('@/assets/images/brokenimage.png')}
-                    />
-                    :
+                      />
+                      :
                       <Image
                         style={styles.image}
                         source={{
-                          uri: `https://phixotech.com/igoepp/public/products/${item.picture}`,
+                          uri: `${PUBLIC_API_BASE_URL}products/${item.picture}`,
                         }}
                       />
                   }
-                  <View style={{marginLeft:8, flexShrink:1}}>
-                  <ThemedText>{item.category_name}</ThemedText>
-                  <ThemedText type='small'>{item.product_name || 'Brand'}</ThemedText>
-                  <ThemedText>NGN {Number(item.sub_total_amount).toLocaleString()}</ThemedText>
-                  {item.delivery_status === 'D' ? 
-                      <ThemedText type="small" style={{color: Colors.green4}}>
+                  <View style={{ marginLeft: 8, flexShrink: 1 }}>
+                    <ThemedText>{item.category_name}</ThemedText>
+                    <ThemedText type='small'>{item.product_name || 'Brand'}</ThemedText>
+                    <ThemedText>NGN {Number(item.sub_total_amount).toLocaleString()}</ThemedText>
+                    {item.delivery_status === 'D' ?
+                      <ThemedText type="small" style={{ color: Colors.green4 }}>
                         Delivered
                       </ThemedText>
-                    :
-                      <ThemedText type="small">
-                        Cancelled
-                      </ThemedText>
-                  }  
-                    <View style={{margin:3}}/> 
+                      : item.delivery_status === 'P' ?
+                        <ThemedText type="small" style={{ color: 'orange' }}>
+                          Packaged
+                        </ThemedText>
+                        : item.delivery_status === 'R' ?
+                          <ThemedText type="small" style={{ color: Colors.yellow }}>
+                            Dispatched
+                          </ThemedText>
+                          : item.delivery_status === 'N' ?
+                            <ThemedText type="small">
+                              Undelivered
+                            </ThemedText>
+                            : <ThemedText type="small" style={{ color: Colors.red }}>
+                              Cancelled
+                            </ThemedText>
+                    }
+                    <View style={{ margin: 3 }} />
 
-                    <ThemedText  type="small">
+                    <ThemedText type="small">
                       {item.delivery_date}
                     </ThemedText>
 
-                    </View>
                   </View>
-            </ThemedView>
-          )}
-        />
+                </View>
+              </ThemedView>
+            )}
+          />
         </>
       )}
     </SafeAreaView>
@@ -142,10 +153,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     // borderWidth:1
   },
-  image:{
-    width:90,
-    height:120,
-    borderRadius:6
+  image: {
+    width: 90,
+    height: 120,
+    borderRadius: 6
   },
   shadow: {
     boxShadow: '0px 4px 6px rgba(0,0,0,0.35)',

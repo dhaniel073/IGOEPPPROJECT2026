@@ -10,7 +10,7 @@ import { ThemedView } from '@/components/ThemedView'
 import { validateEducation } from '@/components/validateEducation'
 import { Colors, decryptData, encryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { customerbillercommission, educationpay, validatepin } from '@/hooks/AuthRoutes'
+import { customerbillercommission, educationpay, validatepin, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialIcons } from '@expo/vector-icons'
 import axios from 'axios'
@@ -26,23 +26,23 @@ const { height } = Dimensions.get('window');
 export type Props = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  headerBackgroundColor:{ dark: string; light: string };
+  headerBackgroundColor: { dark: string; light: string };
 };
 
 
 export default function billspaymentEducation({
-    lightColor,
-    darkColor,
-    headerBackgroundColor,
-  }: Props){
+  lightColor,
+  darkColor,
+  headerBackgroundColor,
+}: Props) {
 
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const router = useRouter()
   const [isloading, setIsLoading] = useState(false)
   const slideAnim = React.useRef(new Animated.Value(height)).current;
-  const {user, token} = useAuth()
-  const {billid} = useLocalSearchParams()
+  const { user, token } = useAuth()
+  const { billid } = useLocalSearchParams()
   const [bouquets, setBouquets] = useState<any>([])
 
   const [visible, setVisible] = useState(false);
@@ -56,29 +56,29 @@ export default function billspaymentEducation({
 
   const [formData, setFormData] = useState({
     platform: "",
-    platformName:"",
+    platformName: "",
     bouquets: "",
     amount: "",
     commission: "",
     reference: "",
-    pin:"",
+    pin: "",
     imagepath: ""
   });
 
   const openPopup1 = () => {
     setModalVisible1(true);
     Animated.timing(slideAnim, {
-    toValue: 0, 
-    duration: 300,
-    useNativeDriver: true,
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
     }).start();
   };
-        
+
   const closePopup1 = () => {
     Animated.timing(slideAnim, {
-    toValue: height,
-    duration: 300,
-    useNativeDriver: true,
+      toValue: height,
+      duration: 300,
+      useNativeDriver: true,
     }).start(() => setModalVisible1(false));
   };
 
@@ -89,7 +89,7 @@ export default function billspaymentEducation({
       }
     }, [user?.transaction_pin_setup])
   );
-    
+
 
   useEffect(() => {
     const fetchBillers = async () => {
@@ -97,7 +97,7 @@ export default function billspaymentEducation({
         setIsLoading(true)
         const config = {
           method: 'get',
-          url: `https://phixotech.com/igoepp/public/api/auth/billpayment/getAllBillersByCategory/${billid}`,
+          url: `${YOUR_API_BASE_URL}auth/billpayment/getAllBillersByCategory/${billid}`,
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${decryptData(token)}`,
@@ -113,7 +113,7 @@ export default function billspaymentEducation({
         setEducationPlatform(countryArray);
       } catch (error) {
         console.error("Country fetch error:", error);
-      }finally{
+      } finally {
         setIsLoading(false)
       }
     };
@@ -124,7 +124,7 @@ export default function billspaymentEducation({
     console.log(value)
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/billpayment/getAllBouquetByBillerID/${billid}/${value}`,
+        `${YOUR_API_BASE_URL}auth/billpayment/getAllBouquetByBillerID/${billid}/${value}`,
         {
           headers: {
             Accept: 'application/json',
@@ -148,7 +148,7 @@ export default function billspaymentEducation({
       // console.error("Bousquest fetch error:", error.response);
     }
   };
-  
+
   const validatehandler = () => {
     const validationErrors = validateEducation(formData);
     setErrors(validationErrors);
@@ -173,7 +173,7 @@ export default function billspaymentEducation({
         text: "Proceed",
         onPress: () => openPopup1()
       }
-    ]);  
+    ]);
   }
 
   const pinvalidation = async (pin: any) => {
@@ -190,8 +190,8 @@ export default function billspaymentEducation({
 
       console.log(response);
 
-      closePopup1();        
-      makepayment();    
+      closePopup1();
+      makepayment();
 
     } catch (error: any) {
       Alert.alert("Error", error.response?.data?.message || "PIN validation failed");
@@ -248,29 +248,29 @@ export default function billspaymentEducation({
     }
   };
 
-  if(isloading || isPinLoading || isPaymentLoading){
-    return <LogoSpinner lightColor='' darkColor=''/>
+  if (isloading || isPinLoading || isPaymentLoading) {
+    return <LogoSpinner lightColor='' darkColor='' />
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-      <KeyboardAvoidingView 
-        style={{ flex: 1 }} 
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
       >
-        <Animated.ScrollView showsVerticalScrollIndicator={false}>  
-          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}> 
+        <Animated.ScrollView showsVerticalScrollIndicator={false}>
+          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
             <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
           </GoBack>
-          <View style={{margin:6}}/> 
+          <View style={{ margin: 6 }} />
           <ThemedText type="titleMedium">Education</ThemedText>
-          <ThemedText style={{color: Colors.gray9}}>Buy WAEC or JAMB card PIN</ThemedText>
-          <View style={{margin:10}}/> 
+          <ThemedText style={{ color: Colors.gray9 }}>Buy WAEC or JAMB card PIN</ThemedText>
+          <View style={{ margin: 10 }} />
 
           <ThemedText>Select Option</ThemedText>
-          <View style={{margin:2}}/>
-          <View style={{ flex: 1, margin:1 }}>
+          <View style={{ margin: 2 }} />
+          <View style={{ flex: 1, margin: 1 }}>
             <Dropdown
               style={styles.dropdown}
               placeholderStyle={{ color: Colors.gray9 }}
@@ -303,7 +303,7 @@ export default function billspaymentEducation({
                 <View style={{ flexDirection: "row", alignItems: "center", padding: 10 }}>
                   <Image
                     source={{ uri: item.flag }}  // your API flag field
-                    style={{ width: 24, height: 24, marginRight: 10, borderRadius:4 }}
+                    style={{ width: 24, height: 24, marginRight: 10, borderRadius: 4 }}
                     resizeMode="contain"
                   />
                   <Text style={{ color: "#000" }}>{item.label}</Text>
@@ -319,7 +319,7 @@ export default function billspaymentEducation({
                 return selected ? (
                   <Image
                     source={{ uri: selected.flag }}
-                    style={{ width: 20, height: 20, marginRight: 8, borderRadius:4 }}
+                    style={{ width: 20, height: 20, marginRight: 8, borderRadius: 4 }}
                     resizeMode="contain"
                   />
                 ) : null;
@@ -331,11 +331,11 @@ export default function billspaymentEducation({
               )}
             />
           </View>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
           <ThemedText>Select Scratch Card Pin</ThemedText>
-          <View style={{margin:2}}/>
-          <View style={{ flex: 1, margin:1 }}>
+          <View style={{ margin: 2 }} />
+          <View style={{ flex: 1, margin: 1 }}>
             <Dropdown
               style={styles.dropdown}
               placeholderStyle={{ color: Colors.gray9 }}
@@ -361,7 +361,7 @@ export default function billspaymentEducation({
             />
           </View>
 
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
           <ThemedText>Amount</ThemedText>
 
@@ -374,76 +374,84 @@ export default function billspaymentEducation({
             />
           </View>
 
-          <View style={{margin:15}}/>
-          
-          <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}} onPress={() => {validatehandler()}} disabled={isloading}>
-            <ThemedText style={{color:'#fff'}}>Continue</ThemedText>
+          <View style={{ margin: 15 }} />
+
+          <ThemedButton style={{ backgroundColor: Colors.green, padding: 15, borderRadius: 30, alignItems: 'center' }} onPress={() => { validatehandler() }} disabled={isloading}>
+            <ThemedText style={{ color: '#fff' }}>Continue</ThemedText>
           </ThemedButton>
 
           <Modal
             transparent
             visible={modalVisible1}
-            animationType="slide" 
+            animationType="slide"
             onRequestClose={closePopup1}
           >
-            <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
-  
-            <Animated.View
-              style={[
-                styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-              ]}
+            <KeyboardAvoidingView
+              style={{ flex: 1 }}
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
             >
-              <ThemedText type='titleMedium' style={{textAlign:'center'}}>Enter Pin</ThemedText>
-              <View style={{margin:8}}/> 
-  
-              <ThemedText style={{textAlign:'center', color: Colors.gray9}}>Enter Transaction PIN</ThemedText>
-              <View style={{margin:10}}/>
-              <View style={{margin:5}}/>
-              <PinInput length={4} secure={true} onSubmit={(pin) => {closePopup1(), pinvalidation(pin)}}/>
-              <View style={{margin:10}}/>
-            </Animated.View>
+              <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
+
+              <Animated.View
+                style={[
+                  styles.popup,
+                  { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                ]}
+              >
+                <ThemedText type='titleMedium' style={{ textAlign: 'center' }}>Enter Pin</ThemedText>
+                <View style={{ margin: 8 }} />
+
+                <ThemedText style={{ textAlign: 'center', color: Colors.gray9 }}>Enter Transaction PIN</ThemedText>
+                <View style={{ margin: 10 }} />
+                <View style={{ margin: 5 }} />
+
+
+                <PinInput length={4} secure={true} onSubmit={(pin) => { closePopup1(), pinvalidation(pin) }} />
+                <View style={{ margin: 10 }} />
+              </Animated.View>
+            </KeyboardAvoidingView>
           </Modal>
 
           <ReceiptView visible={visible} onClose={() => setVisible(false)} watermarkText="IGOEPP">
-            <ThemedView style={{backgroundColor: Colors.gray6, marginHorizontal:5, paddingHorizontal:10, paddingVertical:10, borderRadius:8}}>
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>From</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>Wallet</ThemedText>
+            <ThemedView style={{ backgroundColor: Colors.gray6, marginHorizontal: 5, paddingHorizontal: 10, paddingVertical: 10, borderRadius: 8 }}>
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>From</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>Wallet</ThemedText>
               </View>
-              <View style={{margin:2}}/>
-  
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Education Platform</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.platformName}</ThemedText>
+              <View style={{ margin: 2 }} />
+
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Education Platform</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.platformName}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
-  
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Amount</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{formData.amount}</ThemedText>
+              <View style={{ margin: 2 }} />
+
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Amount</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{formData.amount}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
-  
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}}>Reference</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} >{formData.reference}</ThemedText>
+              <View style={{ margin: 2 }} />
+
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }}>Reference</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} >{formData.reference}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
-  
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Date</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{dayjs().format("MMMM D, YYYY")}</ThemedText>
+              <View style={{ margin: 2 }} />
+
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Date</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{dayjs().format("MMMM D, YYYY")}</ThemedText>
               </View>
-              <View style={{margin:2}}/>
-  
-              <View style={{justifyContent:'space-between', flexDirection:'row'}}>
-                <ThemedText style={{color: '#000'}} type='small'>Time</ThemedText>
-                <ThemedText style={{color:Colors.wallet }} type='small'>{dayjs().format("h:mm A")}</ThemedText>
+              <View style={{ margin: 2 }} />
+
+              <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <ThemedText style={{ color: '#000' }} type='small'>Time</ThemedText>
+                <ThemedText style={{ color: Colors.wallet }} type='small'>{dayjs().format("h:mm A")}</ThemedText>
               </View>
             </ThemedView>
           </ReceiptView>
-  
+
           <StatusModal
             visible={modalVisible2}
             onClose={() => setModalVisible2(false)}
@@ -461,13 +469,13 @@ export default function billspaymentEducation({
 const styles = StyleSheet.create({
   popup: {
     position: 'absolute',
-    bottom:0,
+    bottom: 0,
     width: '100%',
     backgroundColor: '#fff',
     padding: 10,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
+    // boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
   },
   overlay: {
     flex: 1,

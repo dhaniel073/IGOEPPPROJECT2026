@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { validateComplaince } from '@/components/validateComplaince'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { customerinfocheck, customerupdateid, customeruploadAddressproof, customeruploadIdcard } from '@/hooks/AuthRoutes'
+import { customerinfocheck, customerupdateid, customeruploadAddressproof, customeruploadCAC, customeruploadIdcard, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Octicons } from '@expo/vector-icons'
 import axios from 'axios'
@@ -21,73 +21,93 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 const { height } = Dimensions.get('window');
 
 export type Props = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
-  headerBackgroundColor?: { dark: string; light: string };
+    lightColor?: string;
+    darkColor?: string;
+    headerBackgroundColor?: { dark: string; light: string };
 };
 
 export default function complaince({
-  lightColor,
-  darkColor,
-  headerBackgroundColor,
+    lightColor,
+    darkColor,
+    headerBackgroundColor,
 }: Props) {
-    
+
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text')
     const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background')
     const router = useRouter()
-    const {user, token, logout} = useAuth()
+    const { user, token, logout } = useAuth()
     const [isloading, setIsLoading] = useState(false)
     const [isIdCardModalVisble, setIdCardModalVisible] = useState(false)
+    const [isCACModalVisble, setCACModalVisible] = useState(false)
     const [isAddressModalVisble, setIsAddressModalVisible] = useState(false)
     const [isIdCardNumberModalVisble, setIdCardNumberModalVisible] = useState(false)
     const slideAnim = React.useRef(new Animated.Value(height)).current;
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible1, setModalVisible1] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
+    const [modalVisible3, setModalVisible3] = useState(false);
+
     const [ids, setids] = useState<any>([])
     const [errors, setErrors] = useState<Record<string, string>>({});
-     const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState({
         idnum: "",
         idtype: ""
-      });
+    });
 
     const [fetchedInfo, setFetchedInfo] = useState<any>([])
     const navigation = useNavigation()
 
-    const openPopup= () => {
+    const openPopup = () => {
         setModalVisible(true);
         Animated.timing(slideAnim, {
-        toValue: 0, // Slide to the screen
-        duration: 300,
-        useNativeDriver: true,
+            toValue: 0, // Slide to the screen
+            duration: 300,
+            useNativeDriver: true,
         }).start();
     };
-    
+
     const closePopup = () => {
         Animated.timing(slideAnim, {
-        toValue: height, // Slide back down
-        duration: 300,
-        useNativeDriver: true,
+            toValue: height, // Slide back down
+            duration: 300,
+            useNativeDriver: true,
         }).start(() => setModalVisible(false)); // Close after animation
     };
 
     const openPopup1 = () => {
         setModalVisible1(true);
         Animated.timing(slideAnim, {
-        toValue: 0, // Slide to the screen
-        duration: 300,
-        useNativeDriver: true,
+            toValue: 0, // Slide to the screen
+            duration: 300,
+            useNativeDriver: true,
         }).start();
     };
-    
+
     const closePopup1 = () => {
         Animated.timing(slideAnim, {
-        toValue: height, // Slide back down
-        duration: 300,
-        useNativeDriver: true,
+            toValue: height, // Slide back down
+            duration: 300,
+            useNativeDriver: true,
         }).start(() => setModalVisible1(false)); // Close after animation
     };
-    
+
+    const openPopup2 = () => {
+        setModalVisible3(true);
+        Animated.timing(slideAnim, {
+            toValue: 0, // Slide to the screen
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const closePopup2 = () => {
+        Animated.timing(slideAnim, {
+            toValue: height, // Slide back down
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => setModalVisible3(false)); // Close after animation
+    };
+
     const toggleAddressModal = () => {
         setIsAddressModalVisible(!isAddressModalVisble)
     }
@@ -100,32 +120,36 @@ export default function complaince({
         setIdCardModalVisible(!isIdCardModalVisble)
     }
 
+    const toggleCACModal = () => {
+        setCACModalVisible(!isCACModalVisble)
+    }
+
     useEffect(() => {
         const fetchBillers = async () => {
-        try {
-            setIsLoading(true)
-            const config = {
-                method: 'get',
-                url: `https://phixotech.com/igoepp/public/api/getid`,
-                headers: {
-                    Accept: 'application/json',
-                    Authorization: `Bearer ${decryptData(token)}`,
-                },
-            };
+            try {
+                setIsLoading(true)
+                const config = {
+                    method: 'get',
+                    url: `${YOUR_API_BASE_URL}getid`,
+                    headers: {
+                        Accept: 'application/json',
+                        Authorization: `Bearer ${decryptData(token)}`,
+                    },
+                };
                 const response = await axios(config);
                 console.log(response.data)
                 const data = response.data;
                 const countryArray = data.map((item: any) => ({
-                label: item.Identification_name,
-                value: item.identification_prefix,
-            
-            }));
-            setids(countryArray);
-        } catch (error: any) {
-            console.error("An error occured:", error.response);
-        }finally{
-            setIsLoading(false)
-        }
+                    label: item.Identification_name,
+                    value: item.identification_prefix,
+
+                }));
+                setids(countryArray);
+            } catch (error: any) {
+                console.error("An error occured:", error.response);
+            } finally {
+                setIsLoading(false)
+            }
         };
         fetchBillers();
     }, []);
@@ -173,12 +197,12 @@ export default function complaince({
             });
 
             if (result.canceled) {
-                toggleAddressModal();
+                closePopup();
                 return;
             }
 
             const image = result.assets[0];
-            toggleAddressModal();
+            closePopup();
             await uploadAddress(image.base64);
         } catch (error) {
             console.error('Camera error:', error);
@@ -186,7 +210,7 @@ export default function complaince({
         }
     };
 
-   
+
     const pickAddressImage = async () => {
         try {
             // ✅ Ask for media library permission properly
@@ -204,12 +228,12 @@ export default function complaince({
             });
 
             if (result.canceled) {
-                toggleAddressModal();
+                closePopup();
                 return;
             }
 
             const image = result.assets[0];
-            toggleAddressModal();
+            closePopup();
             await uploadAddress(image.base64);
         } catch (error) {
             console.error('Image picker error:', error);
@@ -227,19 +251,19 @@ export default function complaince({
             }
 
             const result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ['images'],
                 allowsEditing: true,
                 quality: 0.75,
                 base64: true,
             });
 
             if (result.canceled) {
-                toggleIdCardModal();
+                closePopup1();
                 return;
             }
 
             const image = result.assets[0];
-            toggleIdCardModal();
+            closePopup1();
             uploadIdCard(image.base64);
         } catch (error) {
             console.error('Camera error:', error);
@@ -247,7 +271,7 @@ export default function complaince({
         }
     };
 
-   
+
     const pickIdCardImage = async () => {
         try {
             // ✅ Ask for media library permission properly
@@ -258,19 +282,19 @@ export default function complaince({
             }
 
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ['images'],
                 allowsEditing: true,
                 quality: 0.75,
                 base64: true,
             });
 
             if (result.canceled) {
-                toggleIdCardModal();
+                closePopup1();
                 return;
             }
 
             const image = result.assets[0];
-            toggleIdCardModal();
+            closePopup1();
             uploadIdCard(image.base64);
         } catch (error) {
             console.error('Image picker error:', error);
@@ -278,15 +302,78 @@ export default function complaince({
         }
     };
 
+
+    const captureCACImage = async () => {
+        try {
+            // ✅ Ask for camera permission properly
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Camera access is required to take a picture.');
+                return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                quality: 0.75,
+                base64: true,
+            });
+
+            if (result.canceled) {
+                closePopup2();
+                return;
+            }
+
+            const image = result.assets[0];
+            closePopup2();
+            await uploadCAC(image.base64);
+        } catch (error) {
+            console.error('Camera error:', error);
+            Alert.alert('Error', 'Unable to open camera.');
+        }
+    };
+
+
+    const pickCACImage = async () => {
+        try {
+            // ✅ Ask for media library permission properly
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Photo library access is required to select an image.');
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                quality: 0.75,
+                base64: true,
+            });
+
+            if (result.canceled) {
+                closePopup2();
+                return;
+            }
+
+            const image = result.assets[0];
+            closePopup2();
+            await uploadCAC(image.base64);
+        } catch (error) {
+            console.error('Image picker error:', error);
+            Alert.alert('Error', 'Unable to select image.');
+        }
+    };
+
+
     const handleUpload = async ({
-            image,
-            uploadFn,
-            successMessage,
-        }: {
-            image: string;
-            uploadFn: (url: string) => Promise<any>;
-            successMessage: string;
-        }) => {
+        image,
+        uploadFn,
+        successMessage,
+    }: {
+        image: string;
+        uploadFn: (url: string) => Promise<any>;
+        successMessage: string;
+    }) => {
         const imageUrl = `data:image/jpeg;base64,${image}`;
 
         try {
@@ -296,7 +383,7 @@ export default function complaince({
             console.log("Upload response:", response);
 
             Alert.alert("Success", successMessage, [
-            { text: "Ok", onPress: reload },
+                { text: "Ok", onPress: reload },
             ]);
         } catch (error: any) {
             console.error("Upload failed:", error.response?.data || error.message);
@@ -311,15 +398,15 @@ export default function complaince({
         console.log(formData)
         const validationErrors = validateComplaince(formData);
         setErrors(validationErrors);
-    
+
         // Handle errors
         if (Object.keys(validationErrors).length > 0) {
-          console.log("Validation Errors:", validationErrors);
-    
-          const allErrors = Object.values(validationErrors).join("\n");
-          Alert.alert("❌ Validation Errors", allErrors);
-    
-          return; // stop
+            console.log("Validation Errors:", validationErrors);
+
+            const allErrors = Object.values(validationErrors).join("\n");
+            Alert.alert("❌ Validation Errors", allErrors);
+
+            return; // stop
         }
         // Proceed if no error
         return handlesubmit();
@@ -336,7 +423,7 @@ export default function complaince({
             ]);
         } catch (error) {
             Alert.alert("Error", "An error occurred. Please try again later.");
-        }finally{
+        } finally {
             setIsLoading(false)
         }
     }
@@ -347,7 +434,15 @@ export default function complaince({
             uploadFn: (url) => customeruploadAddressproof(url, user?.customer_id, decryptData(token)),
             successMessage: "Address Proof Uploaded Successfully",
         }
-    );
+        );
+
+    const uploadCAC = (image: any) =>
+        handleUpload({
+            image,
+            uploadFn: (url) => customeruploadCAC(url, user?.customer_id, decryptData(token)),
+            successMessage: "CAC document Uploaded Successfully",
+        }
+        );
 
     const uploadIdCard = (image: any) =>
         handleUpload({
@@ -355,10 +450,10 @@ export default function complaince({
             uploadFn: (url) => customeruploadIdcard(url, user?.customer_id, decryptData(token)),
             successMessage: "ID Card Uploaded Successfully",
         }
-    );
+        );
 
 
-    const reload = async() => {
+    const reload = async () => {
         try {
             setIsLoading(true)
             const response = await customerinfocheck(user?.customer_id, decryptData(token))
@@ -367,220 +462,285 @@ export default function complaince({
         } catch (error: any) {
             console.log(error.response)
             return;
-        }finally{
+        } finally {
             setIsLoading(false)
         }
     }
 
-    if(isloading){
-        return <LogoSpinner lightColor='' darkColor=''/>
+    if (isloading) {
+        return <LogoSpinner lightColor='' darkColor='' />
     }
 
 
-  return (
-    <SafeAreaView
-      style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }}
-      edges={['top']}
-    >
-        <Animated.ScrollView showsVerticalScrollIndicator={false}>
-            <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
-            <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
-            </GoBack>
+    return (
+        <SafeAreaView
+            style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }}
+            edges={['top', 'bottom']}
+        >
+            <Animated.ScrollView showsVerticalScrollIndicator={false}>
+                <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
+                    <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
+                </GoBack>
 
-            <View style={{ margin: 6 }} />
-            <ThemedText type="titleMedium">KYC Documents</ThemedText>
-            <ThemedText style={{ color: Colors.gray9 }}>Click to upload your kyc documents</ThemedText>
+                <View style={{ margin: 6 }} />
+                <ThemedText type="titleMedium">KYC Documents</ThemedText>
+                <ThemedText style={{ color: Colors.gray9 }}>Click to upload your kyc documents</ThemedText>
 
-            <View style={{ margin: 15 }} />
+                <View style={{ margin: 15 }} />
 
-            <TouchableOpacity onPress={() => fetchedInfo.identification_num ? null :setModalVisible2(prev => !prev)}  style={{padding:20, flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor: Colors.gray8, borderRadius:7}}>
-                <View>
-                    <ThemedText style={{color: '#000'}}>Identification number</ThemedText>
-                    <ThemedText style={{color:Colors.gray9}} type='small'>Click to upload file</ThemedText>
-                </View>
-                
                 {
-                    fetchedInfo.identification_num !== null ?
-                    <Image source={require("@/assets/images/Frame16.png")} style={{width:20, height:20}}/> 
-                    :
-                    <View style={{backgroundColor:'#fff', alignSelf:'flex-start', alignContent:'center', padding:10, borderRadius:6}}>
-                        <Octicons name="person-add" size={18} color={Colors.gray9} />
-                    </View>
+                    user?.account_type !== "B" ?
+                        <TouchableOpacity onPress={() => fetchedInfo.identification_num ? null : setModalVisible2(prev => !prev)} style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Colors.gray8, borderRadius: 7 }}>
+                            <View>
+                                <ThemedText style={{ color: '#000' }}>Identification number</ThemedText>
+                                <ThemedText style={{ color: Colors.gray9 }} type='small'>Click to upload file</ThemedText>
+                            </View>
+
+                            {
+                                fetchedInfo.identification_num !== null ?
+                                    <Image source={require("@/assets/images/Frame16.png")} style={{ width: 20, height: 20 }} />
+                                    :
+                                    <View style={{ backgroundColor: '#fff', alignSelf: 'flex-start', alignContent: 'center', padding: 10, borderRadius: 6 }}>
+                                        <Octicons name="person-add" size={18} color={Colors.gray9} />
+                                    </View>
+                            }
+
+                        </TouchableOpacity>
+                        : null
                 }
 
-            </TouchableOpacity>
-            
-            {
-                modalVisible2 &&
-
-                <>
-                    <View style={{ margin: 7 }} />
-
-                    <ThemedText>Select Plan</ThemedText>
-    
-                    <View style={{ flex: 1, margin:1 }}>
-                        <Dropdown
-                            style={styles.dropdown}
-                            placeholderStyle={{ color: Colors.gray9 }}
-                            selectedTextStyle={{ color: "#000" }}
-                            data={ids}
-                            labelField="label"
-                            valueField="value"
-                            placeholder="Please Select"
-                            maxHeight={300}
-                            value={formData.idtype}
-                            search
-                            searchPlaceholder="Search..."
-                            inputSearchStyle={{ color: Colors.gray9 }}
-            
-                            // When selecting a country
-                            onChange={(item) => {
-                                setFormData(prev => ({
-                                ...prev,
-                                idtype: item.value,
-                                }));
-                            }}
-                        />
-                    </View>
-    
-                    <ThemedText>NIN Number</ThemedText>
-                    <Input
-                        placeholder="Enter nin number"
-                        keyboardType="default"
-                        value={formData.idnum}
-                        maxLength={11}
-                        onUpdateValue={(text) => setFormData({...formData, idnum: text})}
-                    />
-                    <View style={{ margin: 2 }} />
-                    <ThemedButton style={{backgroundColor: Colors.green, padding: 10, borderRadius:30, alignItems:'center'}} onPress={() => {handleValidation()}}>
-                        <ThemedText style={{color:'#fff'}}>Continue</ThemedText>
-                    </ThemedButton>
-                </>
-            }
-
-            <View style={{margin:7}}/>
-
-            <TouchableOpacity onPress={() => [fetchedInfo.identification_path === null ? openPopup1() : null]}  style={{padding:20, flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor: Colors.gray8, borderRadius:7}}>
-                <View>
-                    <ThemedText style={{color:'#000'}}>Identification card</ThemedText>
-                    <ThemedText style={{color:Colors.gray9}} type='small'>Click to upload file</ThemedText>
-                </View>
-
                 {
-                    fetchedInfo.identification_path !== null && fetchedInfo.verify_identification_date === null  && fetchedInfo.verify_identification === "N" ?
-                        <ThemedText type='small' style={{color:Colors.green}}>Pending...</ThemedText>
+                    modalVisible2 &&
 
-                    :
-                    fetchedInfo.identification_path !== null && fetchedInfo.verify_identification_date !== null  && fetchedInfo.verify_identification === "Y" ?
-                        <Image source={require("@/assets/images/Frame16.png")} style={{width:20, height:20}}/> 
-                    :
-                    <View style={{backgroundColor:'#fff', alignSelf:'flex-start', alignContent:'center', padding:10, borderRadius:6}}>
-                        <Octicons name="person-add" size={18} color={Colors.gray9} />
-                    </View>
-                }
-            </TouchableOpacity>
+                    <>
+                        <View style={{ margin: 7 }} />
 
-            {
+                        <ThemedText>Select Plan</ThemedText>
 
-            }
+                        <View style={{ flex: 1, margin: 1 }}>
+                            <Dropdown
+                                style={styles.dropdown}
+                                placeholderStyle={{ color: Colors.gray9 }}
+                                selectedTextStyle={{ color: "#000" }}
+                                data={ids}
+                                labelField="label"
+                                valueField="value"
+                                placeholder="Please Select"
+                                maxHeight={300}
+                                value={formData.idtype}
+                                search
+                                searchPlaceholder="Search..."
+                                inputSearchStyle={{ color: Colors.gray9 }}
 
-            <View style={{margin:7}}/>
-
-            <TouchableOpacity onPress={() => [fetchedInfo.address_verification_path === null ? openPopup() : null]} style={{padding:20, flexDirection:'row', justifyContent:'space-between', alignItems:'center', backgroundColor: Colors.gray8, borderRadius:7}}>
-                <View>
-                    <ThemedText style={{color:'#000'}}>Proof of address</ThemedText>
-                    <ThemedText style={{color:Colors.gray9}} type='small'>Click to upload file</ThemedText>
-                </View>
-                {
-                    fetchedInfo.address_verification_path !== null && fetchedInfo.verify_address_date === null  && fetchedInfo.verify_address === "N" ?
-                        <ThemedText type='small' style={{color:Colors.green}}>Pending...</ThemedText>
-
-                    :
-                    fetchedInfo.address_verification_path !== null && fetchedInfo.verify_address_date !== null  && fetchedInfo.verify_address === "Y" ?
-                        <Image source={require("@/assets/images/Frame16.png")} style={{width:20, height:20}}/> 
-                    :
-                        <View style={{backgroundColor:'#fff', alignSelf:'flex-start', alignContent:'center', padding:10, borderRadius:6}}>
-                            <Octicons name="person-add" size={18} color={Colors.gray9} />
+                                // When selecting a country
+                                onChange={(item) => {
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        idtype: item.value,
+                                    }));
+                                }}
+                            />
                         </View>
+
+                        <ThemedText>NIN Number</ThemedText>
+                        <Input
+                            placeholder="Enter nin number"
+                            keyboardType="default"
+                            value={formData.idnum}
+                            maxLength={11}
+                            onUpdateValue={(text) => setFormData({ ...formData, idnum: text })}
+                        />
+                        <View style={{ margin: 2 }} />
+                        <ThemedButton style={{ backgroundColor: Colors.green, padding: 10, borderRadius: 30, alignItems: 'center' }} onPress={() => { handleValidation() }}>
+                            <ThemedText style={{ color: '#fff' }}>Continue</ThemedText>
+                        </ThemedButton>
+                    </>
                 }
-            </TouchableOpacity>
 
-            <Modal
-                transparent
-                visible={modalVisible}
-                animationType="slide" 
-                onRequestClose={closePopup}
-            >
-                <TouchableOpacity style={styles.overlay} onPress={closePopup}/>
-    
-                <Animated.View
-                    style={[
-                        styles.popup,
-                        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-                    ]}
-                >     
-                    <ThemedText style={{textAlign:'center'}}>Choose Image Source (Address)</ThemedText>
+                <View style={{ margin: 7 }} />
 
-                    <View style={{margin:10}}/>
-                    
-                    <View style={{flexDirection:'row', justifyContent:'space-evenly'}}>
-                        <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor: Colors.gray7, width:'40%', padding:30, borderRadius:5}} onPress={captureAddressImage}>
-                            <View style={{justifyContent:'center', alignItems:'center'}}>
-                                <Text style={[{marginLeft:15, marginRight:10}]}>📸 Camera</Text>
+                {
+                    user?.account_type !== "B" ?
+                        <TouchableOpacity onPress={() => [fetchedInfo.identification_path === null ? openPopup1() : null]} style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Colors.gray8, borderRadius: 7 }}>
+                            <View>
+                                <ThemedText style={{ color: '#000' }}>Identification card</ThemedText>
+                                <ThemedText style={{ color: Colors.gray9 }} type='small'>Click to upload file</ThemedText>
                             </View>
-                        </TouchableOpacity>
 
-                        <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor:Colors.gray7, width:'40%', borderRadius:5}} onPress={pickAddressImage}>
-                            <View style={{justifyContent:'center', alignItems:'center'}}>
-                                <Text style={[{marginLeft:15, marginRight:10}]}>🖼️ Libraries</Text>
-                            </View>
+                            {
+                                fetchedInfo.identification_path !== null && fetchedInfo.verify_identification_date === null && fetchedInfo.verify_identification === "N" ?
+                                    <ThemedText type='small' style={{ color: Colors.green }}>Pending...</ThemedText>
+
+                                    :
+                                    fetchedInfo.identification_path !== null && fetchedInfo.verify_identification_date !== null && fetchedInfo.verify_identification === "Y" ?
+                                        <Image source={require("@/assets/images/Frame16.png")} style={{ width: 20, height: 20 }} />
+                                        :
+                                        <View style={{ backgroundColor: '#fff', alignSelf: 'flex-start', alignContent: 'center', padding: 10, borderRadius: 6 }}>
+                                            <Octicons name="person-add" size={18} color={Colors.gray9} />
+                                        </View>
+                            }
                         </TouchableOpacity>
+                        : null
+                }
+
+                {
+                    user?.account_type === "B" ?
+                        <TouchableOpacity onPress={() => [fetchedInfo.cac_path === null ? openPopup2() : null]} style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Colors.gray8, borderRadius: 7 }}>
+                            <View>
+                                <ThemedText style={{ color: '#000' }}>CAC document</ThemedText>
+                                <ThemedText style={{ color: Colors.gray9 }} type='small'>Click to upload file</ThemedText>
+                            </View>
+
+                            {
+                                fetchedInfo.cac_path !== null && fetchedInfo.verify_cac_date === null && fetchedInfo.verify_cac === "N" ?
+                                    <ThemedText type='small' style={{ color: Colors.green }}>Pending...</ThemedText>
+
+                                    :
+                                    fetchedInfo.cac_path !== null && fetchedInfo.verify_cac_date !== null && fetchedInfo.verify_cac === "Y" ?
+                                        <Image source={require("@/assets/images/Frame16.png")} style={{ width: 20, height: 20 }} />
+                                        :
+                                        <View style={{ backgroundColor: '#fff', alignSelf: 'flex-start', alignContent: 'center', padding: 10, borderRadius: 6 }}>
+                                            <Octicons name="person-add" size={18} color={Colors.gray9} />
+                                        </View>
+                            }
+                        </TouchableOpacity>
+                        : null
+                }
+
+                <View style={{ margin: 7 }} />
+
+
+                <TouchableOpacity onPress={() => [fetchedInfo.address_verification_path === null ? openPopup() : null]} style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Colors.gray8, borderRadius: 7 }}>
+                    <View>
+                        <ThemedText style={{ color: '#000' }}>Proof of address</ThemedText>
+                        <ThemedText style={{ color: Colors.gray9 }} type='small'>Click to upload file</ThemedText>
                     </View>
-                    
-                    <View style={{margin:10}}/>
-                </Animated.View>
-            </Modal>
+                    {
+                        fetchedInfo.address_verification_path !== null && fetchedInfo.verify_address_date === null && fetchedInfo.verify_address === "N" ?
+                            <ThemedText type='small' style={{ color: Colors.green }}>Pending...</ThemedText>
 
-            <Modal
-                transparent
-                visible={modalVisible1}
-                animationType="slide" 
-                onRequestClose={closePopup1}
-            >
-                <TouchableOpacity style={styles.overlay} onPress={closePopup1}/>
-    
-                <Animated.View
-                    style={[
-                        styles.popup,
-                        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-                    ]}
-                >     
-                    <ThemedText style={{textAlign:'center'}}>Choose Image Source (ID Card)</ThemedText>
-                    
+                            :
+                            fetchedInfo.address_verification_path !== null && fetchedInfo.verify_address_date !== null && fetchedInfo.verify_address === "Y" ?
+                                <Image source={require("@/assets/images/Frame16.png")} style={{ width: 20, height: 20 }} />
+                                :
+                                <View style={{ backgroundColor: '#fff', alignSelf: 'flex-start', alignContent: 'center', padding: 10, borderRadius: 6 }}>
+                                    <Octicons name="person-add" size={18} color={Colors.gray9} />
+                                </View>
+                    }
+                </TouchableOpacity>
 
-                    <View style={{margin:10}}/>
-                    
-                    <View style={{flexDirection:'row', justifyContent:'space-evenly'}}>
-                        <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor: Colors.gray7, width:'40%', padding:30, borderRadius:5}} onPress={captureIdCardImage}>
-                            <View style={{justifyContent:'center', alignItems:'center'}}>
-                                <Text style={[{marginLeft:15, marginRight:10}]}>📸 Camera</Text>
-                            </View>
-                        </TouchableOpacity>
+                <Modal
+                    transparent
+                    visible={modalVisible}
+                    animationType="slide"
+                    onRequestClose={closePopup}
+                >
+                    <TouchableOpacity style={styles.overlay} onPress={closePopup} />
 
-                        <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor:Colors.gray7, width:'40%', borderRadius:5}} onPress={pickIdCardImage}>
-                            <View style={{justifyContent:'center', alignItems:'center'}}>
-                                <Text style={[{marginLeft:15, marginRight:10}]}>🖼️ Libraries</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                    
-                    <View style={{margin:10}}/>
-                </Animated.View>
-            </Modal>
+                    <Animated.View
+                        style={[
+                            styles.popup,
+                            { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '10%' },
+                        ]}
+                    >
+                        <ThemedText style={{ textAlign: 'center' }}>Choose Image Source (Address)</ThemedText>
 
-        </Animated.ScrollView>
-    </SafeAreaView>
-  )
+                        <View style={{ margin: 10 }} />
+
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.gray7, width: '40%', padding: 30, borderRadius: 5 }} onPress={captureAddressImage}>
+                                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                    <Text style={[{ marginLeft: 15, marginRight: 10 }]}>📸 Camera</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.gray7, width: '40%', borderRadius: 5 }} onPress={pickAddressImage}>
+                                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                    <Text style={[{ marginLeft: 15, marginRight: 10 }]}>🖼️ Libraries</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={{ margin: 10 }} />
+                    </Animated.View>
+                </Modal>
+
+                <Modal
+                    transparent
+                    visible={modalVisible1}
+                    animationType="slide"
+                    onRequestClose={closePopup1}
+                >
+                    <TouchableOpacity style={styles.overlay} onPress={closePopup1} />
+
+                    <Animated.View
+                        style={[
+                            styles.popup,
+                            { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '10%' },
+                        ]}
+                    >
+                        <ThemedText style={{ textAlign: 'center' }}>Choose Image Source (ID Card)</ThemedText>
+
+
+                        <View style={{ margin: 10 }} />
+
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.gray7, width: '40%', padding: 30, borderRadius: 5 }} onPress={captureIdCardImage}>
+                                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                    <Text style={[{ marginLeft: 15, marginRight: 10 }]}>📸 Camera</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.gray7, width: '40%', borderRadius: 5 }} onPress={pickIdCardImage}>
+                                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                    <Text style={[{ marginLeft: 15, marginRight: 10 }]}>🖼️ Libraries</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={{ margin: 10 }} />
+                    </Animated.View>
+                </Modal>
+
+                <Modal
+                    transparent
+                    visible={modalVisible3}
+                    animationType="slide"
+                    onRequestClose={closePopup2}
+                >
+                    <TouchableOpacity style={styles.overlay} onPress={closePopup2} />
+
+                    <Animated.View
+                        style={[
+                            styles.popup,
+                            { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '10%' },
+                        ]}
+                    >
+                        <ThemedText style={{ textAlign: 'center' }}>Choose Image Source (CAC)</ThemedText>
+
+                        <View style={{ margin: 10 }} />
+
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.gray7, width: '40%', padding: 30, borderRadius: 5 }} onPress={captureCACImage}>
+                                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                    <Text style={[{ marginLeft: 15, marginRight: 10 }]}>📸 Camera</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.gray7, width: '40%', borderRadius: 5 }} onPress={pickCACImage}>
+                                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                    <Text style={[{ marginLeft: 15, marginRight: 10 }]}>🖼️ Libraries</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={{ margin: 10 }} />
+                    </Animated.View>
+                </Modal>
+
+            </Animated.ScrollView>
+        </SafeAreaView>
+    )
 }
 
 const styles = StyleSheet.create({
@@ -610,5 +770,5 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         marginBottom: 10,
         backgroundColor: Colors.offwhite
-    },  
+    },
 })

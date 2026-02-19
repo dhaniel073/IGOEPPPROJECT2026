@@ -3,7 +3,7 @@ import LoadingScreen from '@/components/LoadingScreen'
 import { ThemedText } from '@/components/ThemedText'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { cartshow, category } from '@/hooks/AuthRoutes'
+import { cartshow, category, PUBLIC_API_BASE_URL, walletbal } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useNavigation, useRouter } from 'expo-router'
@@ -24,8 +24,8 @@ export default function Market() {
   const [fetchedCategory, setFetchedCategory] = useState<any>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const router = useRouter()
-  const {user, token, updateUserFields} = useAuth()
-  const {logout} = useAuth()
+  const { user, token, updateUserFields } = useAuth()
+  const { logout } = useAuth()
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
@@ -42,7 +42,7 @@ export default function Market() {
           Alert.alert('Error', 'Unable to load categories.')
         }
         console.log(error.response)
-      }finally{
+      } finally {
         setIsLoading(false)
       }
     })
@@ -54,10 +54,11 @@ export default function Market() {
       try {
         setIsLoading(true)
         const response = await cartshow(user?.customer_id, decryptData(token))
-        updateUserFields({cartcount: response.length})
+        const wallet = await walletbal(user?.customer_id, decryptData(token));
+        updateUserFields({ cartcount: response.length, wallet_balance: wallet.wallet_balance })
       } catch (error: any) {
         console.log(error.response)
-      }finally{
+      } finally {
         setIsLoading(false)
       }
     })
@@ -71,7 +72,7 @@ export default function Market() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: color1 }}
-      edges={['top']}
+      edges={['top', 'bottom']}
     >
       <FlatList
         keyExtractor={(item: any) => item.id.toString()}
@@ -82,7 +83,7 @@ export default function Market() {
         ListHeaderComponent={
           <>
             {/* Cart Button */}
-            <View style={{alignItems:'center', flexDirection:'row', justifyContent:'space-between'}}>
+            <View style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' }}>
 
               <TouchableOpacity
                 activeOpacity={0.7}
@@ -121,7 +122,7 @@ export default function Market() {
                 )}
               </TouchableOpacity>
             </View>
-            
+
             {/* Titles */}
             <ThemedText type="titleMedium">Market Place</ThemedText>
             <ThemedText style={styles.subtitle}>
@@ -143,10 +144,10 @@ export default function Market() {
           <TouchableOpacity
             style={styles.card}
             activeOpacity={0.5}
-            onPress={() => router.push({pathname:"/marketitems", params:{catname:item.cat_name, catid: item.id}})}
+            onPress={() => router.push({ pathname: "/marketitems", params: { catname: item.cat_name, catid: item.id } })}
           >
             <ImageBackground
-              source={{ uri: `https://igoeppms.com/igoepp/public/category/${item.image}` }}
+              source={{ uri: `${PUBLIC_API_BASE_URL}category/${item.image}` }}
               style={styles.imageBackground}
               imageStyle={styles.imageStyle}
             >
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop:10,
+    marginTop: 10,
   },
   subtitle: {
     color: Colors.gray9,
@@ -190,10 +191,10 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
     overflow: 'hidden',
-    alignItems:'center',
-    flex:1,
-    marginRight:5,
-    marginLeft:5
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 5,
+    marginLeft: 5
   },
   imageBackground: {
     width: "100%",

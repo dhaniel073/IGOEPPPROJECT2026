@@ -29,53 +29,53 @@ export default function LandingScreen({ lightColor, darkColor }: Props) {
   const fade8 = useRef(new Animated.Value(0)).current;
   const fade9 = useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
-        const fades = [
-            fade1, fade2, fade3, fade4, fade5, fade6, fade7, fade8
-        ];
+  useEffect(() => {
+    const fades = [
+      fade1, fade2, fade3, fade4, fade5, fade6, fade7, fade8
+    ];
 
-        const fadeIn = (fade: Animated.Value) =>
-            Animated.timing(fade, {
-            toValue: 1,
-            duration: 1500, // slower fade-in (was 800)
-            useNativeDriver: true,
-            });
+    const fadeIn = (fade: Animated.Value) =>
+      Animated.timing(fade, {
+        toValue: 1,
+        duration: 1500, // slower fade-in (was 800)
+        useNativeDriver: true,
+      });
 
-        const fadeOut = (fade: Animated.Value) =>
-            Animated.timing(fade, {
-            toValue: 0,
-            duration: 1500, // slower fade-out (was 800)
-            useNativeDriver: true,
-            });
+    const fadeOut = (fade: Animated.Value) =>
+      Animated.timing(fade, {
+        toValue: 0,
+        duration: 1500, // slower fade-out (was 800)
+        useNativeDriver: true,
+      });
 
-        // Step 1: Fade in one by one (1 → 9)
-        const fadeInSequence = Animated.sequence(
-            fades.flatMap((fade) => [fadeIn(fade), Animated.delay(700)]) // was 300
-        );
+    // Step 1: Fade in one by one (1 → 9)
+    const fadeInSequence = Animated.sequence(
+      fades.flatMap((fade) => [fadeIn(fade), Animated.delay(700)]) // was 300
+    );
 
-        // Step 2: Fade out in reverse (9 → 1)
-        const fadeOutSequence = Animated.sequence(
-            [...fades].reverse().flatMap((fade) => [fadeOut(fade), Animated.delay(700)])
-        );
+    // Step 2: Fade out in reverse (9 → 1)
+    const fadeOutSequence = Animated.sequence(
+      [...fades].reverse().flatMap((fade) => [fadeOut(fade), Animated.delay(700)])
+    );
 
-        // Step 3: Loop forever
-        const loopAnimation = Animated.loop(
-            Animated.sequence([
-            fadeInSequence,
-            Animated.delay(2000), // pause a bit when all are visible
-            fadeOutSequence,
-            Animated.delay(1000), // short pause before restarting
-            ])
-        );
+    // Step 3: Loop forever
+    const loopAnimation = Animated.loop(
+      Animated.sequence([
+        fadeInSequence,
+        Animated.delay(2000), // pause a bit when all are visible
+        fadeOutSequence,
+        Animated.delay(1000), // short pause before restarting
+      ])
+    );
 
-        loopAnimation.start();
+    loopAnimation.start();
 
-        return () => loopAnimation.stop();
-        }, []);
+    return () => loopAnimation.stop();
+  }, []);
 
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor }]} edges={["top"]}>
+    <SafeAreaView style={[styles.container, { backgroundColor }]} edges={["top", 'bottom']}>
       {/* Header Section */}
       <ThemedView style={styles.headerContainer}>
         <Image source={require("@/assets/images/loader.png")} style={styles.logo} />
@@ -85,46 +85,46 @@ export default function LandingScreen({ lightColor, darkColor }: Props) {
 
       {/* Chat Bubble Section */}
       {/* <Animated.View style={{  }}> */}
-        <ThemedView style={styles.bubblesContainer}>
-            {/* Left Bubbles */}
-            <ThemedView>
-            <Animated.View style={[styles.profileWrapper, { opacity: fade6 }]}>
-                <Image source={require("@/assets/images/artcraft.jpg")} style={styles.profileLarge} />
-            </Animated.View>
-            <Animated.View style={[styles.profileSmallWrapper, styles.profileOffset, { opacity: fade7 }]}>
-                <Image source={require("@/assets/images/child.jpg")} style={styles.profileSmall} />
-            </Animated.View>
-            </ThemedView>
-
-            <View style={styles.spacer} />
-            <Animated.View style={[styles.messageBox, styles.messageBrown, {opacity: fade8}]}>
-            <ThemedText type="small" style={styles.brownText}>
-                Available
-            </ThemedText>
-            <ThemedText type="small" style={styles.blackText}>
-                Yes I'm available! Will be there in 7 minutes.
-            </ThemedText>
-            </Animated.View>
+      <ThemedView style={styles.bubblesContainer}>
+        {/* Left Bubbles */}
+        <ThemedView>
+          <Animated.View style={[styles.profileWrapper, { opacity: fade6 }]}>
+            <Image source={require("@/assets/images/artcraft.jpg")} style={styles.profileLarge} />
+          </Animated.View>
+          <Animated.View style={[styles.profileSmallWrapper, styles.profileOffset, { opacity: fade7 }]}>
+            <Image source={require("@/assets/images/child.jpg")} style={styles.profileSmall} />
+          </Animated.View>
         </ThemedView>
+
+        <View style={styles.spacer} />
+        <Animated.View style={[styles.messageBox, styles.messageBrown, { opacity: fade8 }]}>
+          <ThemedText type="small" style={styles.brownText}>
+            Available
+          </ThemedText>
+          <ThemedText type="small" style={styles.blackText}>
+            Yes I'm available! Will be there in 7 minutes.
+          </ThemedText>
+        </Animated.View>
+      </ThemedView>
       {/* </Animated.View> */}
 
 
       {/* Right Bubble Section */}
       {/* <Animated.View style={{ opacity: fade3 }}> */}
-        <ThemedView style={[styles.bubblesContainer, { alignSelf: "flex-end" }]}>
-            <Animated.View style={[styles.messageBox, styles.messageGreen, {opacity: fade2}]}>
-                <ThemedText type="small" style={styles.greenText}>
-                    Available
-                </ThemedText>
-                <ThemedText type="small" style={styles.blackText}>
-                    Yes I'm available! Will be there in 7 minutes.
-                </ThemedText>
-            </Animated.View>
-            <View style={styles.smallSpacer} />
-            <Animated.View style={[styles.profileWrapper, {opacity: fade1}]}>
-            <Image source={require("@/assets/images/chef.jpg")} style={styles.profileLarge} />
-            </Animated.View>
-        </ThemedView>
+      <ThemedView style={[styles.bubblesContainer, { alignSelf: "flex-end" }]}>
+        <Animated.View style={[styles.messageBox, styles.messageGreen, { opacity: fade2 }]}>
+          <ThemedText type="small" style={styles.greenText}>
+            Available
+          </ThemedText>
+          <ThemedText type="small" style={styles.blackText}>
+            Yes I'm available! Will be there in 7 minutes.
+          </ThemedText>
+        </Animated.View>
+        <View style={styles.smallSpacer} />
+        <Animated.View style={[styles.profileWrapper, { opacity: fade1 }]}>
+          <Image source={require("@/assets/images/chef.jpg")} style={styles.profileLarge} />
+        </Animated.View>
+      </ThemedView>
       {/* </Animated.View> */}
 
       {/* Third Chat Section */}
@@ -138,7 +138,7 @@ export default function LandingScreen({ lightColor, darkColor }: Props) {
           </Animated.View>
         </ThemedView>
         <View style={styles.spacer} />
-        <Animated.View style={[styles.messageBox, styles.messageYellow, {opacity: fade5}]}>
+        <Animated.View style={[styles.messageBox, styles.messageYellow, { opacity: fade5 }]}>
           <ThemedText type="small" style={styles.yellowText}>
             Available
           </ThemedText>
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 30,
     height: 30,
-    marginRight:3,
+    marginRight: 3,
     resizeMode: "contain",
   },
   planeIcon: {

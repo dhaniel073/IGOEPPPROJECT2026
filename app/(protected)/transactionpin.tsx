@@ -66,9 +66,9 @@ export default function TransactionPin({
     return unsubscribe;
   }, []);
 
- 
+
   // Handlers
- 
+
   //new pin
   const handleSetNewPin = async (pin: string) => {
     try {
@@ -76,10 +76,10 @@ export default function TransactionPin({
       console.log("Setting new PIN:", pin);
       // await api.post('/set-pin', { pin });
       const response = await setuppin(user?.customer_id, encryptData(pin), decryptData(token))
-      Alert.alert("Success","PIN set successfully!", [
+      Alert.alert("Success", "PIN set successfully!", [
         {
           text: "ok",
-          onPress: () =>  router.back()
+          onPress: () => router.back()
         }
       ]);
       router.back();
@@ -128,16 +128,18 @@ export default function TransactionPin({
       console.log("Updating new PIN:", pin);
       await updatepin(user?.customer_id, encryptData(pin), decryptData(token))
       Alert.alert("Success", "PIN reset successfully!", [
-        {text: "ok",
-          onPress: () =>  router.back()
+        {
+          text: "ok",
+          onPress: () => router.back()
         }
       ]);
-     
+
     } catch (error: any) {
       console.error("Error updating PIN:", error.response.data.message);
       Alert.alert("Error", error.response.data.message || "PIN reset failed!", [
-        {text: "ok",
-          onPress: () =>  router.back()
+        {
+          text: "ok",
+          onPress: () => router.back()
         }
       ]);
     } finally {
@@ -199,13 +201,13 @@ export default function TransactionPin({
   };
 
   if (loading || !step) {
-    return <LogoSpinner lightColor='' darkColor=''/>
+    return <LogoSpinner lightColor='' darkColor='' />
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top']}>
-      <KeyboardAvoidingView 
-        style={{ flex: 1 }} 
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
       >

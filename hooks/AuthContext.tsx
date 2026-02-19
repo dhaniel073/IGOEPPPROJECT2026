@@ -1,8 +1,9 @@
 import LogoSpinner from "@/components/LoadingScreen";
 import { decryptData } from "@/constants/Colors";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { customerinfocheck } from "./AuthRoutes";
+
 
 type UserData = {
   id: any;
@@ -28,7 +29,9 @@ type UserData = {
   cartcount: any;
   notificationcount: any;
   pushtoken: any;
-  isBalanceHidden: any
+  status: any;
+  isBalanceHidden: any,
+  commission_balance: any,
 
   updated_at?: number; // ADDED: timestamp to avoid overwriting new data
 };
@@ -57,8 +60,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const restoreSession = async () => {
       try {
         setIsLoading(true);
-        const storedToken = await AsyncStorage.getItem("userToken");
-        const storedUser = await AsyncStorage.getItem("userData");
+        const storedToken = await SecureStore.getItemAsync("userToken");
+        const storedUser = await SecureStore.getItemAsync("userData");
 
         if (storedToken && storedUser) {
           setToken(storedToken);
@@ -74,6 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     restoreSession();
   }, []);
 
+
   // LOGIN
   const login = async (token: string, userData: UserData) => {
     try {
@@ -82,12 +86,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(stamped);
       setToken(token);
 
-      await AsyncStorage.setItem("userToken", token);
-      await AsyncStorage.setItem("userData", JSON.stringify(stamped));
+      await SecureStore.setItemAsync("userToken", token);
+      await SecureStore.setItemAsync("userData", JSON.stringify(stamped));
     } finally {
       setIsLoading(false);
     }
   };
+
 
   // LOGOUT
   const logout = async () => {
@@ -95,17 +100,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(true);
       setToken(null);
       setUser(null);
-      await AsyncStorage.multiRemove(["userToken", "userData"]);
+      await SecureStore.deleteItemAsync("userToken");
+      await SecureStore.deleteItemAsync("userData");
     } finally {
       setIsLoading(false);
     }
   };
 
+
   // UPDATE TOKEN
   const updateToken = async (newToken: string) => {
     setToken(newToken);
-    await AsyncStorage.setItem("userToken", newToken);
+    await SecureStore.setItemAsync("userToken", newToken);
   };
+
 
   // SAFELY UPDATE USER WITHOUT LOSING DATA
   const updateUser = async (newUserData: Partial<UserData>) => {
@@ -118,7 +126,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
     console.log("[AuthContext] updateUser REPLACE called — source:", newUserData/* add caller info if possible */);
     setUser(stamped);
-    await AsyncStorage.setItem("userData", JSON.stringify(stamped));
+    await SecureStore.setItemAsync("userData", JSON.stringify(stamped));
   };
 
   // UPDATE ONLY CERTAIN FIELDS
@@ -133,7 +141,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // inside updateUserFields
     console.log("[AuthContext] updateUserFields called, updates:", updates);
     setUser(merged);
-    await AsyncStorage.setItem("userData", JSON.stringify(merged));
+    await SecureStore.setItemAsync("userData", JSON.stringify(merged));
   };
 
   // REFRESH USER FROM SERVER SAFELY
@@ -160,7 +168,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       merged.updated_at = Date.now();
 
       setUser(merged);
-      await AsyncStorage.setItem("userData", JSON.stringify(merged));
+      await SecureStore.setItemAsync("userData", JSON.stringify(merged));
     } catch (error) {
       console.error("Failed to refresh user:", error);
     } finally {

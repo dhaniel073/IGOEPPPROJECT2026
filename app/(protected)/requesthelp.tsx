@@ -7,7 +7,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { validateRequest } from '@/components/validateRequest'
 import { Colors, decryptData, DIMENSION } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { requestinfo } from '@/hooks/AuthRoutes'
+import { requestinfo, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Entypo, EvilIcons, Feather, Ionicons, MaterialIcons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -20,40 +20,42 @@ import { Dropdown } from 'react-native-element-dropdown'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 
-  const data = [
-    {
-      id:"Y",
-      name: "Yes"
-    },
-    {
-      id:"N",
-      name: "No"
-    },
-  ]
-  const { height } = Dimensions.get('window');
+const data = [
+  {
+    id: "Y",
+    name: "Yes"
+  },
+  {
+    id: "N",
+    name: "No"
+  },
+]
+const { height } = Dimensions.get('window');
 
-  export type Props = TextProps & {
-    lightColor?: string;
-    darkColor?: string;
-    headerBackgroundColor:{ dark: string; light: string };
-  };
+export type Props = TextProps & {
+  lightColor?: string;
+  darkColor?: string;
+  headerBackgroundColor: { dark: string; light: string };
+};
 
-  export default function categoryScreen({
-    lightColor,
-    darkColor,
-    headerBackgroundColor,
-  }: Props) {
+export default function categoryScreen({
+  lightColor,
+  darkColor,
+  headerBackgroundColor,
+}: Props) {
 
-  
+
   const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const router = useRouter()
-  const {user, token, logout} = useAuth()
+  const { user, token, logout } = useAuth()
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible1, setModalVisible1] = useState(false);
-  const slideAnim = React.useRef(new Animated.Value(height)).current; 
-  const {request_type, catid, subcatid, preassessment_flg, name, helperid, enable_go_to_artisan} = useLocalSearchParams()
+  const slideAnim = React.useRef(new Animated.Value(height)).current;
+  const { request_type, catid, subcatid, preassessment_flg, name, helperid, enable_go_to_artisan } = useLocalSearchParams()
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDatePickerStart, setShowDatePickerStart] = useState(false);
+  const [showDatePickerEnd, setShowDatePickerEnd] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [countryData, setCountryData] = useState<any[]>([]);
   const [stateData, setStateData] = useState<any[]>([]);
@@ -81,39 +83,43 @@ import { SafeAreaView } from 'react-native-safe-area-context'
     helpdate: "",
     frequency: "",
     uploadUrl: "",
+    start_date: "",
+    end_date: "",
+    payment_frequency: "",
+    no_of_helper: ""
   });
 
   const openPopup = () => {
     setModalVisible(true);
     Animated.timing(slideAnim, {
-    toValue: 0, // Slide to the screen
-    duration: 300,
-    useNativeDriver: true,
+      toValue: 0, // Slide to the screen
+      duration: 300,
+      useNativeDriver: true,
     }).start();
   };
-    
+
   const closePopup = () => {
     Animated.timing(slideAnim, {
-    toValue: height, // Slide back down
-    duration: 300,
-    useNativeDriver: true,
+      toValue: height, // Slide back down
+      duration: 300,
+      useNativeDriver: true,
     }).start(() => setModalVisible(false)); // Close after animation
   };
 
   const openPopup1 = () => {
     setModalVisible1(true);
     Animated.timing(slideAnim, {
-    toValue: 0, // Slide to the screen
-    duration: 300,
-    useNativeDriver: true,
+      toValue: 0, // Slide to the screen
+      duration: 300,
+      useNativeDriver: true,
     }).start();
   };
-    
+
   const closePopup1 = () => {
     Animated.timing(slideAnim, {
-    toValue: height, // Slide back down
-    duration: 300,
-    useNativeDriver: true,
+      toValue: height, // Slide back down
+      duration: 300,
+      useNativeDriver: true,
     }).start(() => setModalVisible1(false)); // Close after animation
   };
 
@@ -127,6 +133,22 @@ import { SafeAreaView } from 'react-native-safe-area-context'
     if (selectedDate) {
       const formattedDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
       setFormData({ ...formData, helpdate: formattedDate });
+    }
+  };
+
+  const onChangeStartDate = (event: any, selectedDate?: Date) => {
+    setShowDatePickerStart(Platform.OS === "ios"); // keep open on iOS
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      setFormData({ ...formData, start_date: formattedDate });
+    }
+  };
+
+  const onChangeEndDate = (event: any, selectedDate?: Date) => {
+    setShowDatePickerEnd(Platform.OS === "ios"); // keep open on iOS
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      setFormData({ ...formData, end_date: formattedDate });
     }
   };
 
@@ -149,7 +171,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
       try {
         const config = {
           method: 'get',
-          url: "https://phixotech.com/igoepp/public/api/auth/general/country",
+          url: `${YOUR_API_BASE_URL}auth/general/country`,
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${decryptData(token)}`,
@@ -172,7 +194,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
   const handleState = async (countryCode: string) => {
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/general/state/${countryCode}`,
+        `${YOUR_API_BASE_URL}auth/general/state/${countryCode}`,
         {
           headers: {
             Accept: 'application/json',
@@ -195,7 +217,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
   const handleCity = async (stateCode: string) => {
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/general/lga/${stateCode}`,
+        `${YOUR_API_BASE_URL}auth/general/lga/${stateCode}`,
         {
           headers: {
             Accept: 'application/json',
@@ -216,7 +238,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
   };
 
 
-  const captureAddressImage = async () => {
+  const captureImage = async () => {
     try {
       // ✅ Ask for camera permission properly
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -239,40 +261,40 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
       const image = result.assets[0];
       closePopup1();
-      setFormData({ ...formData, uploadUrl: `data:image/jpeg;base64,${image.base64}`})
+      setFormData({ ...formData, uploadUrl: `data:image/jpeg;base64,${image.base64}` })
       setImage(image.uri)
     } catch (error) {
       console.error('Camera error:', error);
       Alert.alert('Error', 'Unable to open camera.');
     }
-    };
-  
-     
-  const pickAddressImage = async () => {
+  };
+
+
+  const pickImage = async () => {
     try {
       // ✅ Ask for media library permission properly
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Photo library access is required to select an image.');
-          return;
+        Alert.alert('Permission Denied', 'Photo library access is required to select an image.');
+        return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ['images'],
-          allowsEditing: true,
-          quality: 0.75,
-          base64: true,
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        quality: 0.75,
+        base64: true,
       });
 
       if (result.canceled) {
-          toggleModal();
-          return;
+        toggleModal();
+        return;
       }
 
       const image = result.assets[0];
       closePopup1();
       setImage(image.uri)
-      setFormData({ ...formData, uploadUrl: `data:image/jpeg;base64,${image.base64}`})
+      setFormData({ ...formData, uploadUrl: `data:image/jpeg;base64,${image.base64}` })
     } catch (error) {
       console.error('Image picker error:', error);
       Alert.alert('Error', 'Unable to select image.');
@@ -283,13 +305,13 @@ import { SafeAreaView } from 'react-native-safe-area-context'
     Alert.alert("Remove Image", "Do you want to delete selected Image", [
       {
         text: "No",
-        onPress: () => {}
+        onPress: () => { }
       },
       {
         text: "Yes",
         onPress: () => [
-          setImage(null), 
-          setFormData({ ...formData, uploadUrl: ""}),
+          setImage(null),
+          setFormData({ ...formData, uploadUrl: "" }),
         ]
       },
     ])
@@ -316,14 +338,14 @@ import { SafeAreaView } from 'react-native-safe-area-context'
     // proceed to API call, etc.
     return makerequest();
   };
-  
+
   const makerequest = async () => {
     console.log(formData)
     try {
       setisloading(true)
-      const response = await  requestinfo(user?.customer_id, formData.interest, formData.addressfield, formData.countryName, formData.stateName, formData.cityName, formData.landmark, 
-        formData.helpsize, formData.vehiclerequest, formData.description, catid, subcatid, formData.helptime, formData.helpdate, formData.frequency, preassessment_flg,
-        request_type, helperid, formData.uploadUrl, enable_go_to_artisan, decryptData(token)
+      const response = await requestinfo(user?.customer_id, formData.interest, formData.no_of_helper, formData.addressfield, formData.countryName, formData.stateName, formData.cityName, formData.landmark,
+        formData.helpsize, formData.vehiclerequest, formData.description, catid, subcatid, formData.helptime, formData.helpdate, formData.frequency, formData.start_date, formData.end_date,
+        formData.payment_frequency, preassessment_flg, request_type, helperid, formData.uploadUrl, enable_go_to_artisan, decryptData(token)
       )
       console.log(response)
       return openPopup()
@@ -331,60 +353,60 @@ import { SafeAreaView } from 'react-native-safe-area-context'
       alert("Booking failed. Please try again or contact support if the issue continues.")
       console.log(error.response)
       return;
-    }finally{
+    } finally {
       setisloading(false)
     }
     // return openPopup()
   }
 
-  if(isloading){
-    return <LogoSpinner lightColor='' darkColor=''/>
+  if (isloading) {
+    return <LogoSpinner lightColor='' darkColor='' />
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-      <KeyboardAvoidingView 
-        style={{ flex: 1 }} 
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
       >
-      <Animated.ScrollView showsVerticalScrollIndicator={false}>  
-        <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}> 
-          <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
-        </GoBack>
-        <View style={{margin:15}}/> 
-        
-        <ThemedText type="titleMedium">Make a Booking</ThemedText>
+        <Animated.ScrollView showsVerticalScrollIndicator={false}>
+          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
+            <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
+          </GoBack>
+          <View style={{ margin: 15 }} />
 
-      {
-        !enable_go_to_artisan || enable_go_to_artisan === 'N' ? "" :
-        <>
-        <ThemedText>Do you wish to go to the artisan's shop address:</ThemedText> 
-          <View style={{flexDirection:'row', padding:10, }}>
-            {data.map((item: any, key: any) => 
+          <ThemedText type="titleMedium">Make a Booking</ThemedText>
+
+          {
+            !enable_go_to_artisan || enable_go_to_artisan === 'N' ? "" :
               <>
-              <View style={{marginRight:10, flexDirection:'row'}}>
-                <TouchableOpacity style={[styles.outer, {marginRight:4} ]} onPress={() => setgotoArtisanLocation(item.id)}>
-                  {gotoArtisanLocation === item.id && <View style={styles.inner}/>} 
-                </TouchableOpacity>
-                <Text style={{marginTop:5}}> {item.name}</Text>
-              </View>
+                <ThemedText>Do you wish to go to the artisan's shop address:</ThemedText>
+                <View style={{ flexDirection: 'row', padding: 10, }}>
+                  {data.map((item: any, key: any) =>
+                    <>
+                      <View style={{ marginRight: 10, flexDirection: 'row' }}>
+                        <TouchableOpacity style={[styles.outer, { marginRight: 4, borderColor: color }]} onPress={() => setgotoArtisanLocation(item.id)}>
+                          {gotoArtisanLocation === item.id && <View style={styles.inner} />}
+                        </TouchableOpacity>
+                        <ThemedText style={{ marginTop: 5 }}> {item.name}</ThemedText>
+                      </View>
+                    </>
+                  )}
+                </View>
+                <View style={{ marginTop: 5 }} />
               </>
-            )}
-          </View>
-          <View style={{marginTop: 5}}/>
-        </>
-      }
-        <ThemedText>Date for service</ThemedText>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => setShowDatePicker(true)}>
-          <Input
-            placeholder="Please select"
-            value={formData.helpdate}
-            editable={false}
-            // isInvalid={!!errors.helpdate}
-            rightIcon={<MaterialIcons name="keyboard-arrow-down" size={18} color={Colors.gray9} />}
-          />
-        </TouchableOpacity>
+          }
+          <ThemedText>Date for service</ThemedText>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => setShowDatePicker(true)}>
+            <Input
+              placeholder="Please select"
+              value={formData.helpdate}
+              editable={false}
+              // isInvalid={!!errors.helpdate}
+              rightIcon={<MaterialIcons name="keyboard-arrow-down" size={18} color={Colors.gray9} />}
+            />
+          </TouchableOpacity>
 
           {showDatePicker && (
             <DateTimePicker
@@ -392,74 +414,74 @@ import { SafeAreaView } from 'react-native-safe-area-context'
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={onChangeDate}
-              maximumDate={new Date()} // user can't pick a future date
+              minimumDate={new Date()}
             />
           )}
 
           {showDatePicker && Platform.OS === "ios" && (
-          <View style={{ flexDirection: "row", justifyContent: 'space-around' }}>
-            <TouchableOpacity style={[{backgroundColor: "#11182711"}]}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <ThemedText style={[{fontFamily: 'poppinsRegular'}]}>Close</ThemedText>
-            </TouchableOpacity>
+            <View style={{ flexDirection: "row", justifyContent: 'space-around' }}>
+              <TouchableOpacity style={[{ backgroundColor: "#11182711" }]}
+                onPress={() => setShowDatePicker(true)}
+              >
+                <ThemedText style={[{ fontFamily: 'poppinsRegular' }]}>Close</ThemedText>
+              </TouchableOpacity>
 
 
-            {/* <TouchableOpacity style={{}}
+              {/* <TouchableOpacity style={{}}
               onPress={confirmIOSTime}
             >
               <ThemedText style={[{fontFamily: 'poppinsRegular'}]}>Confirm</ThemedText>
             </TouchableOpacity> */}
-          </View>
-        )}
+            </View>
+          )}
 
-        <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
-        <ThemedText>Time for service</ThemedText>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => setShowTimePicker(true)}>
+          <ThemedText>Time for service</ThemedText>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => setShowTimePicker(true)}>
+            <Input
+              placeholder="Please select"
+              value={formData.helptime}
+              editable={false}
+              // isInvalid={!!errors.helptime}
+              rightIcon={<MaterialIcons name="keyboard-arrow-down" size={18} color={Colors.gray9} />}
+            />
+          </TouchableOpacity>
+
+          {showTimePicker && (
+            <DateTimePicker
+              value={formData.helptime ? new Date(`1970-01-01T${formData.helptime}`) : new Date()}
+              mode="time"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={onChangeTime}
+            />
+          )}
+
+          {showTimePicker && Platform.OS === "ios" && (
+            <View style={{ flexDirection: "row", justifyContent: 'space-around' }}>
+              <TouchableOpacity style={{ backgroundColor: "#11182711" }} onPress={() => setShowTimePicker(false)}>
+                <ThemedText style={{ fontFamily: 'poppinsRegular' }}>Close</ThemedText>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <View style={{ margin: 5 }} />
+
+          <ThemedText>Address</ThemedText>
           <Input
-            placeholder="Please select"
-            value={formData.helptime}
-            editable={false}
-            // isInvalid={!!errors.helptime}
-            rightIcon={<MaterialIcons name="keyboard-arrow-down" size={18} color={Colors.gray9} />}
+            placeholder="Enter Address"
+            value={formData.addressfield}
+            onUpdateValue={(text) => setFormData({ ...formData, addressfield: text })}
+            keyboardType="default"
+            multiline
+            // isInvalid={!!errors.addressfield}
+            rightIcon={<Entypo name="address" size={20} color={Colors.gray9} />}
           />
-        </TouchableOpacity>
 
-        {showTimePicker && (
-          <DateTimePicker
-            value={formData.helptime ? new Date(`1970-01-01T${formData.helptime}`) : new Date()}
-            mode="time"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={onChangeTime}
-          />
-        )}
+          <View style={{ margin: 5 }} />
 
-        {showTimePicker && Platform.OS === "ios" && (
-          <View style={{ flexDirection: "row", justifyContent: 'space-around' }}>
-            <TouchableOpacity style={{ backgroundColor: "#11182711" }} onPress={() => setShowTimePicker(false)}>
-              <ThemedText style={{ fontFamily: 'poppinsRegular' }}>Close</ThemedText>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        <View style={{margin:5}}/>
-
-        <ThemedText>Address</ThemedText>
-        <Input
-          placeholder="Enter Address"
-          value={formData.addressfield}
-          onUpdateValue={(text) => setFormData({...formData, addressfield: text})}
-          keyboardType="default"
-          multiline
-          // isInvalid={!!errors.addressfield}
-          rightIcon={<Entypo name="address" size={20} color={Colors.gray9} />}
-        />
-
-        <View style={{margin:5}}/>
-        
           <ThemedText>Country</ThemedText>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
           <Dropdown
             style={[styles.dropdown]}
             placeholderStyle={styles.placeholderStyle}
@@ -484,12 +506,12 @@ import { SafeAreaView } from 'react-native-safe-area-context'
               <MaterialIcons name="keyboard-arrow-down" size={20} color={Colors.gray9} />
             )}
           />
-                    
-          
-          <View style={{margin:5}}/>
-          
+
+
+          <View style={{ margin: 5 }} />
+
           <ThemedText>State</ThemedText>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
           <Dropdown
             style={[styles.dropdown]}
             placeholderStyle={styles.placeholderStyle}
@@ -514,10 +536,10 @@ import { SafeAreaView } from 'react-native-safe-area-context'
             )}
           />
 
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
           <ThemedText>Local Government Area</ThemedText>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
           <Dropdown
             style={[styles.dropdown]}
             // placeholderStyle={{ color: Colors.gray9 }}
@@ -542,231 +564,320 @@ import { SafeAreaView } from 'react-native-safe-area-context'
             )}
           />
 
-        <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
-        <ThemedText>Size of help</ThemedText>
-          <View style={{margin:5}}/>
+          <ThemedText>Size of help</ThemedText>
+          <View style={{ margin: 5 }} />
           <CustomDropdown
             label=""
             data={[
-              {label: 'Small', value: 'Small'},
-              {label: 'Medium', value: 'Medium'},
-              {label: 'Large', value: 'Large'},
+              { label: 'Small', value: 'Small' },
+              { label: 'Medium', value: 'Medium' },
+              { label: 'Large', value: 'Large' },
             ]}
             value={formData.helpsize}
-            onChange={(value:any) => setFormData({ ...formData, helpsize: value })}
+            onChange={(value: any) => setFormData({ ...formData, helpsize: value })}
             error={""}
-          
+
           />
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
           <ThemedText>Landmark</ThemedText>
           <Input
             placeholder="Enter Landmark"
             value={formData.landmark}
-            onUpdateValue={(text) => setFormData({...formData, landmark: text})}
+            onUpdateValue={(text) => setFormData({ ...formData, landmark: text })}
             keyboardType="default"
             // isInvalid={!!errors.landmark}
             rightIcon={<Entypo name="address" size={20} color={Colors.gray9} />}
-          />      
-          
-          <View style={{margin:5}}/>
+          />
 
-          <ThemedText>Frequency</ThemedText>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
+
+          <ThemedText>Task Frequency</ThemedText>
+          <View style={{ margin: 5 }} />
 
           <CustomDropdown
             label=""
             data={[
-              {label: 'One-off', value: 'One-off'},
-              {label: 'Daily', value: 'Daily'},
-              {label: 'Weekly', value: 'Weekly'},
-              {label: 'Bi-Weekly', value: 'Bi-Weekly'},
-              {label: 'Monthly', value: 'Monthly'},
-              {label: 'Bi-Monthly', value: 'Bi-Monthly'},
-              {label: 'Quarterly', value: 'Quarterly'},
-              {label: 'Yearly', value: 'Yearly'}
+              { label: 'One-off', value: 'One-off' },
+              { label: 'Daily', value: 'Daily' },
+              { label: 'Weekly', value: 'Weekly' },
+              { label: 'Bi-Weekly', value: 'Bi-Weekly' },
+              { label: 'Monthly', value: 'Monthly' },
+              { label: 'Bi-Monthly', value: 'Bi-Monthly' },
+              { label: 'Quarterly', value: 'Quarterly' },
+              { label: 'Yearly', value: 'Yearly' }
             ]}
             value={formData.frequency}
-            onChange={(value:any) => setFormData({ ...formData, frequency: value })}
+            onChange={(value: any) => setFormData({ ...formData, frequency: value })}
             error={""}
-          
           />
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
+
+          {
+            formData.frequency && formData.frequency !== "One-off" ? (
+              <>
+                <ThemedText>Start Date</ThemedText>
+
+                <TouchableOpacity onPress={() => setShowDatePickerStart(true)}>
+                  <Input
+                    placeholder="Please select"
+                    value={formData.start_date}
+                    editable={false}
+                    rightIcon={<MaterialIcons name="keyboard-arrow-down" size={18} color={Colors.gray9} />}
+                  />
+                </TouchableOpacity>
+
+                {showDatePickerStart && (
+                  <DateTimePicker
+                    value={formData.start_date ? new Date(formData.start_date) : new Date()}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={onChangeStartDate}
+                    minimumDate={new Date()}
+                  />
+                )}
+
+                {showDatePickerStart && Platform.OS === "ios" && (
+                  <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+                    <TouchableOpacity onPress={() => setShowDatePickerStart(false)}>
+                      <ThemedText>Close</ThemedText>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                <View style={{ margin: 5 }} />
+
+                <ThemedText>End Date</ThemedText>
+
+                <TouchableOpacity onPress={() => setShowDatePickerEnd(true)}>
+                  <Input
+                    placeholder="Please select"
+                    value={formData.end_date}
+                    editable={false}
+                    rightIcon={<MaterialIcons name="keyboard-arrow-down" size={18} color={Colors.gray9} />}
+                  />
+                </TouchableOpacity>
+
+                {showDatePickerEnd && (
+                  <DateTimePicker
+                    value={formData.end_date ? new Date(formData.end_date) : new Date()}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={onChangeEndDate}
+                    minimumDate={new Date()}
+                  />
+                )}
+
+                {showDatePickerEnd && Platform.OS === "ios" && (
+                  <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+                    <TouchableOpacity onPress={() => setShowDatePickerEnd(false)}>
+                      <ThemedText>Close</ThemedText>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                <View style={{ margin: 5 }} />
+
+                <ThemedText>Payment Frequency</ThemedText>
+
+                <View style={{ margin: 5 }} />
+
+                <CustomDropdown
+                  label=""
+                  data={[
+                    { label: "Daily", value: "Daily" },
+                    { label: "Weekly", value: "Weekly" },
+                    { label: "Monthly", value: "Monthly" },
+                  ]}
+                  value={formData.payment_frequency}
+                  onChange={(value: any) => setFormData({ ...formData, payment_frequency: value })}
+                  error={""}
+                />
+              </>
+            ) : null
+          }
+
+          <ThemedText>No of helper</ThemedText>
+          <Input
+            placeholder="No of helper"
+            keyboardType="default"
+            onUpdateValue={(text) => setFormData({ ...formData, no_of_helper: text })}
+            value={formData.no_of_helper}
+            // isInvalid={!!errors.description}
+            rightIcon={<Entypo name="address" size={20} color={Colors.gray9} />}
+          />
+
+          <View style={{ margin: 5 }} />
 
           <ThemedText>Additional info</ThemedText>
           <Input
             placeholder="Help description"
             keyboardType="default"
-            onUpdateValue={(text) => setFormData({...formData, description: text})}
+            onUpdateValue={(text) => setFormData({ ...formData, description: text })}
             value={formData.description}
             multiline
             // isInvalid={!!errors.description}
             rightIcon={<Entypo name="address" size={20} color={Colors.gray9} />}
           />
 
-        <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
-        <ThemedText>Vehicle Req:</ThemedText>
-        <View style={{margin:5}}/>
+          <ThemedText>Vehicle Req:</ThemedText>
+          <View style={{ margin: 5 }} />
 
-        <CustomDropdown
-          label=""
-          data={[
-            {label: 'Yes', value: 'Yes'},
-            {label: 'No', value: 'No'},
-          ]}
-          value={formData.vehiclerequest}
-          onChange={(value:any) => setFormData({ ...formData, vehiclerequest: value })}
-          error={""}
-        />
-        
-        <View style={{margin:5}}/>
+          <CustomDropdown
+            label=""
+            data={[
+              { label: 'Yes', value: 'Yes' },
+              { label: 'No', value: 'No' },
+            ]}
+            value={formData.vehiclerequest}
+            onChange={(value: any) => setFormData({ ...formData, vehiclerequest: value })}
+            error={""}
+          />
 
-        <ThemedText>Request Period:</ThemedText>
-        <View style={{margin:5}}/>
-        <CustomDropdown
-          label=""
-          data={[
-            {label: 'Request for help now', value: 'Request for help now'},
-            {label: 'Request for help later', value: 'Request for help later'},
-          ]}
-          value={formData.interest}
-          onChange={(value:any) => setFormData({ ...formData, interest: value })}
-          error={""}
-        
-        />
-        <View style={{margin:10}}/>
+          <View style={{ margin: 5 }} />
 
-        <ThemedText>Samole Image:</ThemedText>
-        {
-          !image ?
-            <TouchableOpacity onPress={openPopup1} style={{backgroundColor: Colors.offwhite1, paddingHorizontal:18, paddingVertical:10, justifyContent:'space-between', flexDirection:'row', alignItems:'center', borderRadius:7}}>
+          <ThemedText>Request Period:</ThemedText>
+          <View style={{ margin: 5 }} />
+          <CustomDropdown
+            label=""
+            data={[
+              { label: 'Request for help now', value: 'Request for help now' },
+              { label: 'Request for help later', value: 'Request for help later' },
+            ]}
+            value={formData.interest}
+            onChange={(value: any) => setFormData({ ...formData, interest: value })}
+            error={""}
+
+          />
+          <View style={{ margin: 10 }} />
+
+          <ThemedText>Sample Image:</ThemedText>
+          {
+            !image ?
+              <TouchableOpacity onPress={openPopup1} style={{ backgroundColor: Colors.offwhite1, paddingHorizontal: 18, paddingVertical: 10, justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center', borderRadius: 7 }}>
                 <View>
-                  <ThemedText style={{color: "#000"}}>Upload Image</ThemedText>
-                  <ThemedText type='small' style={{color: Colors.gray9}}>Upload Image</ThemedText>
+                  <ThemedText style={{ color: "#000" }}>Upload Image</ThemedText>
+                  <ThemedText type='small' style={{ color: Colors.gray9 }}>Upload Image</ThemedText>
                 </View>
                 <EvilIcons name="image" size={24} color={Colors.gray9} />
-            </TouchableOpacity>
-          :
-            <ImageBackground
-              source={{uri:image}}
-              style={{ height: DIMENSION.HEIGHT * 0.5, width:DIMENSION.WIDTH *0.88, borderWidth: 1, borderRadius: 15, margin:1, gap:15}}
-              imageStyle={{ borderRadius: 15, }}
-              >
-              <TouchableOpacity onPress={() => deleteImage()} style={{backgroundColor: Colors.wallet, padding:10, borderRadius:10, position:'absolute'}}>
-                <Ionicons name='trash' color='#fff' size={24}/>
               </TouchableOpacity>
-            </ImageBackground>
+              :
+              <ImageBackground
+                source={{ uri: image }}
+                style={{ height: DIMENSION.HEIGHT * 0.5, width: DIMENSION.WIDTH * 0.88, borderWidth: 1, borderRadius: 15, margin: 1, gap: 15 }}
+                imageStyle={{ borderRadius: 15, }}
+              >
+                <TouchableOpacity onPress={() => deleteImage()} style={{ backgroundColor: Colors.wallet, padding: 10, borderRadius: 10, position: 'absolute' }}>
+                  <Ionicons name='trash' color='#fff' size={24} />
+                </TouchableOpacity>
+              </ImageBackground>
 
-        }
+          }
 
-        <View style={{margin:15}}/>
+          <View style={{ margin: 15 }} />
 
-        <ThemedButton style={{ padding: 15, borderRadius:30, alignItems:'center', backgroundColor: Colors.green}} onPress={() => handleRequest()}>
-          <ThemedText type='smallBold' style={{color:"#fff"}}>Proceed</ThemedText>
-        </ThemedButton>
-
-        <View style={{margin:15}}/>
-
-      </Animated.ScrollView>
-
-      <Modal
-        transparent
-        visible={modalVisible1}
-        animationType="slide" 
-        onRequestClose={closePopup1}
-      >
-        <TouchableOpacity style={styles.overlay} onPress={closePopup1}/>
-
-        <Animated.View
-          style={[
-            styles.popup1,
-            { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-          ]}
-        >     
-          <ThemedText style={{textAlign:'center'}}>Choose Image Source</ThemedText>
-
-          <View style={{margin:10}}/>
-          
-          <View style={{flexDirection:'row', justifyContent:'space-evenly'}}>
-            <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor: Colors.gray7, width:'40%', padding:30, borderRadius:5}} onPress={captureAddressImage}>
-              <View style={{justifyContent:'center', alignItems:'center'}}>
-                <Text style={[{marginLeft:15, marginRight:10}]}>📸 Camera</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={{alignItems:'center', justifyContent:'center', backgroundColor:Colors.gray7, width:'40%', borderRadius:5}} onPress={pickAddressImage}>
-              <View style={{justifyContent:'center', alignItems:'center'}}>
-                <Text style={[{marginLeft:15, marginRight:10}]}>🖼️ Libraries</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-          
-          <View style={{margin:10}}/>
-        </Animated.View>
-      </Modal>
-
-      <Modal
-        transparent
-        visible={modalVisible}
-        animationType="slide" 
-        onRequestClose={closePopup}
-      >
-        <TouchableOpacity style={styles.overlay} onPress={() => {}} />
-
-        <Animated.View
-          style={[
-            styles.popup,
-            { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-          ]}
-        >
-          <View style={{margin:15}}/>
-
-          <Feather name="check-circle" size={120} color={Colors.green} />
-
-          <View style={{margin:15}}/>
-
-          <ThemedText>Booking Sent</ThemedText>
-          <ThemedText>Congratulations, your booking</ThemedText>
-          <ThemedText>has been submitted.</ThemedText>
-
-          <View style={{margin:15}}/>
-          <ThemedText>A notification will be sent to you</ThemedText>
-          <ThemedText>shortly once an artisan make</ThemedText>
-          <ThemedText>a bid</ThemedText>
-
-          <View style={{margin:15}}/>
-
-          <ThemedButton onPress={() => [closePopup(),router.push("/")]}>
-              <ThemedText style={{color: Colors.green}}>Go to Home</ThemedText>
+          <ThemedButton style={{ padding: 15, borderRadius: 30, alignItems: 'center', backgroundColor: Colors.green }} onPress={() => handleRequest()}>
+            <ThemedText type='smallBold' style={{ color: "#fff" }}>Proceed</ThemedText>
           </ThemedButton>
 
-          <View style={{margin:15}}/>
+          <View style={{ margin: 15 }} />
 
-        </Animated.View>
-      </Modal>
-    </KeyboardAvoidingView>
-  </SafeAreaView>
+        </Animated.ScrollView>
+
+        <Modal
+          transparent
+          visible={modalVisible1}
+          animationType="slide"
+          onRequestClose={closePopup1}
+        >
+          <TouchableOpacity style={styles.overlay} onPress={closePopup1} />
+
+          <Animated.View
+            style={[
+              styles.popup1,
+              { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '10%' },
+            ]}
+          >
+            <ThemedText style={{ textAlign: 'center' }}>Choose Image Source</ThemedText>
+
+            <View style={{ margin: 10 }} />
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
+              <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.gray7, width: '40%', padding: 30, borderRadius: 5 }} onPress={captureImage}>
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={[{ marginLeft: 15, marginRight: 10 }]}>📸 Camera</Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.gray7, width: '40%', borderRadius: 5 }} onPress={pickImage}>
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={[{ marginLeft: 15, marginRight: 10 }]}>🖼️ Libraries</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </Modal>
+
+        <Modal
+          transparent
+          visible={modalVisible}
+          animationType="slide"
+        >
+          <TouchableOpacity style={styles.overlay} onPress={() => { }} />
+
+          <Animated.View
+            style={[
+              styles.popup,
+              { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '15%' },
+            ]}
+          >
+            <View style={{ margin: 15 }} />
+
+            <Feather name="check-circle" size={120} color={Colors.green} />
+
+            <View style={{ margin: 15 }} />
+
+            <ThemedText>Booking Sent</ThemedText>
+            <ThemedText>Congratulations, your booking</ThemedText>
+            <ThemedText>has been submitted.</ThemedText>
+
+            <View style={{ margin: 15 }} />
+            <ThemedText>A notification will be sent to you</ThemedText>
+            <ThemedText>shortly once an artisan make</ThemedText>
+            <ThemedText>a bid</ThemedText>
+
+            <View style={{ margin: 15 }} />
+
+            <ThemedButton onPress={() => [closePopup(), router.push("/")]}>
+              <ThemedText style={{ color: Colors.green }}>Go to Home</ThemedText>
+            </ThemedButton>
+          </Animated.View>
+        </Modal>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   )
 }
 
 
 
 const styles = StyleSheet.create({
-  outer:{
-    width:25,
+  outer: {
+    width: 25,
     height: 25,
     borderWidth: 1,
     borderRadius: 15,
-    justifyContent:'center',
+    justifyContent: 'center',
     alignItems: 'center'
   },
-  inner:{
-    width:15,
-    height:15,
+  inner: {
+    width: 15,
+    height: 15,
     backgroundColor: Colors.green,
-    borderRadius:10
+    borderRadius: 10
   },
   dropdown: {
     height: 60,
@@ -796,7 +907,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     boxShadow: '0px 4px 6px rgba(0,0,0,0.35)',
     // justifyContent:'center'
-    alignItems:'center'
+    alignItems: 'center'
   },
 
   popup1: {

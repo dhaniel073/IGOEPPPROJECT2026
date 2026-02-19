@@ -17,9 +17,9 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 
 export type Props = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
-  headerBackgroundColor:{ dark: string; light: string };
+    lightColor?: string;
+    darkColor?: string;
+    headerBackgroundColor: { dark: string; light: string };
 };
 
 
@@ -27,26 +27,26 @@ export default function virtualaccountrequest({
     lightColor,
     darkColor,
     headerBackgroundColor,
-}: Props){
+}: Props) {
 
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
     const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
     const router = useRouter()
     const [payload, setPayload] = useState<any>([])
-    const {bank, formattedamount, amount, bidid} = useLocalSearchParams<any>()
+    const { bank, formattedamount, amount, bidid } = useLocalSearchParams<any>()
     const [isloading, setIsloading] = useState<any>()
     const navigation = useNavigation()
-    const {user, token, logout} = useAuth()
+    const { user, token, logout } = useAuth()
 
-    const [visible,setIsVisible] = useState(false)
-    const [visible1,setIsVisible1] = useState(false)
+    const [visible, setIsVisible] = useState(false)
+    const [visible1, setIsVisible1] = useState(false)
 
     const copyToClipboard = async (number: any) => {
         await Clipboard.setStringAsync(number);
     };
 
     const handlePlay = () => {
-        
+
         setIsVisible(true)
         setTimeout(() => {
             setIsVisible(false);
@@ -55,8 +55,8 @@ export default function virtualaccountrequest({
 
     console.log(bank, formattedamount, amount, bidid);
     useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', async() => {
-            if(bank === 'OPTIMUS BANK'){
+        const unsubscribe = navigation.addListener('focus', async () => {
+            if (bank === 'OPTIMUS BANK') {
                 try {
                     setIsloading(true)
                     const response = await virtualaccount(encryptData(amount), user?.customer_id, decryptData(token))
@@ -64,20 +64,21 @@ export default function virtualaccountrequest({
                     console.log(response.data.provider_response)
                     setIsloading(false)
                 } catch (error: any) {
-                     
+
                     console.log(error.response)
                     Alert.alert('Failed', 'Account generation failed. Please try again later', [
-                    {
-                        text:'Ok',
-                        onPress: () => {}
-                    }
-                ])} finally {
+                        {
+                            text: 'Ok',
+                            onPress: () => { }
+                        }
+                    ])
+                } finally {
                     setIsloading(false);
                 }
-            }else{
+            } else {
                 try {
                     setIsloading(true)
-                    const response = await bidaccepttransfer(bidid, user?.customer_id, encryptData(amount),  decryptData(token))
+                    const response = await bidaccepttransfer(bidid, user?.customer_id, encryptData(amount), decryptData(token))
                     setPayload(response.data)
                     console.log(response.data)
                 } catch (error: any) {
@@ -90,14 +91,14 @@ export default function virtualaccountrequest({
                     }
                     console.log(error.response)
                     Alert.alert('Failed', 'Account generation failed. Try again later', [
-                       {
-                           text:'Ok',
-                           onPress: () => navigation.goBack()
-                       }
-                    ])    
+                        {
+                            text: 'Ok',
+                            onPress: () => navigation.goBack()
+                        }
+                    ])
                     console.log(error.response)
                     return;
-                }finally {
+                } finally {
                     setIsloading(false);
                 }
             }
@@ -106,107 +107,107 @@ export default function virtualaccountrequest({
     }, [navigation]);
 
     const validate = async () => {
-        if(bank === 'OPTIMUS BANK'){
+        if (bank === 'OPTIMUS BANK') {
             try {
                 setIsloading(true)
-                const response = await validatetransaction(encryptData(amount), payload.reference, user?.customer_id, user?.email, payload.account_number, decryptData(token)) 
-                console.log(response)    
+                const response = await validatetransaction(encryptData(amount), payload.reference, user?.customer_id, user?.email, payload.account_number, decryptData(token))
+                console.log(response)
                 setIsVisible(true)
             } catch (error: any) {
                 console.log(error.response.data.message)
                 Alert.alert('Failed', error.response.data.message)
-            }finally {
+            } finally {
                 setIsloading(false);
             }
-        }else{
+        } else {
             try {
                 setIsloading(true)
-                const response = await vfdvalidatetransaction(encryptData(amount), payload.reference, user?.customer_id, user?.email, payload.accountNumber, decryptData(token)) 
-                console.log(response)    
+                const response = await vfdvalidatetransaction(encryptData(amount), payload.reference, user?.customer_id, user?.email, payload.accountNumber, decryptData(token))
+                console.log(response)
                 setIsVisible1(true)
             } catch (error: any) {
                 console.log(error.response)
                 Alert.alert('Failed', error.response.data.message)
-            }finally {
+            } finally {
                 setIsloading(false);
             }
         }
     }
 
-    if(isloading){
-        return <LogoSpinner lightColor='' darkColor=''/>
+    if (isloading) {
+        return <LogoSpinner lightColor='' darkColor='' />
     }
 
-  return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-        <Animated.ScrollView showsVerticalScrollIndicator={false}>  
-            <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}> 
-            <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
-            </GoBack>
-            <View style={{margin:6}}/> 
-            
-            <ThemedText type="titleMedium">Request transfer payment</ThemedText>
-            <View style={{marginTop:20}}/>
+    return (
+        <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+            <Animated.ScrollView showsVerticalScrollIndicator={false}>
+                <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
+                    <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
+                </GoBack>
+                <View style={{ margin: 6 }} />
 
-            <SafeAreaView style={{marginHorizontal:5}}>
-            
-            <ThemedText style={{  fontFamily: 'poppinsRegular', color: color}}>Transfer To the account details below</ThemedText>
+                <ThemedText type="titleMedium">Request transfer payment</ThemedText>
+                <View style={{ marginTop: 20 }} />
+
+                <SafeAreaView style={{ marginHorizontal: 5 }}>
+
+                    <ThemedText style={{ fontFamily: 'poppinsRegular', color: color }}>Transfer To the account details below</ThemedText>
 
 
-            <View style={{flexDirection:'row', padding:10, justifyContent:'space-between', borderBottomWidth:0.5, borderBottomColor: Colors.gray7, paddingTop:30, paddingBottom:30}}>
-                <ThemedText>Amount</ThemedText>
-                <ThemedText><MaterialCommunityIcons name="currency-ngn" size={15} color={color}/>{Number(amount).toLocaleString()}</ThemedText>
-            </View>
+                    <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between', borderBottomWidth: 0.5, borderBottomColor: Colors.gray7, paddingTop: 30, paddingBottom: 30 }}>
+                        <ThemedText>Amount</ThemedText>
+                        <ThemedText><MaterialCommunityIcons name="currency-ngn" size={15} color={color} />{Number(amount).toLocaleString()}</ThemedText>
+                    </View>
 
-            <View style={{flexDirection:'row', padding:10, justifyContent:'space-between', borderBottomWidth:0.5, borderBottomColor: Colors.gray7,  paddingTop:30, paddingBottom:30}}>
-                <ThemedText>Bank</ThemedText>
-                <ThemedText>{bank}</ThemedText>
-            </View>
+                    <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between', borderBottomWidth: 0.5, borderBottomColor: Colors.gray7, paddingTop: 30, paddingBottom: 30 }}>
+                        <ThemedText>Bank</ThemedText>
+                        <ThemedText>{bank}</ThemedText>
+                    </View>
 
-            <View style={{flexDirection:'row',padding:10, justifyContent:'space-between', borderBottomWidth:0.5, borderBottomColor: Colors.gray7,  paddingTop:30, paddingBottom:30}}>
-                <View>
-                    <ThemedText>Account Number</ThemedText>
-                </View>
-                <View style={{flexDirection:'row', justifyContent:'space-evenly'}}>
-                    <ThemedText>{payload.accountNumber}</ThemedText>
-                    <TouchableOpacity style={{paddingLeft:8}} onPress={() => [handlePlay(), copyToClipboard(payload.accountNumber)]}>
-                        <Ionicons name="copy" size={15} color={color} />
-                    </TouchableOpacity>
-                </View>
-            </View>
+                    <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between', borderBottomWidth: 0.5, borderBottomColor: Colors.gray7, paddingTop: 30, paddingBottom: 30 }}>
+                        <View>
+                            <ThemedText>Account Number</ThemedText>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                            <ThemedText>{payload.accountNumber}</ThemedText>
+                            <TouchableOpacity style={{ paddingLeft: 8 }} onPress={() => [handlePlay(), copyToClipboard(payload.accountNumber)]}>
+                                <Ionicons name="copy" size={15} color={color} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
 
-            <View style={{flexDirection:'row', padding:10, justifyContent:'space-between', borderBottomWidth:0.5, borderBottomColor: Colors.gray7,  paddingTop:30, paddingBottom:30}}>
-                <ThemedText>Account Name</ThemedText>
-                <ThemedText>IGOEPP</ThemedText>
-            </View>
+                    <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between', borderBottomWidth: 0.5, borderBottomColor: Colors.gray7, paddingTop: 30, paddingBottom: 30 }}>
+                        <ThemedText>Account Name</ThemedText>
+                        <ThemedText>IGOEPP</ThemedText>
+                    </View>
+                </SafeAreaView>
+
+
+                <View style={{ marginBottom: 10 }} />
+                <ThemedText type='small' style={{ textAlign: 'center', color: Colors.red }}>Note: *The receiving account is only valid once, please do not repeat the transaction after first attempt*</ThemedText>
+                {
+                    visible ?
+                        <ThemedView style={{ justifyContent: 'center', alignSelf: 'center', marginTop: 30, marginBottom: 10, padding: 10, borderRadius: 8, backgroundColor: color }}>
+                            <ThemedText style={{ textAlign: 'center', color: color1 }}>Copied!</ThemedText>
+                        </ThemedView>
+                        :
+                        null
+                }
+
+                <View style={{ marginBottom: 5 }} />
+                <ThemedButton style={{ backgroundColor: Colors.green, padding: 15, borderRadius: 30, alignItems: 'center' }} onPress={() => { validate() }}>
+                    <ThemedText style={{ color: '#fff' }}>Confirm transaction</ThemedText>
+                </ThemedButton>
+
+                <FullScreenModal
+                    visible={visible1}
+                    onClose={() => [setIsVisible1(false), router.push('/(protected)/(tabs)/bookings')]}
+                    mainText="Transaction Successful!"
+                    subText={`Payment of ₦${Number(amount).toLocaleString()} has been received successfully`}
+                />
+            </Animated.ScrollView>
         </SafeAreaView>
-
-
-        <View style={{marginBottom:10}}/>
-        <ThemedText type='small' style={{textAlign:'center', color: Colors.red}}>Note: *The receiving account is only valid once, please do not repeat the transaction after first attempt*</ThemedText>
-        {
-            visible ? 
-            <ThemedView style={{justifyContent:'center', alignSelf:'center',  marginTop: 30, marginBottom:10, padding:10, borderRadius:8, backgroundColor:color}}>
-                <ThemedText style={{textAlign:'center', color: color1}}>Copied!</ThemedText>
-            </ThemedView>
-            :
-            null
-        }
-
-        <View style={{marginBottom:5}}/>
-        <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}} onPress={() => {validate()}}>
-            <ThemedText style={{color:'#fff'}}>Confirm transaction</ThemedText>
-        </ThemedButton>
-
-        <FullScreenModal
-            visible={visible1}
-            onClose={() => [setIsVisible1(false), router.push('/(protected)/(tabs)/bookings')]}
-            mainText="Transaction Successful!"
-            subText={`Payment of ₦${Number(amount).toLocaleString()} has been received successfully`}
-        />
-        </Animated.ScrollView>
-    </SafeAreaView>
-  )
+    )
 }
 
 const styles = StyleSheet.create({})

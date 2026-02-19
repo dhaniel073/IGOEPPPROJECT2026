@@ -60,12 +60,12 @@ export default function ResetPassword({
     }
   };
 
-  if(isLoading){
-    return <LogoSpinner lightColor='' darkColor=''/>
+  if (isLoading) {
+    return <LogoSpinner lightColor='' darkColor='' />
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: color1 }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: color1 }]} edges={['top', 'bottom']}>
       <Animated.ScrollView showsVerticalScrollIndicator={false}>
         <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
           <ThemedText style={styles.backText}>Back</ThemedText>

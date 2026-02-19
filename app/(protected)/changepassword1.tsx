@@ -16,29 +16,29 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 export type Props = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  headerBackgroundColor:{ dark: string; light: string };
+  headerBackgroundColor: { dark: string; light: string };
 };
 
 
 export default function changepassword1({
-    lightColor,
-    darkColor,
-    headerBackgroundColor,
-  }: Props){
+  lightColor,
+  darkColor,
+  headerBackgroundColor,
+}: Props) {
 
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const router = useRouter()
   const [pin, setPin] = useState<any>()
   const [isloading, setisLoading] = useState(false)
-  const {user, token} = useAuth()
+  const { user, token } = useAuth()
 
   const submitHandler = async () => {
     const emailIsValid = pin.length !== 4
 
-    const onlyNumbers = /^[0-9]*$/; 
+    const onlyNumbers = /^[0-9]*$/;
     if (onlyNumbers.test(pin) && !emailIsValid) {
-      console.log(pin); 
+      console.log(pin);
       try {
         setisLoading(true)
         const response = await validatecustomerpasswordchangetoken(user?.customer_id, encryptData(pin), decryptData(token))
@@ -46,9 +46,9 @@ export default function changepassword1({
         router.push('/changepassword2')
       } catch (error: any) {
         console.log(error.response)
-        Alert.alert("Error", `${error.response.data.message}`)  
+        Alert.alert("Error", `${error.response.data.message}`)
         setisLoading(false)
-      }finally{
+      } finally {
         setisLoading(false)
       }
     } else {
@@ -61,29 +61,29 @@ export default function changepassword1({
       setisLoading(true)
       const response = await resettoken(user?.customer_id, decryptData(token))
     } catch (error: any) {
-      Alert.alert("Error", `${error.response.data.message}`)  
-    }finally{
+      Alert.alert("Error", `${error.response.data.message}`)
+    } finally {
       setisLoading(false)
     }
   }
 
-  if(isloading){
-    return <LogoSpinner lightColor='' darkColor=''/>
+  if (isloading) {
+    return <LogoSpinner lightColor='' darkColor='' />
   }
 
-  return(
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-      <Animated.ScrollView showsVerticalScrollIndicator={false}>  
-        <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}> 
+  return (
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+      <Animated.ScrollView showsVerticalScrollIndicator={false}>
+        <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
           <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
         </GoBack>
 
-        <View style={{margin:15}}/> 
+        <View style={{ margin: 15 }} />
         <ThemedText type="titleMedium">Change Password</ThemedText>
-        <ThemedText style={{color: Colors.gray9}}>Reset you password here</ThemedText>
+        <ThemedText style={{ color: Colors.gray9 }}>Reset you password here</ThemedText>
 
-        
-        <View style={{margin:6}}/> 
+
+        <View style={{ margin: 6 }} />
 
         <ThemedText>Enter code</ThemedText>
         <Input
@@ -94,12 +94,12 @@ export default function changepassword1({
           maxLength={4}
           keyboardType={'number-pad'}
         />
-        <View style={{margin:15}}/>
+        <View style={{ margin: 15 }} />
 
-        <ThemedText onPress={sendcode} style={{textDecorationLine:'underline', textAlign:'center'}}>Resend Code?</ThemedText>
-        <View style={{margin:5}}/>
-        <ThemedButton style={{ padding: 15, borderRadius:30, alignItems:'center', backgroundColor: Colors.green}} onPress={submitHandler}>
-          <ThemedText type='smallBold' style={{color:"#fff"}}>Proceed</ThemedText>
+        <ThemedText onPress={sendcode} style={{ textDecorationLine: 'underline', textAlign: 'center' }}>Resend Code?</ThemedText>
+        <View style={{ margin: 5 }} />
+        <ThemedButton style={{ padding: 15, borderRadius: 30, alignItems: 'center', backgroundColor: Colors.green }} onPress={submitHandler}>
+          <ThemedText type='smallBold' style={{ color: "#fff" }}>Proceed</ThemedText>
         </ThemedButton>
       </Animated.ScrollView>
     </SafeAreaView>

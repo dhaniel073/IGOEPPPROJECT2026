@@ -1,3 +1,4 @@
+import { PUBLIC_API_BASE_URL } from '@/hooks/AuthRoutes';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -5,10 +6,10 @@ import ImageViewer from "react-native-image-zoom-viewer";
 
 const profilepictureview = () => {
   const router = useRouter()
-  const {imageUrl} = useLocalSearchParams<any>()
+  const { imageUrl } = useLocalSearchParams<any>()
   return (
-     <View style={{ flex: 1, backgroundColor: "#000" }}>
-  
+    <View style={{ flex: 1, backgroundColor: "#000" }}>
+
       {/* Back Button */}
       <TouchableOpacity
         onPress={() => router.back()}
@@ -24,15 +25,15 @@ const profilepictureview = () => {
       </TouchableOpacity>
 
       {/* Zoomable Image */}
-    
+
       <ImageViewer
-        imageUrls={[{ url: `https://phixotech.com/igoepp/public/customers/${imageUrl}` }]}
+        imageUrls={[{ url: `${PUBLIC_API_BASE_URL}customers/${imageUrl}` }]}
         enableSwipeDown={false}
         saveToLocalByLongPress={false}
         backgroundColor="#000"
       />
 
-      
+
     </View>
   )
 }

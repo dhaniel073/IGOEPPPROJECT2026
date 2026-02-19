@@ -4,7 +4,9 @@
  */
 
 import CryptoJS from "crypto-js";
+import Constants from 'expo-constants';
 import { Dimensions, Platform, StatusBar } from "react-native";
+import 'react-native-get-random-values';
 
 const tintColorLight = '#4F772D';
 const tintColorDark = '#fff';
@@ -14,54 +16,90 @@ export const marginStyle = {
 };
 
 export const DIMENSION = {
-    HEIGHT : Dimensions.get('window').height,
-    WIDTH : Dimensions.get('window').width
+  HEIGHT: Dimensions.get('window').height,
+  WIDTH: Dimensions.get('window').width
 }
 
-const key = CryptoJS.enc.Utf8.parse('12345678901234567890123456789012'); // 32 chars
-const iv = CryptoJS.enc.Utf8.parse('1234567890123456'); // 16 chars
 
-export const encryptData = (text: any) => {
-  const encrypted = CryptoJS.AES.encrypt(text, key, {
-    iv: iv,
+const base64Key = Constants.expoConfig?.extra?.aesBase64Key;
+
+if (typeof base64Key !== 'string' || !base64Key.length) {
+  throw new Error('Missing expo.extra.aesBase64Key (base64 AES key) in app config');
+}
+
+const keyBytes = CryptoJS.enc.Base64.parse(base64Key);
+
+function generateIv() {
+  if (!global.crypto || typeof global.crypto.getRandomValues !== 'function') {
+    throw new Error('crypto.getRandomValues is not available; ensure react-native-get-random-values is imported at app entry.');
+  }
+
+  const bytes = new Uint8Array(16);
+  global.crypto.getRandomValues(bytes);
+  return CryptoJS.lib.WordArray.create(Array.from(bytes), bytes.length);
+}
+
+export const encryptData = (text: any): string => {
+  const iv = generateIv();
+
+  const encrypted = CryptoJS.AES.encrypt(text, keyBytes, {
+    iv,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
   });
 
-  return encrypted.toString(); // Base64 string
+  const combined = iv.clone().concat(encrypted.ciphertext);
+  return CryptoJS.enc.Base64.stringify(combined);
 };
 
-export const decryptData = (text: any) => {
-  const decrypted = CryptoJS.AES.decrypt(text, key, {
-    iv: iv,
+export const decryptData = (payload: any): string => {
+  const raw = CryptoJS.enc.Base64.parse(payload);
+  const iv = CryptoJS.lib.WordArray.create(raw.words.slice(0, 4), 16);
+  const ct = CryptoJS.lib.WordArray.create(raw.words.slice(4), raw.sigBytes - 16);
+
+  const decrypted = CryptoJS.AES.decrypt({ ciphertext: ct } as any, keyBytes, {
+    iv,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
   });
 
-  // Return as UTF-8 string
   return decrypted.toString(CryptoJS.enc.Utf8);
 };
 
-
 export const encryptAmount = (text: any) => {
-  const encrypted = CryptoJS.AES.encrypt(String(text), key, {
-    iv: iv,
+  const iv = CryptoJS.lib.WordArray.random(16); // random IV each time
+  const encrypted = CryptoJS.AES.encrypt(text, keyBytes, {
+    iv,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
   });
-  return encrypted.toString();
+  const combined = iv.clone().concat(encrypted.ciphertext);
+  return CryptoJS.enc.Base64.stringify(combined);
 };
 
-export const decryptamount = (text: any) => {
-  const decrypted = CryptoJS.AES.decrypt(text, key, {
-    iv: iv,
+// Decrypt Base64(iv + ciphertext) -> number (0 if invalid)
+export const decryptamount = (payload: any): number => {
+  if (!payload) return 0;
+  if (typeof payload === 'number') return payload; // Return as-is if already a number
+  if (typeof payload !== 'string') return 0; // consistent fallback
+
+
+  const raw = CryptoJS.enc.Base64.parse(payload); // WordArray
+  // First 16 bytes (4 * 4 bytes) as IV
+  const iv = CryptoJS.lib.WordArray.create(raw.words.slice(0, 4), 16);
+  // Remaining bytes as ciphertext
+  const ct = CryptoJS.lib.WordArray.create(raw.words.slice(4), raw.sigBytes - 16);
+
+  const decrypted = CryptoJS.AES.decrypt({ ciphertext: ct } as any, keyBytes, {
+    iv,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
   });
+
   const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
   const amount = Number(decryptedString);
-  if (isNaN(amount)) return 0; // handle invalid decryptions gracefully
-  return amount;
+
+  return Number.isNaN(amount) ? 0 : amount;
 };
 
 export const convertToReadableDateTime = (dateStr: string, timeStr: string): string => {
@@ -126,6 +164,8 @@ export const removeLastChar = (text: any) => {
 
 
 
+
+
 export const Colors = {
   yellow: "#FFCC00B2",
   yellow1: "#FFCC00",
@@ -138,7 +178,7 @@ export const Colors = {
   gray9: "#8C8A93",
   gray10: "#D6D6D6",
   gray11: "#EDEEF2",
-  gray8:"#E1E6EF",
+  gray8: "#E1E6EF",
   wallet: "#90A955",
   custicon: "#FD6922B2",
   helmet: "#FFF1B7",
@@ -149,7 +189,7 @@ export const Colors = {
   clock: "#cedfd6",
   clock1: "#d5e7de",
   gold: '#FF9A3E',
-  marker:'#FF7043',
+  marker: '#FF7043',
   green: "#4F772D",
   green1: "#94BC06",
   green2: "#198754",
@@ -164,7 +204,7 @@ export const Colors = {
   green11: '#5b8135',
   clock2: "#eaf4f0",
   clock3: "#aec594",
-  offwhite:"#eef0e6",
+  offwhite: "#eef0e6",
   offwhite1: "#EFEFEF",
   offwhite2: "#E7E7E7",
   offwhite3: "#FAFAFA",
@@ -176,11 +216,11 @@ export const Colors = {
   lightgray: "#F6F7F9",
   red: "#ED2F46",
   red2: "#FDE8EA",
-  brown:"#865300",
-  brown1:"#FFECC6",
+  brown: "#865300",
+  brown1: "#FFECC6",
   lemon: "#808500",
-  lemon1:"#fffee8",
-  primary4:'#27C153',
+  lemon1: "#fffee8",
+  primary4: '#27C153',
   primary5: '#e2f2e9',
   invoicebrg: "#D1E7DD75",
 

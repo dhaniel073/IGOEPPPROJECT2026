@@ -1,10 +1,6 @@
 import { useThemeColor } from "@/hooks/useThemeColor";
 import React, { useEffect, useRef } from "react";
-import { Animated, Dimensions, Easing, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-
-const { width, height } = Dimensions.get("window");
+import { Animated, Easing, StyleSheet, View } from "react-native";
 
 export type CustomButtonProps = {
   lightColor: string;
@@ -13,13 +9,16 @@ export type CustomButtonProps = {
 
 const LogoSpinner: React.FC<CustomButtonProps> = ({ lightColor, darkColor }) => {
   const spinValue = useRef(new Animated.Value(0)).current;
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, "background");
+  const themeBg = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "background"
+  );
 
   useEffect(() => {
     const spinAnimation = Animated.loop(
       Animated.timing(spinValue, {
         toValue: 1,
-        duration: 1700, // 1.2 seconds per rotation
+        duration: 1700,
         easing: Easing.linear,
         useNativeDriver: true,
       })
@@ -27,31 +26,43 @@ const LogoSpinner: React.FC<CustomButtonProps> = ({ lightColor, darkColor }) => 
     spinAnimation.start();
 
     return () => spinAnimation.stop();
-  }, [spinValue]);
+  }, []);
 
-  // Map value 0-1 to 0deg-360deg
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "360deg"],
   });
 
   return (
-    <SafeAreaView style={[styles.container, { borderWidth: 1, borderColor: color, backgroundColor: color, }]}>
+    <View
+      style={[
+        styles.overlay,
+        {
+          backgroundColor: themeBg || "rgba(0,0,0,0.6)", // fallback background
+        },
+      ]}
+    >
       <Animated.Image
-        source={require("@/assets/images/loader.png")} // put your image here
+        source={require("@/assets/images/loader.png")}
         style={[styles.image, { transform: [{ rotate: spin }] }]}
       />
-    </SafeAreaView>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: "center",
     alignItems: "center",
+    width: "100%",
+    height: "100%",
+    zIndex: 999,
   },
-
   image: {
     width: 100,
     height: 100,

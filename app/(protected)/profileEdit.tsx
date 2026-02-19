@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { customerinfocheck, profileupdate } from '@/hooks/AuthRoutes'
+import { customerinfocheck, profileupdate, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialIcons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -23,14 +23,14 @@ const { height } = Dimensions.get('window');
 export type Props = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  headerBackgroundColor:{ dark: string; light: string };
+  headerBackgroundColor: { dark: string; light: string };
 };
 
 export default function profileEdit({
   lightColor,
   darkColor,
   headerBackgroundColor,
-}: Props){
+}: Props) {
 
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
@@ -38,7 +38,7 @@ export default function profileEdit({
   const [isloading, setIsLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = React.useRef(new Animated.Value(height)).current;
-  const {user, token, updateUser, logout} = useAuth()
+  const { user, token, updateUser, logout } = useAuth()
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
   const [countryData, setCountryData] = useState<any[]>([]);
@@ -48,7 +48,7 @@ export default function profileEdit({
   const [country, setCountry] = useState<any[]>([]);
   const [state, setState] = useState<any[]>([]);
   const [city, setCity] = useState<any[]>([]);
-  
+
   const [formData, setFormData] = useState({
     dob: "",
     gender: "",
@@ -67,7 +67,7 @@ export default function profileEdit({
       useNativeDriver: true,
     }).start();
   };
-      
+
   const closePopup = () => {
     Animated.timing(slideAnim, {
       toValue: height,
@@ -94,7 +94,7 @@ export default function profileEdit({
     } catch (error: any) {
       console.error("Error fetching pending requests:", error.response);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
   // ✅ Fetch current user data
@@ -120,11 +120,11 @@ export default function profileEdit({
         }
       } catch (err: any) {
         if (err.response?.status === 401) {
-            Alert.alert("Session expired", "Please log in again.");
-            await logout(); // from your AuthContext
-            router.replace("/login"); // navigate to login screen
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
         } else {
-            Alert.alert('Error', 'Unable to load notification settings.')
+          Alert.alert('Error', 'Unable to load notification settings.')
         }
         console.error('Error fetching user profile:', err);
         Alert.alert('Error', 'Unable to fetch profile data.');
@@ -186,7 +186,7 @@ export default function profileEdit({
       try {
         const config = {
           method: 'get',
-          url: "https://phixotech.com/igoepp/public/api/auth/general/country",
+          url: `${YOUR_API_BASE_URL}auth/general/country`,
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${decryptData(token)}`,
@@ -209,7 +209,7 @@ export default function profileEdit({
   const handleState = async (countryCode: string) => {
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/general/state/${countryCode}`,
+        `${YOUR_API_BASE_URL}auth/general/state/${countryCode}`,
         {
           headers: {
             Accept: 'application/json',
@@ -232,7 +232,7 @@ export default function profileEdit({
   const handleCity = async (stateCode: string) => {
     try {
       const response = await axios.get(
-        `https://phixotech.com/igoepp/public/api/auth/general/lga/${stateCode}`,
+        `${YOUR_API_BASE_URL}auth/general/lga/${stateCode}`,
         {
           headers: {
             Accept: 'application/json',
@@ -258,7 +258,7 @@ export default function profileEdit({
   }
 
 
-    const updateProfile = async () => {
+  const updateProfile = async () => {
     // Validate required fields
     if (
       !formData.dob ||
@@ -310,7 +310,7 @@ export default function profileEdit({
 
       openPopup()
       // Alert.alert('Success', 'Your profile has been updated successfully!');
-        
+
     } catch (err: any) {
       console.error('Profile update error:', err.response || err);
       Alert.alert('Error', 'Something went wrong while updating your profile.');
@@ -320,29 +320,29 @@ export default function profileEdit({
   };
 
 
-  if(isloading){
-    return <LogoSpinner  lightColor='' darkColor=''/>
+  if (isloading) {
+    return <LogoSpinner lightColor='' darkColor='' />
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-      <KeyboardAvoidingView 
-        style={{ flex: 1 }} 
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
-        <Animated.ScrollView showsVerticalScrollIndicator={false}>  
-          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}> 
+        <Animated.ScrollView showsVerticalScrollIndicator={false}>
+          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
             <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
           </GoBack>
-          <View style={{margin:6}}/> 
+          <View style={{ margin: 6 }} />
           <ThemedText type="titleMedium">Edit Profile</ThemedText>
-          <ThemedText style={{color: Colors.gray9}}>Edit your profile details here</ThemedText>
-          
-          <View style={{margin:10}}/> 
+          <ThemedText style={{ color: Colors.gray9 }}>Edit your profile details here</ThemedText>
+
+          <View style={{ margin: 10 }} />
 
           <ThemedText>Date Of Birth</ThemedText>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
           <TouchableOpacity activeOpacity={0.8} onPress={() => setShowDatePicker(true)}>
             <Input
               placeholder="Please select"
@@ -361,11 +361,11 @@ export default function profileEdit({
               maximumDate={new Date()} // user can't pick a future date
             />
           )}
-                    
-          <View style={{margin:5}}/>
+
+          <View style={{ margin: 5 }} />
 
           <ThemedText>Sex</ThemedText>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
           <Dropdown
             style={
               styles.dropdown
@@ -392,10 +392,10 @@ export default function profileEdit({
             )}
           />
 
-          <View style={{margin:5}}/>
-          
+          <View style={{ margin: 5 }} />
+
           <ThemedText>Country</ThemedText>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
           <Dropdown
             style={styles.dropdown}
             placeholderStyle={{ color: Colors.gray9 }}
@@ -420,12 +420,12 @@ export default function profileEdit({
               <MaterialIcons name="keyboard-arrow-down" size={20} color={Colors.gray9} />
             )}
           />
-                    
-          
-          <View style={{margin:5}}/>
-          
+
+
+          <View style={{ margin: 5 }} />
+
           <ThemedText>State</ThemedText>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
           <Dropdown
             style={styles.dropdown}
             placeholderStyle={{ color: Colors.gray9 }}
@@ -451,10 +451,10 @@ export default function profileEdit({
           />
 
 
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
 
           <ThemedText>Local Government Area</ThemedText>
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
           <Dropdown
             style={styles.dropdown}
             placeholderStyle={{ color: Colors.gray9 }}
@@ -477,13 +477,13 @@ export default function profileEdit({
             )}
           />
 
-          <View style={{margin:5}}/>
+          <View style={{ margin: 5 }} />
           <ThemedText>Phone</ThemedText>
-          
-          <View style={{ flexDirection: "row", alignItems: "center"}}>
+
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             {/* Country Code Box */}
             <ThemedView
-                style={{
+              style={{
                 paddingHorizontal: 12,
                 paddingVertical: 14,
                 borderRadius: 8,
@@ -492,69 +492,67 @@ export default function profileEdit({
                 borderWidth: 1,
                 borderColor: Colors.gray9,
                 marginRight: 10, // space between code box and input
-                }}
+              }}
             >
-                <Image
-                  source={require("@/assets/images/flag.png")}
-                  style={{ width: 20, height: 15, resizeMode: "contain" }}
-                />
-                <ThemedText style={{ marginLeft: 6, fontSize: 16 }}>+234</ThemedText>
+              <Image
+                source={require("@/assets/images/flag.png")}
+                style={{ width: 20, height: 15, resizeMode: "contain" }}
+              />
+              <ThemedText style={{ marginLeft: 6, fontSize: 16 }}>+234</ThemedText>
             </ThemedView>
-              <View style={{ flex: 1 }}>
-                <Input
-                  placeholder="Enter Phone"
-                  value={formData.phone}
-                  onUpdateValue={(text) => setFormData({...formData, phone: text})}
-                  keyboardType="number-pad"
-                  />
-              </View>
+            <View style={{ flex: 1 }}>
+              <Input
+                placeholder="Enter Phone"
+                value={formData.phone}
+                onUpdateValue={(text) => setFormData({ ...formData, phone: text })}
+                keyboardType="number-pad"
+              />
             </View>
-            
+          </View>
 
-          <View style={{margin:5}}/>
+
+          <View style={{ margin: 5 }} />
 
           <ThemedText>Address</ThemedText>
           <Input
             placeholder="Enter Address"
             value={formData.address}
-            onUpdateValue={(text) => setFormData({...formData, address: text})}
+            onUpdateValue={(text) => setFormData({ ...formData, address: text })}
             keyboardType="default"
             multiline
           />
 
-          <View style={{margin:15}}/>
+          <View style={{ margin: 15 }} />
 
-          <ThemedButton style={{ padding: 15, borderRadius:30, alignItems:'center', backgroundColor: Colors.green}} onPress={updateProfile}>
-            <ThemedText type='smallBold' style={{color:"#fff"}}>{isloading ? "Updating..." : "Proceed"}</ThemedText>
+          <ThemedButton style={{ padding: 15, borderRadius: 30, alignItems: 'center', backgroundColor: Colors.green }} onPress={updateProfile}>
+            <ThemedText type='smallBold' style={{ color: "#fff" }}>{isloading ? "Updating..." : "Proceed"}</ThemedText>
           </ThemedButton>
 
-          <View style={{margin:15}}/>
+          <View style={{ margin: 15 }} />
 
           <Modal
             transparent
             visible={modalVisible}
-            animationType="slide" 
+            animationType="slide"
           >
-            <TouchableOpacity style={styles.overlay} onPress={() => {}} />
+            <TouchableOpacity style={styles.overlay} onPress={() => { }} />
 
             <Animated.View
               style={[
                 styles.popup,
-                { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
+                { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '15%' },
               ]}
             >
-              <View style={{margin:15}}/>
+              <View style={{ margin: 15 }} />
 
-              <ThemedText style={{textAlign:'center'}}>Profile Updated</ThemedText>
-              <ThemedText style={{textAlign:'center'}}>Your profile has been updated successfully</ThemedText>
+              <ThemedText style={{ textAlign: 'center' }}>Profile Updated</ThemedText>
+              <ThemedText style={{ textAlign: 'center' }}>Your profile has been updated successfully</ThemedText>
 
-              <View style={{margin:15}}/>
-    
-              <ThemedButton style={{ padding: 15, borderRadius:30, alignItems:'center', backgroundColor: Colors.green, flex:1}} onPress={() => [closePopup(),fetchPendingRequests()]} >
-                <ThemedText style={{color: "#fff"}}>Go to Home</ThemedText>
+              <View style={{ margin: 15 }} />
+
+              <ThemedButton style={{ padding: 15, borderRadius: 30, alignItems: 'center', backgroundColor: Colors.green, flex: 1 }} onPress={() => [closePopup(), fetchPendingRequests()]} >
+                <ThemedText style={{ color: "#fff" }}>Go to Home</ThemedText>
               </ThemedButton>
-
-              <View style={{margin:15}}/>
             </Animated.View>
           </Modal>
         </Animated.ScrollView>

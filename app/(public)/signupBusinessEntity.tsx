@@ -21,41 +21,41 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 const { height } = Dimensions.get('window');
 
 export type Props = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
-  headerBackgroundColor:{ dark: string; light: string };
+    lightColor?: string;
+    darkColor?: string;
+    headerBackgroundColor: { dark: string; light: string };
 };
 
 export default function signupBusinessEntity({
     lightColor,
     darkColor,
     headerBackgroundColor,
-  }: Props){
+}: Props) {
 
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
     const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
     const router = useRouter()
     const [modalVisible, setModalVisible] = useState(false);
-    const slideAnim = React.useRef(new Animated.Value(height)).current; 
+    const slideAnim = React.useRef(new Animated.Value(height)).current;
     const navigation = useNavigation()
     const [htmlContent, setHtmlContent] = useState();
     const [isloading, setisloading] = useState(false)
     const { login } = useAuth();
-    
+
     const openPopup = () => {
         setModalVisible(true);
         Animated.timing(slideAnim, {
-        toValue: 0, // Slide to the screen
-        duration: 300,
-        useNativeDriver: true,
+            toValue: 0, // Slide to the screen
+            duration: 300,
+            useNativeDriver: true,
         }).start();
     };
-        
+
     const closePopup = () => {
         Animated.timing(slideAnim, {
-        toValue: height, // Slide back down
-        duration: 300,
-        useNativeDriver: true,
+            toValue: height, // Slide back down
+            duration: 300,
+            useNativeDriver: true,
         }).start(() => setModalVisible(false)); // Close after animation
     };
 
@@ -68,7 +68,7 @@ export default function signupBusinessEntity({
         password: "",
         confirmPassword: "",
         referral_code: "",
-        businessid:""
+        businessid: ""
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -92,36 +92,45 @@ export default function signupBusinessEntity({
         // proceed to API call, etc.
         return openPopup();
     };
-    
+
     const signupHandler = async () => {
         try {
             setisloading(true);
 
             // Make signup request
             const response = await authenticateSignUpBusniessEntity(
-            formData.email,
-            encryptData(formData.password),
-            formData.gender,
-            formData.phone,
-            formData.firstname,
-            formData.lastname,
-            formData.referral_code,
-            formData.businessid
+                formData.email,
+                encryptData(formData.password),
+                formData.gender,
+                formData.phone,
+                formData.firstname,
+                formData.lastname,
+                formData.referral_code,
+                formData.businessid
             );
 
             console.log("✅ Signup successful:", response);
 
+            Alert.alert("✅ Signup Successful", "Your account has been created successfully.", [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        // Navigate to login or home screen
+                        router.replace('/(public)/login')
+                    },
+                },
+            ]);
             // Log in immediately after signup
-            await login(encryptData(response.access_token), response);
+            // await login(encryptData(response.access_token), response);
 
         } catch (error: any) {
             console.log("❌ Signup failed:", error.response.data);
 
             // Safe error extraction
             const errorMessage =
-            error?.response?.data?.email ||
-            error?.response?.data?.message ||
-            "Something went wrong. Please try again.";
+                error?.response?.data?.email ||
+                error?.response?.data?.message ||
+                "Something went wrong. Please try again.";
 
             Alert.alert("Sign Up Failed", errorMessage);
         } finally {
@@ -131,263 +140,263 @@ export default function signupBusinessEntity({
     };
 
     useEffect(() => {
-      const unsubscribe = navigation.addListener('focus', async () => {
-        try {
-          setisloading(true)
-          const response = await termsandconditons()
-          console.log(response)
-          setHtmlContent(response)
-          setisloading(false)
-        } catch (error: any) {
-          setisloading(true)
-          console.log(error.response)
-          Alert.alert('Error', "An error occured while fetching terms and conditions", [
-            {
-              text:"Ok",
-              onPress: () => ""
+        const unsubscribe = navigation.addListener('focus', async () => {
+            try {
+                setisloading(true)
+                const response = await termsandconditons()
+                console.log(response)
+                setHtmlContent(response)
+                setisloading(false)
+            } catch (error: any) {
+                setisloading(true)
+                console.log(error.response)
+                Alert.alert('Error', "An error occured while fetching terms and conditions", [
+                    {
+                        text: "Ok",
+                        onPress: () => ""
+                    }
+                ])
+                setisloading(false)
+                // return;
             }
-          ])
-          setisloading(false)
-          // return;
-        }
-      })
-      return unsubscribe;
+        })
+        return unsubscribe;
     }, [])
 
-    if(isloading){
-      return <LogoSpinner lightColor='' darkColor=''/>
+    if (isloading) {
+        return <LogoSpinner lightColor='' darkColor='' />
     }
 
-  return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-        <KeyboardAvoidingView 
-            style={{ flex: 1 }} 
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
-        >
-            <Animated.ScrollView style={{flex:1}} showsVerticalScrollIndicator={false}>
-                <GoBack lightColor='' darkColor='' onClick={() => router.back()}>
-                    <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
-                </GoBack>
-                <View style={{margin:15}}/> 
-
-                <ThemedText type="titleMedium">Create An Entity Account</ThemedText>
-
-                <View style={{margin:10}}/> 
-
-                <ThemedText>First Name</ThemedText>
-                <Input
-                    placeholder="Please enter"
-                    keyboardType="default"
-                    rightIcon={<Octicons name="person" size={18} color={Colors.gray9} />}
-                    value={formData.firstname}
-                    onUpdateValue={(val) =>
-                        setFormData({ ...formData, firstname: val })
-                    }
-                    isInvalid={!!errors.firstname}
-                    autoCapitalize='sentences'
-                />
-                <View style={{margin:5}}/> 
-
-                <ThemedText>Last Name</ThemedText>
-                <Input
-                    placeholder="Please enter"
-                    keyboardType="default"
-                    rightIcon={<Octicons name="person" size={18} color={Colors.gray9}/>}
-                    value={formData.lastname}
-                    onUpdateValue={(val) =>
-                        setFormData({ ...formData, lastname: val })
-                    }
-                    isInvalid={!!errors.lastname}
-                    autoCapitalize='sentences'
-
-                />
-                <View style={{margin:5}}/> 
-
-                <ThemedText>Email</ThemedText>
-                <Input
-                    placeholder="Please enter"
-                    keyboardType="email-address"
-                    rightIcon={<Octicons name="person" size={18} color={Colors.gray9}/>}
-                    value={formData.email}
-                    onUpdateValue={(val) =>
-                        setFormData({ ...formData, email: val })
-                    }
-                    isInvalid={!!errors.email}
-                />
-                <View style={{margin:5}}/> 
-
-                <ThemedText>Gender</ThemedText>
-               
-                <View style={{margin:3}}/> 
-                <CustomDropdown
-                    label=""
-                    data={[
-                        { label: 'Male', value: 'M' },
-                        { label: 'Female', value: 'F' },
-                    ]}
-                    value={formData.gender}
-                    onChange={(value:any) => setFormData({ ...formData, gender: value })}
-                    error={errors.gender}
-                />
-                <View style={{margin:5}}/> 
-
-                <ThemedText>Phone Number</ThemedText>
-
-                <View style={{ flexDirection: "row", alignItems: "center"}}>
-                {/* Country Code Box */}
-                <ThemedView
-                    style={{
-                    paddingHorizontal: 12,
-                    paddingVertical: 14,
-                    borderRadius: 8,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    borderWidth: 1,
-                    borderColor: Colors.gray9,
-                    marginRight: 10, // space between code box and input
-                    }}
-                >
-                    <Image
-                        source={require("@/assets/images/flag.png")}
-                        style={{ width: 20, height: 15, resizeMode: "contain" }}
-                    />
-                    <ThemedText style={{ marginLeft: 6, fontSize: 16 }}>+234</ThemedText>
-                </ThemedView>
-
-                {/* Phone Number Input */}
-                <View style={{ flex: 1 }}>
-                    <Input
-                        placeholder="Enter phone number"
-                        keyboardType="phone-pad"
-                        value={formData.phone}
-                        onUpdateValue={(val) =>
-                            setFormData({ ...formData, phone: val })
-                        }
-                        isInvalid={!!errors.phone}
-                        maxLength={10}
-                    />
-                </View>
-                </View>
-
-                <View style={{margin:5}}/> 
-
-                <ThemedText>Business Id</ThemedText>
-                <Input
-                    placeholder="Please enter (optional)"
-                    keyboardType="default"
-                    rightIcon={<Octicons name="person" size={18} color={Colors.gray9}/>}
-                    value={formData.businessid}
-                    onUpdateValue={(val) =>
-                        setFormData({ ...formData, businessid: val })
-                    }
-                    isInvalid={!!errors.businessid}
-                />
-                <View style={{margin:5}}/> 
-
-                <ThemedText>Referral Code</ThemedText>
-                <Input
-                    placeholder="Please enter (optional)"
-                    keyboardType="default"
-                    rightIcon={<Octicons name="person" size={18} color={Colors.gray9}/>}
-                    value={formData.referral_code}
-                    onUpdateValue={(val) =>
-                        setFormData({ ...formData, referral_code: val })
-                    }
-                    isInvalid={!!errors.referral_code}
-                />
-                <View style={{margin:5}}/> 
-
-                <ThemedText>Password</ThemedText>
-                <Input
-                    placeholder="Password"
-                    secure
-                    value={formData.password}
-                    onUpdateValue={(val) =>
-                        setFormData({ ...formData, password: val })
-                    }
-                    isInvalid={!!errors.password}
-                />
-                <View style={{margin:3}}/> 
-                <PasswordRules password={formData.password} />
-                <View style={{margin:5}}/> 
-
-                <ThemedText>Confirm Password</ThemedText>
-                <Input
-                    placeholder="Confirm Password"
-                    secure
-                    value={formData.confirmPassword}
-                    onUpdateValue={(val) =>
-                        setFormData({ ...formData, confirmPassword: val })
-                    }
-                    isInvalid={!!errors.confirmPassword}
-                />
-                <View style={{margin:10}}/> 
-
-                <ThemedButton style={{backgroundColor: Colors.green, padding: 15, borderRadius:30, alignItems:'center'}} onPress={() => {handleSignup()}}>
-                    <ThemedText style={{color:'#fff'}}>Proceed</ThemedText>
-                </ThemedButton>
-                <View style={{margin:15}}/> 
-            </Animated.ScrollView>
-
-            <Modal
-                transparent
-                visible={modalVisible}
-                animationType="slide"
-                onRequestClose={closePopup}
+    return (
+        <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
             >
-                {/* Overlay */}
-                <TouchableOpacity style={styles.overlay} onPress={() => closePopup()} />
+                <Animated.ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+                    <GoBack lightColor='' darkColor='' onClick={() => router.back()}>
+                        <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
+                    </GoBack>
+                    <View style={{ margin: 15 }} />
 
-                {/* Popup Container */}
-                <Animated.View
-                    style={[
-                    styles.popup,
-                    {
-                        transform: [{ translateY: slideAnim }],
-                        backgroundColor: color1,
-                        maxHeight: "80%", // limit height so it can scroll
-                        borderTopLeftRadius: 20,
-                        borderTopRightRadius: 20,
-                    },
-                    ]}
+                    <ThemedText type="titleMedium">Create An Entity Account</ThemedText>
+
+                    <View style={{ margin: 10 }} />
+
+                    <ThemedText>First Name</ThemedText>
+                    <Input
+                        placeholder="Please enter"
+                        keyboardType="default"
+                        rightIcon={<Octicons name="person" size={18} color={Colors.gray9} />}
+                        value={formData.firstname}
+                        onUpdateValue={(val) =>
+                            setFormData({ ...formData, firstname: val })
+                        }
+                        isInvalid={!!errors.firstname}
+                        autoCapitalize='sentences'
+                    />
+                    <View style={{ margin: 5 }} />
+
+                    <ThemedText>Last Name</ThemedText>
+                    <Input
+                        placeholder="Please enter"
+                        keyboardType="default"
+                        rightIcon={<Octicons name="person" size={18} color={Colors.gray9} />}
+                        value={formData.lastname}
+                        onUpdateValue={(val) =>
+                            setFormData({ ...formData, lastname: val })
+                        }
+                        isInvalid={!!errors.lastname}
+                        autoCapitalize='sentences'
+
+                    />
+                    <View style={{ margin: 5 }} />
+
+                    <ThemedText>Email</ThemedText>
+                    <Input
+                        placeholder="Please enter"
+                        keyboardType="email-address"
+                        rightIcon={<Octicons name="person" size={18} color={Colors.gray9} />}
+                        value={formData.email}
+                        onUpdateValue={(val) =>
+                            setFormData({ ...formData, email: val })
+                        }
+                        isInvalid={!!errors.email}
+                    />
+                    <View style={{ margin: 5 }} />
+
+                    <ThemedText>Gender</ThemedText>
+
+                    <View style={{ margin: 3 }} />
+                    <CustomDropdown
+                        label=""
+                        data={[
+                            { label: 'Male', value: 'M' },
+                            { label: 'Female', value: 'F' },
+                        ]}
+                        value={formData.gender}
+                        onChange={(value: any) => setFormData({ ...formData, gender: value })}
+                        error={errors.gender}
+                    />
+                    <View style={{ margin: 5 }} />
+
+                    <ThemedText>Phone Number</ThemedText>
+
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        {/* Country Code Box */}
+                        <ThemedView
+                            style={{
+                                paddingHorizontal: 12,
+                                paddingVertical: 14,
+                                borderRadius: 8,
+                                flexDirection: "row",
+                                alignItems: "center",
+                                borderWidth: 1,
+                                borderColor: Colors.gray9,
+                                marginRight: 10, // space between code box and input
+                            }}
+                        >
+                            <Image
+                                source={require("@/assets/images/flag.png")}
+                                style={{ width: 20, height: 15, resizeMode: "contain" }}
+                            />
+                            <ThemedText style={{ marginLeft: 6, fontSize: 16 }}>+234</ThemedText>
+                        </ThemedView>
+
+                        {/* Phone Number Input */}
+                        <View style={{ flex: 1 }}>
+                            <Input
+                                placeholder="Enter phone number"
+                                keyboardType="phone-pad"
+                                value={formData.phone}
+                                onUpdateValue={(val) =>
+                                    setFormData({ ...formData, phone: val })
+                                }
+                                isInvalid={!!errors.phone}
+                                maxLength={10}
+                            />
+                        </View>
+                    </View>
+
+                    <View style={{ margin: 5 }} />
+
+                    <ThemedText>Business Id</ThemedText>
+                    <Input
+                        placeholder="Please enter (optional)"
+                        keyboardType="default"
+                        rightIcon={<Octicons name="person" size={18} color={Colors.gray9} />}
+                        value={formData.businessid}
+                        onUpdateValue={(val) =>
+                            setFormData({ ...formData, businessid: val })
+                        }
+                        isInvalid={!!errors.businessid}
+                    />
+                    <View style={{ margin: 5 }} />
+
+                    <ThemedText>Referral Code</ThemedText>
+                    <Input
+                        placeholder="Please enter (optional)"
+                        keyboardType="default"
+                        rightIcon={<Octicons name="person" size={18} color={Colors.gray9} />}
+                        value={formData.referral_code}
+                        onUpdateValue={(val) =>
+                            setFormData({ ...formData, referral_code: val })
+                        }
+                        isInvalid={!!errors.referral_code}
+                    />
+                    <View style={{ margin: 5 }} />
+
+                    <ThemedText>Password</ThemedText>
+                    <Input
+                        placeholder="Password"
+                        secure
+                        value={formData.password}
+                        onUpdateValue={(val) =>
+                            setFormData({ ...formData, password: val })
+                        }
+                        isInvalid={!!errors.password}
+                    />
+                    <View style={{ margin: 3 }} />
+                    <PasswordRules password={formData.password} />
+                    <View style={{ margin: 5 }} />
+
+                    <ThemedText>Confirm Password</ThemedText>
+                    <Input
+                        placeholder="Confirm Password"
+                        secure
+                        value={formData.confirmPassword}
+                        onUpdateValue={(val) =>
+                            setFormData({ ...formData, confirmPassword: val })
+                        }
+                        isInvalid={!!errors.confirmPassword}
+                    />
+                    <View style={{ margin: 10 }} />
+
+                    <ThemedButton style={{ backgroundColor: Colors.green, padding: 15, borderRadius: 30, alignItems: 'center' }} onPress={() => { handleSignup() }}>
+                        <ThemedText style={{ color: '#fff' }}>Proceed</ThemedText>
+                    </ThemedButton>
+                    <View style={{ margin: 15 }} />
+                </Animated.ScrollView>
+
+                <Modal
+                    transparent
+                    visible={modalVisible}
+                    animationType="slide"
+                    onRequestClose={closePopup}
                 >
-                    <ScrollView
-                        style={{ flexGrow: 0 }}
-                        contentContainerStyle={{ padding: 10 }}
-                        showsVerticalScrollIndicator={true}
+                    {/* Overlay */}
+                    <TouchableOpacity style={styles.overlay} onPress={() => closePopup()} />
+
+                    {/* Popup Container */}
+                    <Animated.View
+                        style={[
+                            styles.popup,
+                            {
+                                transform: [{ translateY: slideAnim }],
+                                backgroundColor: color1,
+                                maxHeight: "80%", // limit height so it can scroll
+                                borderTopLeftRadius: 20,
+                                borderTopRightRadius: 20,
+                            },
+                        ]}
                     >
-                        <ThemedText>{htmlContent}</ThemedText>
-
-
-                        <ThemedButton
-                            onPress={() => {
-                                closePopup();
-                                signupHandler();
-                            }}
-                            style={{paddingHorizontal:30, paddingVertical:13, borderRadius:30, alignSelf: "center", backgroundColor: Colors.green}}
+                        <ScrollView
+                            style={{ flexGrow: 0 }}
+                            contentContainerStyle={{ padding: 10 }}
+                            showsVerticalScrollIndicator={true}
                         >
-                            <ThemedText style={{ color: '#fff' }}>I Agree</ThemedText>
-                        </ThemedButton>
+                            <ThemedText>{htmlContent}</ThemedText>
 
-                        <View style={{ margin: 5 }} />
-                        
-                        <ThemedButton
-                            onPress={() => {
-                                closePopup();
-                            }}
-                            style={{paddingHorizontal:30, paddingVertical:13, alignSelf: "center"}}
-                        >
-                            <ThemedText style={{ color: Colors.green }}>I Disagree</ThemedText>
-                        </ThemedButton>
 
-                        <View style={{ margin: 10 }} />
-                    </ScrollView>
-                </Animated.View>
-            </Modal>
-        </KeyboardAvoidingView>
-    </SafeAreaView>
-  )
+                            <ThemedButton
+                                onPress={() => {
+                                    closePopup();
+                                    signupHandler();
+                                }}
+                                style={{ paddingHorizontal: 30, paddingVertical: 13, borderRadius: 30, alignSelf: "center", backgroundColor: Colors.green }}
+                            >
+                                <ThemedText style={{ color: '#fff' }}>I Agree</ThemedText>
+                            </ThemedButton>
+
+                            <View style={{ margin: 5 }} />
+
+                            <ThemedButton
+                                onPress={() => {
+                                    closePopup();
+                                }}
+                                style={{ paddingHorizontal: 30, paddingVertical: 13, alignSelf: "center" }}
+                            >
+                                <ThemedText style={{ color: Colors.green }}>I Disagree</ThemedText>
+                            </ThemedButton>
+
+                            <View style={{ margin: 10 }} />
+                        </ScrollView>
+                    </Animated.View>
+                </Modal>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
+    )
 }
 
 

@@ -1,7 +1,7 @@
 export interface RequestData {
   platform: any,
   bouquets: any,
-  amount:any,
+  bosquetsamount:any,
   thirdparty:any,
   mode:any,
   phone: any
@@ -17,7 +17,7 @@ export const validateData = (data: RequestData) => {
   if (!data.bouquets.trim()) errors.bouquets = 'Bouquets id is required';
 
   //state
-  if(!data.amount || Number(data.amount) < 100 ) errors.rprice = 'Amount is required'
+  if(!data.bosquetsamount || Number(data.bosquetsamount) < 100 ) errors.bosquetsamount = 'Amount is required'
 
   if(data.mode === "self"){
     if(!data.phone || Number(data.phone) < 10 ) errors.phone = 'Phone number is required'

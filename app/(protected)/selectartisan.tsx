@@ -4,124 +4,125 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { getsubcathelper } from '@/hooks/AuthRoutes'
+import { getsubcathelper, PUBLIC_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { Alert, Animated, Dimensions, FlatList, Image, Modal, StyleSheet, TextInput, TextProps, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-  
- const { height } = Dimensions.get('window');
 
- export type Props = TextProps & {
-    lightColor?: string;
-    darkColor?: string;
-    headerBackgroundColor:{ dark: string; light: string };
-  };
+const { height } = Dimensions.get('window');
 
-  export default function selectartisan({
-    lightColor,
-    darkColor,
-    headerBackgroundColor,
-  }: Props) {
+export type Props = TextProps & {
+  lightColor?: string;
+  darkColor?: string;
+  headerBackgroundColor: { dark: string; light: string };
+};
 
-    const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
-    const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-    const router = useRouter()
-    const {token, user, logout} = useAuth()
-    const [isModalVisible, setModalVisible] = useState(false);
-    const slideAnim = React.useRef(new Animated.Value(height)).current; // Start below the screen
-    const navigation = useNavigation()
-    const [responseData, setresponseData] = useState<any>([])
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filteredData, setFilteredData] = useState(responseData);
-    const [fetchedRequest, setFetchedRequest] = useState<any>([])
-    const [isloading, setisloading] = useState(false)
-    const {request_type, catid, subcatid, preassessment_flg, name, enable_go_to_artisan} = useLocalSearchParams()
-    const [formData, setFormData] = useState({
-      helperid: "",
-    });
-        
-    
-    useLayoutEffect(() => {
-      const fetchPendingRequests = async () => {
+export default function selectartisan({
+  lightColor,
+  darkColor,
+  headerBackgroundColor,
+}: Props) {
+
+  const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const router = useRouter()
+  const { token, user, logout } = useAuth()
+  const [isModalVisible, setModalVisible] = useState(false);
+  const slideAnim = React.useRef(new Animated.Value(height)).current; // Start below the screen
+  const navigation = useNavigation()
+  const [responseData, setresponseData] = useState<any>([])
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredData, setFilteredData] = useState(responseData);
+  const [fetchedRequest, setFetchedRequest] = useState<any>([])
+  const [isloading, setisloading] = useState(false)
+  const { request_type, catid, subcatid, preassessment_flg, name, enable_go_to_artisan } = useLocalSearchParams()
+  const [formData, setFormData] = useState({
+    helperid: "",
+  });
+
+
+  useLayoutEffect(() => {
+    const fetchPendingRequests = async () => {
       try {
         setisloading(true)
-        const response = await getsubcathelper(catid, decryptData(token));
+        const response = await getsubcathelper(subcatid, decryptData(token));
         console.log(response)
         setresponseData(response.data)
         setFetchedRequest(response.data)
       } catch (error: any) {
         if (error.response?.status === 401) {
-        Alert.alert("Session expired", "Please log in again.");
-        await logout(); // from your AuthContext
-        router.replace("/login"); // navigate to login screen
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
         } else {
-        Alert.alert('Error', 'Unable to load notification settings.')
+          Alert.alert('Error', 'Unable to load notification settings.')
         }
         console.error("Error fetching pending requests:", error.response);
       } finally {
         setisloading(false);
-      }};
-      const unsubscribe = navigation.addListener("focus", fetchPendingRequests);
-      return unsubscribe;
-    }, []);
-
-    const toggleModal = () => {
-      setModalVisible(!isModalVisible);
-    };
-
-    useEffect(() => {
-      const q = searchQuery.trim().toLowerCase();
-        if (q.length === 0) {
-          setFilteredData(responseData);
-        } else {
-        setFilteredData(
-        responseData.filter((item: any) =>
-        (item.helper_name || '').toLowerCase().includes(q)
-        ));
       }
-    }, [searchQuery, responseData]);
+    };
+    const unsubscribe = navigation.addListener("focus", fetchPendingRequests);
+    return unsubscribe;
+  }, []);
 
-    const openPopup = () => {
-      setModalVisible(true);
-      Animated.timing(slideAnim, {
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+
+  useEffect(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (q.length === 0) {
+      setFilteredData(responseData);
+    } else {
+      setFilteredData(
+        responseData.filter((item: any) =>
+          (item.helper_name || '').toLowerCase().includes(q)
+        ));
+    }
+  }, [searchQuery, responseData]);
+
+  const openPopup = () => {
+    setModalVisible(true);
+    Animated.timing(slideAnim, {
       toValue: 0, // Slide to the screen
       duration: 300,
       useNativeDriver: true,
-      }).start();
-    };
-      
-    const closePopup = () => {
-      Animated.timing(slideAnim, {
+    }).start();
+  };
+
+  const closePopup = () => {
+    Animated.timing(slideAnim, {
       toValue: height, // Slide back down
       duration: 300,
       useNativeDriver: true,
-      }).start(() => setModalVisible(false)); // Close after animation
-    };
+    }).start(() => setModalVisible(false)); // Close after animation
+  };
 
-    if(isloading){
-      return <LogoSpinner lightColor='' darkColor=''/>
-    }
+  if (isloading) {
+    return <LogoSpinner lightColor='' darkColor='' />
+  }
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal:20, paddingTop:10, backgroundColor: color1 }} edges={['top']}>
-      <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}> 
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+      <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
         <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
       </GoBack>
-      <View style={{margin:6}}/> 
-      
-      <ThemedText type="titleMedium">Select Artisan</ThemedText>
-      <View style={{margin:5  }}/> 
+      <View style={{ margin: 6 }} />
 
-      <View style={styles.searchRow}> 
-        <TextInput style={styles.input} placeholder="Search artisans by name" value={searchQuery} onChangeText={setSearchQuery} returnKeyType="search" /> 
-        {searchQuery.length > 0 && ( 
-        <TouchableOpacity onPress={() => setSearchQuery('')}> 
-          <MaterialCommunityIcons name="close" size={20} color={color} /> 
-        </TouchableOpacity> )} 
+      <ThemedText type="titleMedium">Select Artisan</ThemedText>
+      <View style={{ margin: 5 }} />
+
+      <View style={styles.searchRow}>
+        <TextInput style={styles.input} placeholder="Search artisans by name" placeholderTextColor={"#000"} value={searchQuery} onChangeText={setSearchQuery} returnKeyType="search" />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <MaterialCommunityIcons name="close" size={20} color={color} />
+          </TouchableOpacity>)}
       </View>
-      <View style={{margin:10}}/> 
+      <View style={{ margin: 10 }} />
 
       <FlatList
         keyExtractor={(item: any) => item.helper_id.toString()}
@@ -130,14 +131,14 @@ import { SafeAreaView } from 'react-native-safe-area-context'
         numColumns={1}
         renderItem={({ item }) => (
           <ThemedView style={styles.mainstyle}>
-            <View style={{flexDirection:'row'}}>
-              <View style={{backgroundColor:Colors.clock1, alignSelf:'center', borderRadius:50, marginRight:15}}>
+            <View style={{ flexDirection: 'row' }}>
+              <View style={{ backgroundColor: Colors.clock1, alignSelf: 'center', borderRadius: 50, marginRight: 15 }}>
                 {/* <ThemedText style={{color: Colors.green}}>SM</ThemedText> */}
                 {
-                  !item.photo ? 
-                  <Image style={[styles.image, ]} source={require("@/assets/images/person-4.png")}/>
-                  :
-                  <Image style={[styles.image, ]} source={{ uri: `https://phixotech.com/igoepp/public/handyman/${item.photo}` }} />
+                  !item.photo ?
+                    <Image style={[styles.image,]} source={require("@/assets/images/person-4.png")} />
+                    :
+                    <Image style={[styles.image,]} source={{ uri: `${PUBLIC_API_BASE_URL}handyman/${item.photo}` }} />
                 }
               </View>
               <View>
@@ -146,39 +147,38 @@ import { SafeAreaView } from 'react-native-safe-area-context'
                 {/* <ThemedText type='small'>Lagos</ThemedText> */}
               </View>
             </View>
-            <TouchableOpacity onPress={() => [setFormData({helperid:item.helper_id}), openPopup()]}>
+            <TouchableOpacity onPress={() => [setFormData({ helperid: item.helper_id }), openPopup()]}>
               <MaterialCommunityIcons name="dots-vertical" size={20} color={color} />
             </TouchableOpacity>
           </ThemedView>
         )}
       />
 
-      <View style={{margin:10}}/> 
+      <View style={{ margin: 5 }} />
 
-    <Modal
-      transparent
-      visible={isModalVisible}
-      animationType="slide" 
-      onRequestClose={closePopup}
-    >
-      <TouchableOpacity style={styles.overlay} onPress={() => [closePopup()]} />
-
-      <Animated.View
-        style={[
-        styles.popup,
-        { transform: [{ translateY: slideAnim }], backgroundColor: color1 },
-        ]}
+      <Modal
+        transparent
+        visible={isModalVisible}
+        animationType="slide"
+        onRequestClose={closePopup}
       >
-        <TouchableOpacity style={styles.option} onPress={() => [closePopup(), router.push({pathname:"/requesthelp", params:{request_type, catid, subcatid, preassessment_flg, name, helperid: formData.helperid, enable_go_to_artisan}})]}>
-          <ThemedText>Select</ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.option} onPress={() => [closePopup(), router.push({pathname:"/artisan", params:{request_type, catid, subcatid, preassessment_flg, name, helperid: formData.helperid, enable_go_to_artisan}})]}>
-          <ThemedText>View Details</ThemedText>
-        </TouchableOpacity>
-        <View style={{margin:10}}/>
-      </Animated.View>
-    </Modal>
-  </SafeAreaView>
+        <TouchableOpacity style={styles.overlay} onPress={() => [closePopup()]} />
+
+        <Animated.View
+          style={[
+            styles.popup,
+            { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '15%' },
+          ]}
+        >
+          <TouchableOpacity style={styles.option} onPress={() => [closePopup(), router.push({ pathname: "/requesthelp", params: { request_type, catid, subcatid, preassessment_flg, name, helperid: formData.helperid, enable_go_to_artisan } })]}>
+            <ThemedText>Select</ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.option} onPress={() => [closePopup(), router.push({ pathname: "/artisan", params: { request_type, catid, subcatid, preassessment_flg, name, helperid: formData.helperid, enable_go_to_artisan } })]}>
+            <ThemedText>View Details</ThemedText>
+          </TouchableOpacity>
+        </Animated.View>
+      </Modal>
+    </SafeAreaView>
 
   )
 }
@@ -195,26 +195,26 @@ const styles = StyleSheet.create({
   },
 
   input: {
-    flex: 1,                       
+    flex: 1,
     fontSize: 16,
-    color: Colors.blacktext,           
-    paddingVertical: 7,            
-    paddingHorizontal: 10,          
+    color: Colors.blacktext,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
   },
-  image:{
-    height:50,
-    width:50,
-    alignSelf:'center',
-    borderRadius:100
+  image: {
+    height: 50,
+    width: 50,
+    alignSelf: 'center',
+    borderRadius: 100
   },
-  mainstyle:{
-    flexDirection:'row', 
-    borderRadius:8, 
-    marginBottom:3,
-    justifyContent:'space-between', 
-    alignItems:'center', 
-    boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
-    padding:10, 
+  mainstyle: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    marginBottom: 3,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    boxShadow: '0px 4px 6px rgba(0,0,0,0.35)',
+    padding: 10,
   },
   name: { fontSize: 16, fontWeight: "500" },
   more: { fontSize: 20 },
@@ -232,15 +232,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: "#ddd",
   },
-   popup: {
+  popup: {
     position: 'absolute',
-    bottom:0,
+    bottom: 0,
     width: '100%',
     backgroundColor: '#fff',
     padding: 10,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    boxShadow: '0px 4px 6px rgba(0,0,0,0.35)', 
+    boxShadow: '0px 4px 6px rgba(0,0,0,0.35)',
   },
   overlay: {
     flex: 1,

@@ -1,6 +1,9 @@
-import { Colors } from "@/constants/Colors";
+import { Colors, decryptData } from "@/constants/Colors";
+import { useAuth } from "@/hooks/AuthContext";
+
+import { customerinfocheck } from "@/hooks/AuthRoutes";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { Ionicons } from "@expo/vector-icons";
+import { Entypo, Feather, Ionicons } from "@expo/vector-icons";
 import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
@@ -66,6 +69,7 @@ export default function ReceiptView({
   );
 
   const viewShotRef = useRef<View>(null);
+  const { user, token, updateUser } = useAuth();
 
   // 📸 Save receipt image to gallery
   const saveReceipt = async () => {
@@ -92,43 +96,54 @@ export default function ReceiptView({
   };
 
   const shareReceipt = async () => {
-  try {
-    if (!viewShotRef.current) {
-      Alert.alert("Error", "Receipt is not ready to share.");
+    try {
+      if (!viewShotRef.current) {
+        Alert.alert("Error", "Receipt is not ready to share.");
+        return;
+      }
+
+      // Capture the image
+      const uri = await captureRef(viewShotRef.current, {
+        format: "png",
+        quality: 1,
+        result: "tmpfile", // ensures temporary file path
+      });
+
+      // Check if Sharing is available
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert("Not Supported", "Sharing is not available on this device.");
+        return;
+      }
+
+      // Share the file
+      await Sharing.shareAsync(uri, {
+        mimeType: "image/png",
+        dialogTitle: "Share Receipt",
+        UTI: "public.png",
+      });
+
+    } catch (error) {
+      console.error("Share error:", error);
+      Alert.alert("Error", "Failed to share receipt.");
+    }
+  };
+
+  const reload = async () => {
+    try {
+      const response = await customerinfocheck(user?.customer_id, decryptData(token))
+      updateUser(response);
+      console.log(response)
+    } catch (error: any) {
+      console.log(error.response)
       return;
     }
-
-    // Capture the image
-    const uri = await captureRef(viewShotRef.current, {
-      format: "png",
-      quality: 1,
-      result: "tmpfile", // ensures temporary file path
-    });
-
-    // Check if Sharing is available
-    const isAvailable = await Sharing.isAvailableAsync();
-    if (!isAvailable) {
-      Alert.alert("Not Supported", "Sharing is not available on this device.");
-      return;
-    }
-
-    // Share the file
-    await Sharing.shareAsync(uri, {
-      mimeType: "image/png",
-      dialogTitle: "Share Receipt",
-      UTI: "public.png",
-    });
-
-  } catch (error) {
-    console.error("Share error:", error);
-    Alert.alert("Error", "Failed to share receipt.");
   }
-};
 
   console.log(imageuri)
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={() => { }}>
       <ThemedView
         style={[styles.modalContainer, { backgroundColor }]}
         lightColor={backgroundColor}
@@ -140,29 +155,29 @@ export default function ReceiptView({
           <View style={styles.headerContainer}>
             {
               !imageuri ?
-              <>
-                {showIcon && (
-                  <View
-                    style={{
-                      padding: 10,
-                      borderRadius: 50,
-                      backgroundColor: iconBg,
-                      marginBottom: 10,
-                    }}
-                  >
-                    <Ionicons name={iconName} size={50} color={iconColor} />
-                  </View>
-                )}
-              </>
-              :
-              <>
-                <Image source={{uri:imageuri}} style={{width:70, height:70}} resizeMode="contain"/>
-              </>
+                <>
+                  {showIcon && (
+                    <View
+                      style={{
+                        padding: 10,
+                        borderRadius: 50,
+                        backgroundColor: iconBg,
+                        marginBottom: 10,
+                      }}
+                    >
+                      <Ionicons name={iconName} size={50} color={iconColor} />
+                    </View>
+                  )}
+                </>
+                :
+                <>
+                  <Image source={{ uri: imageuri }} style={{ width: 70, height: 70 }} resizeMode="contain" />
+                </>
             }
             <ThemedText type="smallBold">Transaction Successful!</ThemedText>
           </View>
 
-        <View style={{margin:3}}/>
+          <View style={{ margin: 3 }} />
           {/* Custom content (amount, txn ID, etc.) */}
           <View style={styles.contentContainer}>{children}</View>
 
@@ -201,28 +216,35 @@ export default function ReceiptView({
               )}
             </View>
           )} */}
-        <RepeatedWatermark text="IGOEPP"/>
+          <RepeatedWatermark text="IGOEPP" />
         </ViewShot>
 
         {/* Action Buttons */}
-        <View style={{ width: "100%" }}>
-          <ThemedButton
-            onPress={saveReceipt}
-            style={[styles.button, { backgroundColor: Colors.green }]}
-          >
-            <Text style={styles.buttonText}>Download Receipt</Text>
-          </ThemedButton>
+        <View style={styles.footerContainer}>
+          <View style={styles.actionButtonsRow}>
+            <ThemedButton
+              onPress={saveReceipt}
+              style={[styles.smallButton, { backgroundColor: Colors.green }]}
+            >
+              <View style={styles.buttonContent}>
+                <Text style={styles.buttonText}>Download Receipt</Text>
+                <Feather name="download" size={16} color="white" />
+              </View>
+            </ThemedButton>
 
-          <View style={{margin:6}}/> 
-          <ThemedButton
-            onPress={shareReceipt}
-            style={[styles.button, { backgroundColor: Colors.green }]}
-          >
-            <ThemedText type="small" style={styles.buttonText}>Share Receipt</ThemedText>
-          </ThemedButton>
+            <ThemedButton
+              onPress={shareReceipt}
+              style={[styles.smallButton, { backgroundColor: Colors.green }]}
+            >
+              <View style={styles.buttonContent}>
+                <ThemedText type="small" style={styles.buttonText}>Share Receipt</ThemedText>
+                <Entypo name="share" size={16} color="white" />
+              </View>
+            </ThemedButton>
+          </View>
 
-          <ThemedButton onPress={() => [onClose(), router.push("/payments")]}>
-            <ThemedText style={styles.buttonText}>Go To Home</ThemedText>
+          <ThemedButton style={styles.homeButton} onPress={() => [onClose(), router.push("/payments")]}>
+            <ThemedText style={styles.homeButtonText}>Go To Home</ThemedText>
           </ThemedButton>
         </View>
       </ThemedView>
@@ -243,22 +265,48 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
   contentContainer: {
-    // flex: 1,
-    // justifyContent: "center",
-    // alignItems: "center",
     padding: 5,
-    borderRadius:10
+    borderRadius: 10
   },
-  button: {
-    paddingVertical: 16,
-    paddingHorizontal: 30,
-    borderRadius: 40,
-    alignSelf: "stretch",
+  footerContainer: {
+    width: "100%",
+    paddingBottom: 20,
+  },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 15,
+  },
+  smallButton: {
+    width: '48%',
+    paddingVertical: 14,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonText: {
     color: "white",
     fontSize: 13,
+    fontWeight: '600',
+    marginRight: 6,
+    textAlign: "center",
+  },
+  homeButton: {
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignSelf: "stretch",
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  homeButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
     textAlign: "center",
   },
 });
