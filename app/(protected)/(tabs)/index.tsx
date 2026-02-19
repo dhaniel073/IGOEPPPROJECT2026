@@ -42,7 +42,11 @@ export default function HomeScreen({
   const [visible, setVisible] = useState(false);
   const [handymen, setHandymen] = useState<any>(null);
   const [invoice, setInvoice] = useState<any>([]);
+<<<<<<< HEAD
   const { expoPushToken, notification, error } = useNotification();
+=======
+  const {expoPushToken, notification, error} = useNotification();
+>>>>>>> c5d52217c9c53da894be2ad8c9ed6e1e0cf45792
   const [needsUpdate, setNeedsUpdate] = useState(false);
   const [requiredVersion, setRequiredVersion] = useState(null);
   const [isBalanceHidden, setIsBalanceHidden] = useState<"Y" | "N">(
@@ -54,7 +58,11 @@ export default function HomeScreen({
   useEffect(() => {
     const checkVersion = async () => {
       try {
+<<<<<<< HEAD
         const response = await fetch(`${PUBLIC_API_BASE_URL}api/getcustomerappversion`);
+=======
+        const response = await fetch("https://igoeppms.com/igoepp/public/api/getcustomerappversion");
+>>>>>>> c5d52217c9c53da894be2ad8c9ed6e1e0cf45792
         const data = await response.json();
 
         const currentAppVersion = Constants.expoConfig?.version ?? "unknown";
@@ -163,7 +171,6 @@ export default function HomeScreen({
       useNativeDriver: true,
     }).start(() => setVisible(false)); // Close after animation
   };
-
   useFocusEffect(
     useCallback(() => {
       if (!user?.customer_id || !token) return;
@@ -428,9 +435,9 @@ export default function HomeScreen({
                 <MaterialCommunityIcons name="wallet-plus" size={13} color="#fff" />
               </View>
             </TouchableOpacity>
-          </ThemedView>
+          </ThemedView >
 
-        </ThemedView>
+        </ThemedView >
 
         {
           user?.account_type === "B" || user?.account_type === 'E' ?
@@ -628,8 +635,6 @@ export default function HomeScreen({
 
         <View style={{ margin: 10 }} />
 
-
-
         <Modal
           transparent
           visible={visible}
@@ -703,9 +708,9 @@ export default function HomeScreen({
               </TouchableOpacity>
 
               <View style={{ margin: 10 }} />
-            </View>
-          </View>
-        </Modal>
+            </View >
+          </View >
+        </Modal >
 
         <StatusModal
           visible={modalVisible1}
@@ -715,8 +720,8 @@ export default function HomeScreen({
           navigateTo="/transactionpin"
           close={false}
         />
-      </Animated.ScrollView>
-    </SafeAreaView>
+      </Animated.ScrollView >
+    </SafeAreaView >
   );
 }
 
@@ -776,7 +781,6 @@ const styles = StyleSheet.create({
   laterText: {
     color: '#1E90FF',
   },
-
   card: {
     borderRadius: 12,
     marginRight: 15,
@@ -784,7 +788,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     overflow: "hidden"
   },
-
   details: {
     padding: 10,
     borderBottomLeftRadius: 12,

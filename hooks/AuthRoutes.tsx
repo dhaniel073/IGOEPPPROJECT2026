@@ -92,7 +92,6 @@ async function categoriesbylga(lga: any, token: any) {
   return data;
 }
 
-
 async function marketplaceitemsget(token: any) {
   const response = await axios.get(`${YOUR_API_BASE_URL}auth/globalproductcategory`, {
     headers: {
@@ -1121,7 +1120,6 @@ async function billcategory(token: any) {
   const data = response.data
   return data
 }
-
 
 
 async function getbillsHistoryById(customerid: any, id: any, billerid: any, token: any) {

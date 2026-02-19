@@ -36,7 +36,6 @@ export default function payments({
 
   const [activeTab, setActiveTab] = useState<'bills' | 'history'>('bills');
 
-
   const [isFetching, setIsFetching] = useState(false);
   const [fetchedHistory, setFetchedHistory] = useState<any>([]);
   const [fetchedBillcategory, setFetchedBillcategory] = useState<any>([]);

@@ -333,7 +333,6 @@ export default function complaince({
         }
     };
 
-
     const pickCACImage = async () => {
         try {
             // ✅ Ask for media library permission properly

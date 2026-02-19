@@ -1,6 +1,5 @@
 import { Colors, decryptData } from "@/constants/Colors";
 import { useAuth } from "@/hooks/AuthContext";
-
 import { customerinfocheck } from "@/hooks/AuthRoutes";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Entypo, Feather, Ionicons } from "@expo/vector-icons";
@@ -246,6 +245,7 @@ export default function ReceiptView({
           <ThemedButton style={styles.homeButton} onPress={() => [onClose(), router.push("/payments")]}>
             <ThemedText style={styles.homeButtonText}>Go To Home</ThemedText>
           </ThemedButton>
+          <View style={{ margin: 15 }} />
         </View>
       </ThemedView>
     </Modal>

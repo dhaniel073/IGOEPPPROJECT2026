@@ -200,7 +200,6 @@ export default function addmoneycard({
             ])
 
             // console.log(response);
-
         } catch (error: any) {
             Alert.alert("Error", error.response?.data.message || "Payment failed");
             console.log(error.response);

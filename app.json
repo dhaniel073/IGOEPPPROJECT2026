@@ -2,7 +2,7 @@
   "expo": {
     "name": "igoepptest",
     "slug": "igoeppCus",
-    "version": "1.0.0",
+    "version": "1.10.9",
     "orientation": "portrait",
     "icon": "./assets/images/icon1.png",
     "scheme": "igoeppcus",
@@ -46,7 +46,7 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#161719"
           }
         }
       ],

@@ -41,7 +41,7 @@ export default function PinInput({
   };
 
   return (
-    <View style={{ alignItems: "center", gap: 20, width: "100%" }}>
+    <View style={{ alignItems: "center", gap: 20, width: "100%", paddingBottom: '8%' }}>
       {/* Hidden Input */}
       <TextInput
         ref={inputRef}

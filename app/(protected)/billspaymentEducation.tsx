@@ -392,7 +392,6 @@ export default function billspaymentEducation({
               keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
             >
               <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
-
               <Animated.View
                 style={[
                   styles.popup,
