@@ -53,7 +53,6 @@ export default function subcategoryScreen({
             try {
                 setisloading(true)
                 const response = await subcategory(id);
-                console.log(response)
                 setFetchedCategory(response)
             } catch (error: any) {
                 if (error.response?.status === 401) {
@@ -61,9 +60,8 @@ export default function subcategoryScreen({
                     await logout(); // from your AuthContext
                     router.replace("/login"); // navigate to login screen
                 } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
+                    Alert.alert('Error', 'Unable to load sub categories.')
                 }
-                console.error("Error fetching pending requests:", error.response);
             } finally {
                 setisloading(false);
             }

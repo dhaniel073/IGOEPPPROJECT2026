@@ -11,38 +11,38 @@ import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
 import { downloadattachment } from './downloadattachment';
 
-const {height} = Dimensions.get("window")
+const { height } = Dimensions.get("window")
 
 export const BookingCard = ({ item, onPress }: any) => {
   const router = useRouter();
   const color = Colors.gray9;
   const [modalVisible, setModalVisible] = useState(false);
-  const slideAnim = React.useRef(new Animated.Value(height)).current; 
-  const {user} = useAuth()
+  const slideAnim = React.useRef(new Animated.Value(height)).current;
+  const { user } = useAuth()
   const [isFetching, setIsFetching] = React.useState(false);
-  const {token, logout} = useAuth()
+  const { token, logout } = useAuth()
   const [modalVisible2, setModalVisible2] = useState(false);
   const [formData, setFormData] = useState({
     id: "",
     assigned_helper: "",
     cancel_frequency: "",
   });
-  
-  const color1 = useThemeColor({},'background');
+
+  const color1 = useThemeColor({}, 'background');
   const openPopup = () => {
     setModalVisible(true);
     Animated.timing(slideAnim, {
-    toValue: 0, // Slide to the screen
-    duration: 300,
-    useNativeDriver: true,
+      toValue: 0, // Slide to the screen
+      duration: 300,
+      useNativeDriver: true,
     }).start();
   };
-  
+
   const closePopup = () => {
     Animated.timing(slideAnim, {
-    toValue: height, // Slide back down
-    duration: 300,
-    useNativeDriver: true,
+      toValue: height, // Slide back down
+      duration: 300,
+      useNativeDriver: true,
     }).start(() => setModalVisible(false)); // Close after animation
   };
 
@@ -54,7 +54,6 @@ export const BookingCard = ({ item, onPress }: any) => {
         { text: "Ok", onPress: onPress },
       ]);
     } catch (error: any) {
-      console.error("Error fetching pending requests:", error);
       if (error.response?.status === 401) {
         Alert.alert("Session expired", "Please log in again.");
         await logout(); // from your AuthContext
@@ -66,21 +65,20 @@ export const BookingCard = ({ item, onPress }: any) => {
       setIsFetching(false);
     }
   }
-  
-  console.log(item)
+
   const handleDownload = async (url: any) => {
     const fileName = "attachment.pdf";
     const fileUrl = `https://igoeppms.com/igoepp/public/attachment/${url}`;
     await downloadattachment(fileUrl, fileName);
   };
 
-  if(isFetching){
-    return <ActivityIndicator/>
+  if (isFetching) {
+    return <ActivityIndicator />
   }
 
   return (
     <>
-      <TouchableOpacity onPress={() => router.push({pathname:'/bookings1',  params: { bookingId: item.id } })}>
+      <TouchableOpacity onPress={() => router.push({ pathname: '/bookings1', params: { bookingId: item.id } })}>
         <ThemedView
           style={{
             padding: 20,
@@ -91,11 +89,11 @@ export const BookingCard = ({ item, onPress }: any) => {
           }}
         >
           {
-            item.image === null ? <Image source={require('@/assets/images/bookings.png')} style={{ width: '100%', height: 150, borderRadius: 10 }} /> 
-            : 
-            <Image source={{ uri: `https://igoeppms.com/igoepp/public/subcategory/${item.image}` }} style={{ width: '100%', height: 150, borderRadius: 10 }} />
+            item.image === null ? <Image source={require('@/assets/images/bookings.png')} style={{ width: '100%', height: 150, borderRadius: 10 }} />
+              :
+              <Image source={{ uri: `https://igoeppms.com/igoepp/public/subcategory/${item.image}` }} style={{ width: '100%', height: 150, borderRadius: 10 }} />
           }
-          
+
           <View style={{ margin: 10 }} />
 
           <ThemedView style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -127,19 +125,19 @@ export const BookingCard = ({ item, onPress }: any) => {
                 borderRadius: 10,
               }}
             >
-              <ThemedText type="smallMedium" style={{ color:'#fff'}}>
+              <ThemedText type="smallMedium" style={{ color: '#fff' }}>
                 {item.help_status === 'N' ? 'Pending' : item.help_status === 'A' ? 'Accepted' : item.help_status === 'C' ? 'Completed' : item.help_status === 'X' ? 'Cancelled' : item.help_status}
               </ThemedText>
             </ThemedView>
           </ThemedView>
 
           <View style={{ margin: 10 }} />
-          
+
           <View>
 
             <ThemedView style={{ flexDirection: 'row' }}>
               <MaterialCommunityIcons name="map-marker-outline" size={16} color={Colors.gray9} style={{ marginRight: 10 }} />
-              <ThemedText style={{ color: Colors.gray9 }}>{item.help_location+", "+item.help_lga+" "+item.help_state+"."}</ThemedText>
+              <ThemedText style={{ color: Colors.gray9 }}>{item.help_location + ", " + item.help_lga + " " + item.help_state + "."}</ThemedText>
             </ThemedView>
 
             {item.help_status === 'A' && (
@@ -178,7 +176,7 @@ export const BookingCard = ({ item, onPress }: any) => {
                 )}
               </TouchableOpacity>
             )}
-              {/* <ThemedText style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>
+            {/* <ThemedText style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>
                       {item.chat_unread_customer}
                     </ThemedText> */}
           </View>
@@ -200,19 +198,19 @@ export const BookingCard = ({ item, onPress }: any) => {
 
           <ThemedView style={{ flexDirection: 'row' }}>
             <MaterialIcons name="payments" size={16} color={Colors.gray9} style={{ marginRight: 10 }} />
-            <ThemedText  style={{ color: Colors.gray9 }}>{item.invoice_type === "Y" ? "Invoice Payment" : "Immediate Payment"}</ThemedText>
+            <ThemedText style={{ color: Colors.gray9 }}>{item.invoice_type === "Y" ? "Invoice Payment" : "Immediate Payment"}</ThemedText>
           </ThemedView>
 
           <View style={{ margin: 4 }} />
-          
+
           <ThemedView style={{ flexDirection: 'row' }}>
             <MaterialIcons name="payments" size={16} color={Colors.gray9} style={{ marginRight: 10 }} />
-            <ThemedText  style={{ color: Colors.gray9 }}>{item.preassessment_flg === "Y" ? "Preassessment Request" : "Normal Request" }</ThemedText>
+            <ThemedText style={{ color: Colors.gray9 }}>{item.preassessment_flg === "Y" ? "Preassessment Request" : "Normal Request"}</ThemedText>
           </ThemedView>
 
           <View style={{ margin: 10 }} />
 
-          <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             {item.help_status !== 'A' && item.help_status !== 'C' && item.help_status !== 'X' ?
               <ThemedButton
                 style={{
@@ -221,13 +219,13 @@ export const BookingCard = ({ item, onPress }: any) => {
                   padding: 7,
                   borderRadius: 25,
                 }}
-                onPress={() => router.push({pathname:'/bidspending',  params: { bookingId: item.id } })}
+                onPress={() => router.push({ pathname: '/bidspending', params: { bookingId: item.id } })}
               >
                 <ThemedText style={{ color: '#fff' }} type="defaultSemiBold">
                   View Offer({item.bid_count})
                 </ThemedText>
               </ThemedButton>
-              :  item.help_status === 'C' && item.customer_statisfy === null ?
+              : item.help_status === 'C' && item.customer_statisfy === null ?
                 <ThemedButton
                   style={{
                     backgroundColor: Colors.wallet,
@@ -235,42 +233,42 @@ export const BookingCard = ({ item, onPress }: any) => {
                     padding: 7,
                     borderRadius: 25,
                   }}
-                  onPress={() => router.push({pathname:'/bookings1',  params: { bookingId: item.id } })}
-                  >
+                  onPress={() => router.push({ pathname: '/bookings1', params: { bookingId: item.id } })}
+                >
                   <ThemedText style={{ color: '#fff' }} type="defaultSemiBold">
                     Satisfy Request
                   </ThemedText>
                 </ThemedButton>
-              : item.customer_statisfy !== null && item.helper_rating === null ?
-                <ThemedButton
-                  style={{
-                    backgroundColor: Colors.yellow,
-                    alignSelf: 'flex-start',
-                    flexDirection:'row',
-                    alignItems:'center',
-                    padding: 7,
-                    borderRadius: 25,
-                  }}
-                  onPress={() => [closePopup(),router.push({pathname:'/(protected)/customerrating', params:{requestid:item.id, assigned_helper: item.assigned_helper, helper_rating: item.custom_rating }})]}
-                >
-                  <ThemedText style={{ color: '#fff', marginRight:3 }} type="defaultSemiBold">
-                    Rate Helper
-                  </ThemedText>
-                  <MaterialIcons name="star-rate" size={15} color="white" />
-                </ThemedButton>
-              :
-              <View></View>
+                : item.customer_statisfy !== null && item.helper_rating === null ?
+                  <ThemedButton
+                    style={{
+                      backgroundColor: Colors.yellow,
+                      alignSelf: 'flex-start',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      padding: 7,
+                      borderRadius: 25,
+                    }}
+                    onPress={() => [closePopup(), router.push({ pathname: '/(protected)/customerrating', params: { requestid: item.id, assigned_helper: item.assigned_helper, helper_rating: item.custom_rating } })]}
+                  >
+                    <ThemedText style={{ color: '#fff', marginRight: 3 }} type="defaultSemiBold">
+                      Rate Helper
+                    </ThemedText>
+                    <MaterialIcons name="star-rate" size={15} color="white" />
+                  </ThemedButton>
+                  :
+                  <View></View>
             }
 
             {item.help_status !== 'N' &&
-              <TouchableOpacity style={{alignContent:'flex-end'}} onPress={() => [openPopup(), setFormData(prev => ({...prev,id: item.id, assigned_helper: item.assigned_helper, cancel_frequency: item.cancel_frequency}))]}>
+              <TouchableOpacity style={{ alignContent: 'flex-end' }} onPress={() => [openPopup(), setFormData(prev => ({ ...prev, id: item.id, assigned_helper: item.assigned_helper, cancel_frequency: item.cancel_frequency }))]}>
                 <Entypo name="dots-three-vertical" size={20} color={Colors.gray9} />
               </TouchableOpacity>
             }
           </View>
 
-           <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-           
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+
           </View>
 
           <View style={{ height: 1, backgroundColor: Colors.gray9, marginTop: 10 }} />
@@ -284,78 +282,78 @@ export const BookingCard = ({ item, onPress }: any) => {
         onRequestClose={() => [closePopup()]} // Close on back press
       >
 
-      {/* <Pressable  onPress={Keyboard.dismiss} style={styles.centeredView}> */}
+        {/* <Pressable  onPress={Keyboard.dismiss} style={styles.centeredView}> */}
 
-      <TouchableOpacity style={styles.overlay} onPress={() => {closePopup()}} />
+        <TouchableOpacity style={styles.overlay} onPress={() => { closePopup() }} />
 
-      <Animated.View
-        style={[
-          styles.popup,
-          { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom:'15%'},
-        ]}
-      >
-        <View style={{flexDirection:'row'}}>
-          <TouchableOpacity onPress={closePopup}>
-            <AntDesign name="close-circle" size={20} color={color} />
-          </TouchableOpacity>
-          <View style={{flexDirection:'row', flex:1, justifyContent:'center'}}>
-            <ThemedText type='titleMedium'>Actions</ThemedText>
+        <Animated.View
+          style={[
+            styles.popup,
+            { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: '15%' },
+          ]}
+        >
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity onPress={closePopup}>
+              <AntDesign name="close-circle" size={20} color={color} />
+            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'center' }}>
+              <ThemedText type='titleMedium'>Actions</ThemedText>
+            </View>
           </View>
-        </View>
 
-        <View style={{marginTop:10}}/>
-          <TouchableOpacity style={{flexDirection:'row',}} onPress={() => [closePopup(),router.push({pathname:'/viewmaterials', params:{requestid:formData.id, assignedhelper: formData.assigned_helper}})]}>
-            <MaterialIcons name="view-headline" size={16} color={color}/>
-            <View style={{margin:5}}/>
-            <View style={{alignItems:'center', alignContent:'center',alignSelf:'center'}}>
+          <View style={{ marginTop: 10 }} />
+          <TouchableOpacity style={{ flexDirection: 'row', }} onPress={() => [closePopup(), router.push({ pathname: '/viewmaterials', params: { requestid: formData.id, assignedhelper: formData.assigned_helper } })]}>
+            <MaterialIcons name="view-headline" size={16} color={color} />
+            <View style={{ margin: 5 }} />
+            <View style={{ alignItems: 'center', alignContent: 'center', alignSelf: 'center' }}>
               <ThemedText>{"View Material's"}</ThemedText>
             </View>
           </TouchableOpacity>
 
-          <View style={{marginTop:15}}/>
+          <View style={{ marginTop: 15 }} />
 
           {
-            item.help_status === "A" && 
+            item.help_status === "A" &&
             <>
-              <TouchableOpacity style={{flexDirection:'row',}} onPress={() => [closePopup(),router.push({pathname:'/(protected)/dispute', params:{requestid:formData.id}})]}>
+              <TouchableOpacity style={{ flexDirection: 'row', }} onPress={() => [closePopup(), router.push({ pathname: '/(protected)/dispute', params: { requestid: formData.id } })]}>
                 <AntDesign name="exclamation-circle" size={16} color={color} />
-                <View style={{margin:5}}/>
-                <View style={{alignItems:'center', alignContent:'center',alignSelf:'center'}}>
+                <View style={{ margin: 5 }} />
+                <View style={{ alignItems: 'center', alignContent: 'center', alignSelf: 'center' }}>
                   <ThemedText>{"Log a Dispute"}</ThemedText>
                 </View>
               </TouchableOpacity>
-              <View style={{marginTop:15}}/>
+              <View style={{ marginTop: 15 }} />
             </>
-          }
- 
-          {
-             item.help_status === "A" && item.attachment ? 
-            <>
-              <TouchableOpacity style={{flexDirection:'row',}} onPress={() => [closePopup(),handleDownload(item.attachment)]}>
-                <Entypo name="attachment" size={16} color={color} />
-                <View style={{margin:5}}/>
-                <View style={{alignItems:'center', alignContent:'center',alignSelf:'center'}}>
-                  <ThemedText>{"View Attachment's"}</ThemedText>
-                </View>
-              </TouchableOpacity>
-              <View style={{margin:15}}/>
-            </> : null
           }
 
           {
-            formData.cancel_frequency === "N" && 
+            item.help_status === "A" && item.attachment ?
+              <>
+                <TouchableOpacity style={{ flexDirection: 'row', }} onPress={() => [closePopup(), router.push({ pathname: '/(protected)/attachment', params: { url: `https://phixotech.com/igoeppms/public/attachment/${item.attachment}` } })]}>
+                  <Entypo name="attachment" size={16} color={color} />
+                  <View style={{ margin: 5 }} />
+                  <View style={{ alignItems: 'center', alignContent: 'center', alignSelf: 'center' }}>
+                    <ThemedText>{"View Attachment's"}</ThemedText>
+                  </View>
+                </TouchableOpacity>
+                <View style={{ marginTop: 15 }} />
+              </> : null
+          }
+
+          {
+            formData.cancel_frequency === "Y" &&
             <>
               {/* <View style={{marginTop:20}}/> */}
-              <TouchableOpacity style={{flexDirection:'row',}} onPress={() => [closePopup(), cancelfrequncyhandler()]}>
-                <MaterialIcons name="mode" size={16} color={color}/>
-                <View style={{margin:5}}/>
-                <View style={{alignItems:'center', alignContent:'center',alignSelf:'center'}}>
+              <TouchableOpacity style={{ flexDirection: 'row', }} onPress={() => [closePopup(), cancelfrequncyhandler()]}>
+                <MaterialIcons name="mode" size={16} color={color} />
+                <View style={{ margin: 5 }} />
+                <View style={{ alignItems: 'center', alignContent: 'center', alignSelf: 'center' }}>
                   <ThemedText>{"Cancel Recurring Request"}</ThemedText>
                 </View>
               </TouchableOpacity>
             </>
-          } 
-          </Animated.View>
+          }
+        </Animated.View>
         {/* </Pressable> */}
       </Modal>
     </>

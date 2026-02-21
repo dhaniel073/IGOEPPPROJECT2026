@@ -83,28 +83,24 @@ export default function viewmaterials({
             reference: `TNX_${Date.now()}`,
             onSuccess: async (res: any) => {
                 await SuccessHandler(res);
-                console.log("Payment success:", res);
             },
             onCancel: () => {
                 Alert.alert("Cancelled", "Transaction Cancelled")
             },
-            onLoad: (res: any) => console.log("Webview loading"),
+            onLoad: (res: any) => { },
             onError: (err: any) => {
-                console.log("An error occured while per", err)
+                Alert.alert("Error", "An error occured while processing payment")
             }
         })
     }
 
     const SuccessHandler = async (res: any) => {
-        console.log("Payment response:", res);
         try {
             setIsFetching(true);
             const response = await materialpaymentbycustomer(user?.customer_id, requestid, avail?.id, user?.session_id, decryptData(token));
-            console.log("Wallet update response:", response);
             fetchAll()
             Alert.alert("Success", "Payment was successful", [{ text: "Ok", onPress: () => { } },]);
         } catch (error: any) {
-            console.log("Error in SuccessHandler:", error.response);
             Alert.alert("Sorry", "An error occurred. Please try again later", [{ text: "Ok", onPress: () => router.push("/"), },]);
         } finally {
             setIsFetching(false)
@@ -177,18 +173,12 @@ export default function viewmaterials({
                     sessionId(user?.email, decryptData(token)),
                     getbanks(decryptData(token))
                 ]);
-
-                console.log("Materials:", materials);
-                console.log("Total amount:", totalAmount);
-                console.log("Session:", session);
-
                 setFetchedMaterial(materials);
                 setAmount(totalAmount);
                 setBank(banks)
                 // setSession(session);
                 updateUserFields({ session_id: session.login_session_id })
             } catch (error: any) {
-                console.error("Error fetching data:", error.response);
                 if (error.response?.status === 401) {
                     Alert.alert("Session expired", "Please log in again.");
                     await logout();
@@ -214,17 +204,11 @@ export default function viewmaterials({
                 gettotalamountnmaterialrequestid(requestid, decryptData(token)),
                 sessionId(user?.email, decryptData(token)),
             ]);
-
-            console.log("Materials:", materials);
-            console.log("Total amount:", totalAmount);
-            console.log("Session:", session);
-
             setFetchedMaterial(materials);
             setAmount(totalAmount);
             // setSession(session);
             updateUserFields({ session_id: session.login_session_id })
         } catch (error: any) {
-            console.error("Error fetching data:", error.response);
             if (error.response?.status === 401) {
                 Alert.alert("Session expired", "Please log in again.");
                 await logout();
@@ -291,10 +275,8 @@ export default function viewmaterials({
     const paybywallet = async () => {
         try {
             const response = await materialpaymentbycustomer(user?.customer_id, requestid, avail?.id, user?.session_id, decryptData(token));
-            console.log("Wallet payment response:", response);
             Alert.alert("Success", "Payment was successful", [{ text: "Ok", onPress: () => fetchAll() },]);
         } catch (error: any) {
-            console.log("Error in SuccessHandler:", error.response);
             Alert.alert("Sorry", error.response.data.message || "An error occurred. Please try again later", [{ text: "Ok", onPress: () => router.push("/bookings"), },]);
         } finally {
             setIsFetching(false)

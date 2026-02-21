@@ -88,11 +88,10 @@ export default function profileEdit({
     try {
       setIsLoading(true);
       const response = await customerinfocheck(user?.customer_id, decryptData(token));
-      console.log(response)
       updateUser(response)
       router.replace("/(protected)/profile")
     } catch (error: any) {
-      console.error("Error fetching pending requests:", error.response);
+      return;
     } finally {
       setIsLoading(false);
     }
@@ -124,10 +123,8 @@ export default function profileEdit({
           await logout(); // from your AuthContext
           router.replace("/login"); // navigate to login screen
         } else {
-          Alert.alert('Error', 'Unable to load notification settings.')
+          Alert.alert('Error', 'Unable to fetch profile data.')
         }
-        console.error('Error fetching user profile:', err);
-        Alert.alert('Error', 'Unable to fetch profile data.');
       } finally {
         setIsLoading(false);
       }
@@ -200,7 +197,7 @@ export default function profileEdit({
         }));
         setCountryData(countryArray);
       } catch (error) {
-        console.error("Country fetch error:", error);
+        return;
       }
     };
     fetchCountries();
@@ -225,7 +222,7 @@ export default function profileEdit({
       }));
       setStateData(stateArray);
     } catch (error) {
-      console.error("State fetch error:", error);
+      return;
     }
   };
 
@@ -248,7 +245,7 @@ export default function profileEdit({
       }));
       setCityData(cityArray);
     } catch (error) {
-      console.error("City fetch error:", error);
+      return;
     }
   };
 
@@ -312,7 +309,6 @@ export default function profileEdit({
       // Alert.alert('Success', 'Your profile has been updated successfully!');
 
     } catch (err: any) {
-      console.error('Profile update error:', err.response || err);
       Alert.alert('Error', 'Something went wrong while updating your profile.');
     } finally {
       setIsLoading(false);

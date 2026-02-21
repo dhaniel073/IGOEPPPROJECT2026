@@ -130,7 +130,6 @@ export const convertToReadableDateTime = (dateStr: string, timeStr: string): str
 
     return `${formattedDate.replace(',', '')} at ${formattedTime}`;
   } catch (error) {
-    console.error("Date conversion error:", error);
     return `${dateStr} at ${timeStr}`;
   }
 };

@@ -49,7 +49,6 @@ export default function selectartisan({
       try {
         setisloading(true)
         const response = await getsubcathelper(subcatid, decryptData(token));
-        console.log(response)
         setresponseData(response.data)
         setFetchedRequest(response.data)
       } catch (error: any) {
@@ -58,9 +57,8 @@ export default function selectartisan({
           await logout(); // from your AuthContext
           router.replace("/login"); // navigate to login screen
         } else {
-          Alert.alert('Error', 'Unable to load notification settings.')
+          Alert.alert('Error', 'An error occurred. Please try again later.')
         }
-        console.error("Error fetching pending requests:", error.response);
       } finally {
         setisloading(false);
       }

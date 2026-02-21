@@ -137,7 +137,6 @@ export default function complaince({
                     },
                 };
                 const response = await axios(config);
-                console.log(response.data)
                 const data = response.data;
                 const countryArray = data.map((item: any) => ({
                     label: item.Identification_name,
@@ -146,7 +145,7 @@ export default function complaince({
                 }));
                 setids(countryArray);
             } catch (error: any) {
-                console.error("An error occured:", error.response);
+                return;
             } finally {
                 setIsLoading(false)
             }
@@ -159,7 +158,6 @@ export default function complaince({
             try {
                 setIsLoading(true);
                 const response = await customerinfocheck(user?.customer_id, decryptData(token));
-                console.log(response);
                 setFetchedInfo(response);
             } catch (error: any) {
                 if (error.response?.status === 401) {
@@ -167,9 +165,8 @@ export default function complaince({
                     await logout(); // from your AuthContext
                     router.replace("/login"); // navigate to login screen
                 } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
+                    Alert.alert('Error', 'An error occurred. Please try again later.')
                 }
-                console.error("Error fetching pending requests:", error);
             } finally {
                 setIsLoading(false);
             }
@@ -205,7 +202,6 @@ export default function complaince({
             closePopup();
             await uploadAddress(image.base64);
         } catch (error) {
-            console.error('Camera error:', error);
             Alert.alert('Error', 'Unable to open camera.');
         }
     };
@@ -236,7 +232,6 @@ export default function complaince({
             closePopup();
             await uploadAddress(image.base64);
         } catch (error) {
-            console.error('Image picker error:', error);
             Alert.alert('Error', 'Unable to select image.');
         }
     };
@@ -266,7 +261,6 @@ export default function complaince({
             closePopup1();
             uploadIdCard(image.base64);
         } catch (error) {
-            console.error('Camera error:', error);
             Alert.alert('Error', 'Unable to open camera.');
         }
     };
@@ -297,7 +291,6 @@ export default function complaince({
             closePopup1();
             uploadIdCard(image.base64);
         } catch (error) {
-            console.error('Image picker error:', error);
             Alert.alert('Error', 'Unable to select image.');
         }
     };
@@ -328,7 +321,6 @@ export default function complaince({
             closePopup2();
             await uploadCAC(image.base64);
         } catch (error) {
-            console.error('Camera error:', error);
             Alert.alert('Error', 'Unable to open camera.');
         }
     };
@@ -358,7 +350,6 @@ export default function complaince({
             closePopup2();
             await uploadCAC(image.base64);
         } catch (error) {
-            console.error('Image picker error:', error);
             Alert.alert('Error', 'Unable to select image.');
         }
     };
@@ -379,13 +370,10 @@ export default function complaince({
             setIsLoading(true);
 
             const response = await uploadFn(imageUrl);
-            console.log("Upload response:", response);
-
             Alert.alert("Success", successMessage, [
                 { text: "Ok", onPress: reload },
             ]);
         } catch (error: any) {
-            console.error("Upload failed:", error.response?.data || error.message);
             Alert.alert("Error", "An error occurred. Please try again later.");
         } finally {
             setIsLoading(false);
@@ -394,13 +382,11 @@ export default function complaince({
 
 
     const handleValidation = () => {
-        console.log(formData)
         const validationErrors = validateComplaince(formData);
         setErrors(validationErrors);
 
         // Handle errors
         if (Object.keys(validationErrors).length > 0) {
-            console.log("Validation Errors:", validationErrors);
 
             const allErrors = Object.values(validationErrors).join("\n");
             Alert.alert("❌ Validation Errors", allErrors);
@@ -415,8 +401,6 @@ export default function complaince({
         try {
             setIsLoading(true);
             const response = await customerupdateid(user?.customer_id, formData.idtype, formData.idnum, decryptData(token));
-            console.log(response)
-
             Alert.alert("Success", response.message, [
                 { text: "Ok", onPress: () => [reload(), setModalVisible2(prev => !prev)] },
             ]);
@@ -457,9 +441,7 @@ export default function complaince({
             setIsLoading(true)
             const response = await customerinfocheck(user?.customer_id, decryptData(token))
             setFetchedInfo(response)
-            console.log(response)
         } catch (error: any) {
-            console.log(error.response)
             return;
         } finally {
             setIsLoading(false)

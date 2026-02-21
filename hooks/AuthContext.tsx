@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(JSON.parse(storedUser));
         }
       } catch (err) {
-        console.log("Failed to restore session:", err);
+        return;
       } finally {
         setIsLoading(false);
       }
@@ -124,7 +124,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       ...newUserData,
       updated_at: Date.now(),
     };
-    console.log("[AuthContext] updateUser REPLACE called — source:", newUserData/* add caller info if possible */);
     setUser(stamped);
     await SecureStore.setItemAsync("userData", JSON.stringify(stamped));
   };
@@ -139,7 +138,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       updated_at: Date.now(),
     };
     // inside updateUserFields
-    console.log("[AuthContext] updateUserFields called, updates:", updates);
     setUser(merged);
     await SecureStore.setItemAsync("userData", JSON.stringify(merged));
   };
@@ -170,7 +168,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(merged);
       await SecureStore.setItemAsync("userData", JSON.stringify(merged));
     } catch (error) {
-      console.error("Failed to refresh user:", error);
+      return;
     } finally {
       if (!silent) setIsLoading(false);
     }

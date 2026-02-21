@@ -98,8 +98,7 @@ export default function addmoneycard({
                     return;
                 }
 
-                console.log(error.response);
-                Alert.alert("Error", "An error occurred.");
+                Alert.alert("Error", "An error occurred. Please try again later.");
             } finally {
                 setisloading(false);
             }
@@ -157,8 +156,6 @@ export default function addmoneycard({
 
 
     const pinvalidation = async (pin: any) => {
-        console.log(pin);
-
         try {
             setIsPinLoading(true);
 
@@ -168,14 +165,11 @@ export default function addmoneycard({
                 decryptData(token)
             );
 
-            console.log(response);
             closePopup();        // close the PIN modal
             makepayment();        // start payment loading immediately
 
         } catch (error: any) {
             Alert.alert("Error", error.response?.data?.message || "PIN validation failed");
-            console.log(error.response?.data?.message);
-
         } finally {
             setIsPinLoading(false);
         }
@@ -191,7 +185,6 @@ export default function addmoneycard({
                 decryptData(token)
             );
 
-            console.log(response)
             Alert.alert('Successful', 'Commission withdrawal was successful', [
                 {
                     text: 'OK',
@@ -199,10 +192,8 @@ export default function addmoneycard({
                 }
             ])
 
-            // console.log(response);
         } catch (error: any) {
             Alert.alert("Error", error.response?.data.message || "Payment failed");
-            console.log(error.response);
 
         } finally {
             setIsPaymentLoading(false);
@@ -222,7 +213,6 @@ export default function addmoneycard({
                 router.replace("/login");
                 return;
             }
-            console.log(error.response);
             Alert.alert("Error", "An error occurred.");
         } finally {
             setisloading(false);

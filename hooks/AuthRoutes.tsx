@@ -80,6 +80,17 @@ async function category() {
   return data;
 }
 
+async function globalproductcategory(token: any) {
+  const response = await axios.get(`${YOUR_API_BASE_URL}auth/globalproductcategory`, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  })
+  const data = response.data.data
+  return data;
+}
+
 async function categoriesbylga(lga: any, token: any) {
   const response = await axios.get(`${YOUR_API_BASE_URL}auth/categoriesbylga/${lga}`, {
     headers: {
@@ -1645,7 +1656,7 @@ export {
   category, csutomerwallet, customerbillercommission, customerinfocheck, customernotsatisfied, customerRequestRating, customerresetpassword, customersatisfied, customerupdateid, customeruploadAddressproof, customeruploadCAC, customeruploadIdcard,
   customerwallethistory, customerwallethistoryall, deleteaccount, deletefromcart, disablealert, disablebiometric, discopayment, disputelog, educationpay, enablealert, fetchrequestbyid, forgotpass, frequentlyusedartisans,
   getbanks, getbillsHistory, getbillsHistoryById, getlatestinvoices, getmaterialdetailsbyrequestidmobile, getpaystackkey, getpendinginvoices,
-  getsession, getsubcathelper, gettotalamountnmaterialrequestid, getVFDVirtualAccountCustomerMaterial, helperget, internetPayment, loginwithbiometric, marketplaceitemsget,
+  getsession, getsubcathelper, gettotalamountnmaterialrequestid, getVFDVirtualAccountCustomerMaterial, globalproductcategory, helperget, internetPayment, loginwithbiometric, marketplaceitemsget,
   materialpaymentbycustomer, movecommissiontocustomerwallet, notification, notificationbyid, notificationunread, profileupdate, requestinfo, resettoken, sessioncheckcustomer, sessionId, setuppin, showcompletedrequestbycustomerid, showhelperrating,
   showpendingrequestbycustomerid, showrecurringrequestbycustomerid, subcategory, termsandconditons, tvpay, tvrenewalpay, updateExpoToken, updatepin, uploadprofileimage, validatebetting, validatecustomerpasswordchangetoken,
   validatecustomerself, validatecustomerthirdparty, validatedisco, validateinternets, validatepin, validatetelevision, validatetransaction, vfdvalidatetransaction, vfdvirtualaccount,

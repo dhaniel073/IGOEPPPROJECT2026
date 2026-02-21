@@ -68,15 +68,11 @@ export default function virtualaccounttopup({
                 // Different payload structure per bank
                 if (bank === 'OPTIMUS BANK') {
                     setPayload(response);
-                    console.log('Optimus:', response);
                 } else {
                     setPayload(response);
-                    console.log('VFD:', response);
                 }
 
             } catch (error: any) {
-                console.log('Fetch Error:', error.response);
-
                 if (error.response?.status === 401) {
                     Alert.alert('Session expired', 'Please log in again.');
                     await logout();
@@ -117,11 +113,9 @@ export default function virtualaccounttopup({
                 decryptData(token)
             );
 
-            console.log(response);
             isOptimus ? setIsVisible(true) : setIsVisible1(true);
 
         } catch (error: any) {
-            console.log(error.response?.data || error);
             const message = error.response?.data?.message || "An unexpected error occurred";
             Alert.alert('Failed', message);
         } finally {

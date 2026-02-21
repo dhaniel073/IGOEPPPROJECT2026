@@ -48,7 +48,7 @@ export default function billspaymentTv({
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible1, setModalVisible1] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
-  const { user, token } = useAuth()
+  const { user, token, logout } = useAuth()
   const [tvPlatform, setTvPlatform] = useState<any>([])
   const [bouquets, setBouquets] = useState<any>([])
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -131,8 +131,14 @@ export default function billspaymentTv({
           flag: item.imagePath
         }));
         setTvPlatform(countryArray);
-      } catch (error) {
-        console.error("Country fetch error:", error);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
+        } else {
+          Alert.alert('Error', 'An error occurred. Please try again later.')
+        };
       } finally {
         setIsLoading(false)
       }
@@ -153,7 +159,6 @@ export default function billspaymentTv({
         }
       );
 
-      console.log(response.data.data)
       const data = response.data.data.bouquets;
       const cityArray = data.map((item: any) => ({
         label: item.name,
@@ -165,7 +170,6 @@ export default function billspaymentTv({
     } catch (error: any) {
       Alert.alert("Error", `No bouquet fetched for current option selected`)
       setBouquets([])
-      // console.error("Bousquest fetch error:", error.response);
     }
   };
 
@@ -183,8 +187,6 @@ export default function billspaymentTv({
 
     // Handle errors
     if (Object.keys(validationErrors).length > 0) {
-      console.log("Validation Errors:", validationErrors);
-
       const allErrors = Object.values(validationErrors).join("\n");
       Alert.alert("❌ Validation Errors", allErrors);
 
@@ -196,12 +198,9 @@ export default function billspaymentTv({
   };
 
   const validatehandler = async () => {
-    console.log(formData)
     try {
       setIsLoading(true)
       const response = await validatetelevision(user?.customer_id, formData.platform, formData.smartcard, formData.imagepath, decryptData(token));
-      // setFormData({...formData, reference: response.data.requestID})
-      console.log(response)
       setFormData(prev => ({
         ...prev,
         reference: response.data.requestID,
@@ -221,7 +220,6 @@ export default function billspaymentTv({
         }
       ]);
     } catch (error: any) {
-      console.log("Failed to validate betting details:", error.response?.data || error);
       Alert.alert("Error", error.response?.data.message || "Failed to validate meter number.");
     } finally {
       setIsLoading(false)
@@ -229,8 +227,6 @@ export default function billspaymentTv({
   }
 
   const pinvalidation = async (pin: any) => {
-    console.log(pin);
-
     try {
       setIsPinLoading(true);
 
@@ -240,14 +236,11 @@ export default function billspaymentTv({
         decryptData(token)
       );
 
-      console.log(response);
-
       closePopup1();        // close the PIN modal
       makepayment();        // start payment loading immediately
 
     } catch (error: any) {
       Alert.alert("Error", error.response?.data?.message || "PIN validation failed");
-      console.log(error.response?.data?.message);
 
     } finally {
       setIsPinLoading(false);
@@ -279,8 +272,6 @@ export default function billspaymentTv({
         );
       }
 
-      console.log(response);
-
       // Update your formData with the response
       setFormData(prev => ({
         ...prev,
@@ -291,8 +282,6 @@ export default function billspaymentTv({
 
     } catch (error: any) {
       Alert.alert("Error", error.response?.data.message || "Payment failed");
-      console.log(error.response);
-
     } finally {
       setIsPaymentLoading(false);
     }
@@ -302,22 +291,14 @@ export default function billspaymentTv({
   const commissionget = async (id: any) => {
     try {
       const response = await customerbillercommission(id, decryptData(token));
-      console.log(response);
 
       setFormData(prev => ({
         ...prev,
         commission: response
       }));
     } catch (error: any) {
-      console.log(error.response);
+      return;
     }
-  };
-
-
-
-  const handleSubmit = (pin: any) => {
-    console.log("Entered PIN:", pin);
-    // handle verification here
   };
 
   if (isloading || isPinLoading || isPaymentLoading) {

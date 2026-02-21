@@ -9,7 +9,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Animated, StyleSheet, TextProps, View } from 'react-native';
+import { Alert, Animated, StyleSheet, TextProps, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -34,7 +34,7 @@ export default function addressdetialsforrequest({
   const [country, setCountry] = useState<any[]>([]);
   const [state, setState] = useState<any[]>([]);
   const [city, setCity] = useState<any[]>([]);
-  const { token } = useAuth()
+  const { token, logout } = useAuth()
   const router = useRouter()
   const [formData, setFormData] = useState<any>({
     countryName: "",
@@ -61,15 +61,20 @@ export default function addressdetialsforrequest({
           value: item.id,
         }));
         setCountryData(countryArray);
-      } catch (error) {
-        console.error("Country fetch error:", error);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
+        } else {
+          Alert.alert('Error', 'An error occurred. Please try again later.')
+        }
       }
     };
     fetchCountries();
   }, []);
 
   const handleState = async (countryCode: string) => {
-    console.log(countryCode)
     try {
       const response = await axios.get(
         `${YOUR_API_BASE_URL}auth/general/state/${countryCode}`,
@@ -80,7 +85,6 @@ export default function addressdetialsforrequest({
           },
         }
       );
-      console.log(response)
       const data = response.data.data;
       const stateArray = data.map((item: any) => ({
         label: item.state_name,
@@ -88,7 +92,7 @@ export default function addressdetialsforrequest({
       }));
       setStateData(stateArray);
     } catch (error) {
-      console.error("State fetch error:", error);
+      return;
     }
   };
 
@@ -111,7 +115,7 @@ export default function addressdetialsforrequest({
       }));
       setCityData(cityArray);
     } catch (error) {
-      console.error("City fetch error:", error);
+      return;
     }
   };
 

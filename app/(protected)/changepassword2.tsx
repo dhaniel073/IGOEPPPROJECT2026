@@ -26,7 +26,7 @@ export default function ResetPassword({
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const router = useRouter();
-  const { user, token } = useAuth();
+  const { user, token, logout } = useAuth();
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -53,8 +53,13 @@ export default function ResetPassword({
         [{ text: 'OK', onPress: () => router.push('/settings') }]
       );
     } catch (error: any) {
-      console.error('Error resetting password:', error.response);
-      Alert.alert('Error', 'An error occurred. Please try again later.');
+      if (error.response?.status === 401) {
+        Alert.alert("Session expired", "Please log in again.");
+        await logout(); // from your AuthContext
+        router.replace("/login"); // navigate to login screen
+      } else {
+        Alert.alert('Error', 'An error occurred. Please try again later.');
+      }
     } finally {
       setIsLoading(false);
     }

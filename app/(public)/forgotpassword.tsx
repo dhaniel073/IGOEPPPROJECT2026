@@ -45,7 +45,6 @@ export default function forgotpassword({
 
     if (Object.keys(validationErrors).length > 0) {
       // stop signup — show all errors
-      console.log("Validation Errors:", validationErrors);
 
       // Join all error messages together
       const allErrors = Object.values(validationErrors).join("\n");
@@ -61,7 +60,6 @@ export default function forgotpassword({
     try {
       setisLoading(true)
       const response = await forgotpass(formData.email)
-      console.log(response)
       Alert.alert('Success', 'A mail has been sent', [
         {
           text: "Ok",

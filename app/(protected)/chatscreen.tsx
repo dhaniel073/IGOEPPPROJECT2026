@@ -10,14 +10,14 @@ import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Image, Platform, StyleSheet, View } from "react-native";
+import { Alert, Image, Platform, StyleSheet, View } from "react-native";
 import { Bubble, GiftedChat, Send, User } from "react-native-gifted-chat";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
 export default function ChatScreen() {
     const { id, helperId, helper_user_id } = useLocalSearchParams()
-    const { token, user } = useAuth();
+    const { token, user, logout } = useAuth();
 
     const [messages, setMessages] = useState<any>([]);
     const [loading, setLoading] = useState(true);
@@ -39,14 +39,18 @@ export default function ChatScreen() {
             setLoading(true)
             const response = await helperget(helperId, decryptData(token))
             setHelperData(response.data.data)
-        } catch (error) {
-            return;
+        } catch (error: any) {
+            if (error.response?.status === 401) {
+                Alert.alert("Session expired", "Please log in again.");
+                await logout(); // from your AuthContext
+                router.replace("/login"); // navigate to login screen
+            } else {
+                Alert.alert('Error', 'An error occurred. Please try again later.')
+            }
         } finally {
             setLoading(false)
         }
     }
-
-    console.log(helper_user_id)
 
     // Fetch chat messages
     const fetchMessages = useCallback(async () => {
@@ -78,8 +82,7 @@ export default function ChatScreen() {
             const descArr = stateArray.sort().reverse();
             setMessages(descArr)
         } catch (error: any) {
-            console.log(error.response?.data);
-            // Alert.alert("Error", "Unable to load chat messages");
+            return;
         } finally {
             setLoading(false);
         }
@@ -93,7 +96,6 @@ export default function ChatScreen() {
 
     const SendMessage = (text: any,) => {
         const url = `${YOUR_API_BASE_URL}auth/hrequest/helpchat`
-        // console.log(text)
         axios.post(url, {
             help_id: id,
             from_user_id: user?.userid,
@@ -106,9 +108,8 @@ export default function ChatScreen() {
                 Authorization: `Bearer ${decryptData(token)}`
             }
         }).then((res) => {
-            console.log(res.data)
+            return
         }).catch((error: any) => {
-            console.log(error.response.data)
             return;
         })
     }
@@ -182,14 +183,10 @@ export default function ChatScreen() {
                 renderBubble={renderBubble}
                 alwaysShowSend
                 renderSend={renderSend}
-                // scrollToBottom:true
                 scrollToBottomComponent={() => null}
                 keyboardShouldPersistTaps="handled"
                 bottomOffset={Platform.OS === "ios" ? 20 : 0}
-            // onKeyboardWillShow={() => console.log("Keyboard opening")}
-            // onKeyboardDidShow={() => console.log("Keyboard opened")}
             />
-            <View style={{ marginBottom: '10%' }} />
         </SafeAreaView>
     );
 }

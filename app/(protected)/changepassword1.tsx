@@ -31,21 +31,18 @@ export default function changepassword1({
   const router = useRouter()
   const [pin, setPin] = useState<any>()
   const [isloading, setisLoading] = useState(false)
-  const { user, token } = useAuth()
+  const { user, token, logout } = useAuth()
 
   const submitHandler = async () => {
     const emailIsValid = pin.length !== 4
 
     const onlyNumbers = /^[0-9]*$/;
     if (onlyNumbers.test(pin) && !emailIsValid) {
-      console.log(pin);
       try {
         setisLoading(true)
         const response = await validatecustomerpasswordchangetoken(user?.customer_id, encryptData(pin), decryptData(token))
-        // console.log(response.data)
         router.push('/changepassword2')
       } catch (error: any) {
-        console.log(error.response)
         Alert.alert("Error", `${error.response.data.message}`)
         setisLoading(false)
       } finally {
@@ -61,7 +58,13 @@ export default function changepassword1({
       setisLoading(true)
       const response = await resettoken(user?.customer_id, decryptData(token))
     } catch (error: any) {
-      Alert.alert("Error", `${error.response.data.message}`)
+      if (error.response?.status === 401) {
+        Alert.alert("Session expired", "Please log in again.");
+        await logout(); // from your AuthContext
+        router.replace("/login"); // navigate to login screen
+      } else {
+        Alert.alert("Error", `${error.response.data.message}`)
+      }
     } finally {
       setisLoading(false)
     }

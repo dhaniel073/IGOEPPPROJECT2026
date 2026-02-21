@@ -68,18 +68,15 @@ export default function addmoneycard({
     const { popup } = usePaystack()
 
     const SuccessHandler = async (res: any) => {
-        console.log("Payment response:", res);
         try {
             setisloading(true);
             const response = await walletupdate(user?.customer_id, decryptData(token), encryptData(String(amount)));
-            console.log("Wallet update response:", response);
             if (response) {
                 await updateUserFields({ wallet_balance: response });
             }
             setAmount(null)
             router.back()
         } catch (error: any) {
-            console.log("Error in SuccessHandler:", error.response);
             Alert.alert("Sorry", "An error occurred. Please try again later", [{ text: "Ok", onPress: () => router.push("/"), },]);
         } finally {
             setisloading(false)
@@ -94,14 +91,13 @@ export default function addmoneycard({
             reference: `TNX_${Date.now()}`,
             onSuccess: async (res: any) => {
                 await SuccessHandler(res);
-                console.log("Payment success:", res);
             },
             onCancel: () => {
                 Alert.alert("Cancelled", "Transaction Cancelled")
             },
-            onLoad: (res: any) => console.log("Webview loading"),
+            onLoad: (res: any) => { },
             onError: (err: any) => {
-                console.log("An error occured while per", err)
+                Alert.alert("Sorry", "An error occurred. Please try again later", [{ text: "Ok", onPress: () => router.push("/"), },]);
             }
         })
     }

@@ -60,24 +60,21 @@ export default function HomeScreen({
         const currentAppVersion = Constants.expoConfig?.version ?? "unknown";
         const required = data.version;
 
-        console.log(required);
         setRequiredVersion(required);
 
         if (currentAppVersion !== required) {
           setNeedsUpdate(true);
           setModalVisible(true);
         } else {
-          console.log("not");
+          return;
         }
       } catch (error) {
-        console.error("Failed to check version", error);
+        return;
       }
     };
 
-    // Initial check immediately
     checkVersion();
 
-    // Set interval to run checkVersion every 15 minutes (900000 milliseconds)
     const intervalId = setInterval(() => {
       checkVersion();
     }, 900000);
@@ -104,17 +101,14 @@ export default function HomeScreen({
           if (!isActive) return;
           if (!pushtoken) return;
 
-          // Only update if it's different from what's already stored in context
           if (user?.pushtoken !== pushtoken) {
-            console.log("[HomeScreen] pushing new token to server:", pushtoken);
             await updateExpoToken(String(user.customer_id), encryptData(pushtoken), decryptData(token));
             updateUserFields({ pushtoken });
           } else {
-            // nothing to do
-            // console.log("[HomeScreen] push token unchanged");
+            return;
           }
         } catch (err) {
-          console.log("Error syncing notification token:", err);
+          return;
         }
       };
 
@@ -139,13 +133,17 @@ export default function HomeScreen({
             notificationcount: response,
           });
         }
-      } catch (error) {
-        console.log("Error fetching notifications:", error);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
+        }
       }
     };
 
     fetchNotifications();
-  }, [user?.userid, token]) // Changed dependency to user.userid to avoid loops with notificationcount
+  }, [user?.userid, token])
 
   const openPopup1 = () => {
     setVisible(true);
@@ -163,6 +161,7 @@ export default function HomeScreen({
       useNativeDriver: true,
     }).start(() => setVisible(false)); // Close after animation
   };
+
   useFocusEffect(
     useCallback(() => {
       if (!user?.customer_id || !token) return;
@@ -175,7 +174,7 @@ export default function HomeScreen({
           const response = await getlatestinvoices(user.customer_id, decryptData(token));
           setInvoice(response);
         } catch (error) {
-          console.log(error);
+          return;
         }
       };
 
@@ -193,7 +192,7 @@ export default function HomeScreen({
           const response = await frequentlyusedartisans(decryptData(token));
           setHandymen(response);
         } catch (error: any) {
-          console.log(error.response);
+          return;
         }
       };
 

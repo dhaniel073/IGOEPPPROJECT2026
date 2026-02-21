@@ -38,16 +38,14 @@ export default function recurringrequest({
             try {
                 setIsFetching(true);
                 const response = await showrecurringrequestbycustomerid(user?.customer_id, decryptData(token));
-                console.log(response)
                 setFetchedRequest(response);
             } catch (error: any) {
-                console.error("Error fetching recurring requests:", error);
                 if (error.response?.status === 401) {
                     Alert.alert("Session expired", "Please log in again.");
                     await logout(); // from your AuthContext
                     router.replace("/login"); // navigate to login screen
                 } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
+                    Alert.alert('Error', 'An error occurred. Please try again later.')
                 }
             } finally {
                 setIsFetching(false);
@@ -65,13 +63,12 @@ export default function recurringrequest({
             const response = await showrecurringrequestbycustomerid(user?.customer_id, decryptData(token));
             setFetchedRequest(response);
         } catch (error: any) {
-            console.error("Error fetching recurring requests:", error);
             if (error.response?.status === 401) {
                 Alert.alert("Session expired", "Please log in again.");
                 await logout(); // from your AuthContext
                 router.replace("/login"); // navigate to login screen
             } else {
-                Alert.alert('Error', 'Unable to load notification settings.')
+                Alert.alert('Error', 'An error occurred. Please try again later.')
             }
         } finally {
             setIsFetching(false);

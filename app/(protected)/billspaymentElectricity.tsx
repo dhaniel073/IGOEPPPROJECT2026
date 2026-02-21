@@ -62,7 +62,7 @@ export default function billspaymentElectricity({
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
   const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const router = useRouter()
-  const { user, token } = useAuth()
+  const { user, token, logout } = useAuth()
   const [isloading, setIsLoading] = useState(false)
   const [visible, setVisible] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false)
@@ -187,8 +187,14 @@ export default function billspaymentElectricity({
           flag: item.imagePath
         }));
         setElectricityPlatform(countryArray);
-      } catch (error) {
-        console.error("Country fetch error:", error);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
+        } else {
+          Alert.alert('Error', 'An error occurred. Please try again later.')
+        };
       } finally {
         setIsLoading(false)
       }
@@ -202,7 +208,6 @@ export default function billspaymentElectricity({
 
     if (Object.keys(validationErrors).length > 0) {
       // stop signup — show all errors
-      console.log("Validation Errors:", validationErrors);
 
       // Join all error messages together
       const allErrors = Object.values(validationErrors).join("\n");
@@ -217,24 +222,20 @@ export default function billspaymentElectricity({
   const commissionget = async (id: any) => {
     try {
       const response = await customerbillercommission(id, decryptData(token));
-      console.log(response);
-
       setFormData(prev => ({
         ...prev,
         commission: response
       }));
     } catch (error: any) {
-      console.log(error.response);
+      return;
     }
   };
 
   const validatehandler = async () => {
-    console.log(formData)
     try {
       setIsLoading(true)
       const response = await validatedisco(user?.customer_id, formData.platform, formData.meternumber, formData.meter_type, formData.imagepath, decryptData(token));
       // setFormData({...formData, reference: response.data.requestID})
-      console.log(response.data)
       setFormData(prev => ({
         ...prev,
         reference: response.data.requestID,
@@ -252,7 +253,6 @@ export default function billspaymentElectricity({
         }
       ]);
     } catch (error: any) {
-      console.log("Failed to validate betting details:", error.response?.data || error);
       Alert.alert("Error", error.response?.data.message || "Failed to validate meter number.");
     } finally {
       setIsLoading(false)
@@ -260,8 +260,6 @@ export default function billspaymentElectricity({
   }
 
   const pinvalidation = async (pin: any) => {
-    console.log(pin);
-
     try {
       setIsPinLoading(true);
 
@@ -271,14 +269,11 @@ export default function billspaymentElectricity({
         decryptData(token)
       );
 
-      console.log(response);
-
       closePopup1();        // close the PIN modal
       makepayment();        // start payment loading immediately
 
     } catch (error: any) {
       Alert.alert("Error", error.response?.data?.message || "PIN validation failed");
-      console.log(error.response?.data?.message);
 
     } finally {
       setIsPinLoading(false);
@@ -296,7 +291,6 @@ export default function billspaymentElectricity({
         formData.commission
       );
 
-      console.log(response);
       setFormData(prev => ({
         ...prev,
         token: response.token,
@@ -309,16 +303,9 @@ export default function billspaymentElectricity({
 
     } catch (error: any) {
       Alert.alert("Error", error.response?.data.message || "Payment failed");
-      console.log(error.response);
-
     } finally {
       setIsPaymentLoading(false);
     }
-  };
-
-  const handleSubmit = (pin: any) => {
-    console.log("Entered PIN:", pin);
-    // handle verification here
   };
 
   if (isloading || isPinLoading || isPaymentLoading) {

@@ -8,7 +8,6 @@ import { useAuth } from '@/hooks/AuthContext'
 import { authenticateLogin, loginwithbiometric } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Octicons } from '@expo/vector-icons'
-import Constants from 'expo-constants'
 import * as LocalAuthentication from "expo-local-authentication"
 import { useRouter } from 'expo-router'
 import * as SecureStore from "expo-secure-store"
@@ -38,8 +37,6 @@ export default function login({
     const [supported, setSupported] = useState(false);
 
     const loginHandler = async () => {
-        console.log(email, password);
-
         // --- Validation ---
         if (!email.trim()) {
             Alert.alert("Error", "Email cannot be empty.");
@@ -66,8 +63,6 @@ export default function login({
             setIsLoading(true);
             const encryptedPassword = encryptData(password);
             const response = await authenticateLogin(email, encryptedPassword);
-            console.log('aesBase64Key =', Constants.expoConfig?.extra?.aesBase64Key);
-            console.log("Login Response:", response);
 
             if (response) {
                 await login(encryptData(response.access_token), response);
@@ -76,8 +71,6 @@ export default function login({
                 Alert.alert("Login Failed", response?.message || "Invalid credentials.");
             }
         } catch (error: any) {
-            console.log('aesBase64Key =', Constants.expoConfig?.extra?.aesBase64Key);
-            console.log("Login Error:", error.response);
             Alert.alert("Error", error.response.data.message || "An error occurred during login.");
         } finally {
             setIsLoading(false);
@@ -127,9 +120,6 @@ export default function login({
             setIsLoading(true);
             const encryptedBiometric = encryptData(deviceToken);
             const response = await loginwithbiometric(encryptedBiometric);
-            console.log("Auth Loading: " + isLoading)
-            console.log("Login Response:", response);
-
             if (response) {
                 await login(encryptData(response.access_token), response);
                 router.replace("/");
@@ -137,12 +127,10 @@ export default function login({
                 Alert.alert("Login Failed", response?.message || "Invalid credentials.");
             }
         } catch (error: any) {
-            console.log("Login Error:", error.response);
             const msg = error?.response?.data?.message || error.message || "An unexpected error occurred";
             Alert.alert("Error", msg);
             setIsLoading(false);
         }
-        console.log(deviceToken);
     }
 
     if (isloading) {

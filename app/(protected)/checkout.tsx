@@ -102,8 +102,14 @@ export default function checkout({
                     value: item.id,
                 }));
                 setCountryData(countryArray);
-            } catch (error) {
-                console.error("Country fetch error:", error);
+            } catch (error: any) {
+                if (error.response?.status === 401) {
+                    Alert.alert("Session expired", "Please log in again.");
+                    await logout(); // from your AuthContext
+                    router.replace("/login"); // navigate to login screen
+                } else {
+                    Alert.alert('Error', 'An error occurred. Please try again later.')
+                }
             }
         };
         fetchCountries();
@@ -127,8 +133,15 @@ export default function checkout({
                 value: item.id,
             }));
             setStateData(stateArray);
-        } catch (error) {
-            console.error("State fetch error:", error);
+        } catch (error: any) {
+            if (error.response?.status === 401) {
+                Alert.alert("Session expired", "Please log in again.");
+                await logout(); // from your AuthContext
+                router.replace("/login"); // navigate to login screen
+            } else {
+                Alert.alert('Error', 'An error occurred. Please try again later.')
+            }
+            return;
         }
     };
 
@@ -151,19 +164,17 @@ export default function checkout({
             }));
             setCityData(cityArray);
         } catch (error) {
-            console.error("City fetch error:", error);
+            return;
         }
     };
 
 
     const handlevalidation = () => {
-        console.log(formData)
         const validationErrors = validateCheckout(formData);
         setErrors(validationErrors);
 
         if (Object.keys(validationErrors).length > 0) {
             // stop signup — show all errors
-            console.log("Validation Errors:", validationErrors);
 
             // Join all error messages together
             const allErrors = Object.values(validationErrors).join("\n");
@@ -177,8 +188,6 @@ export default function checkout({
     };
 
     const pinvalidation = async (pin: any) => {
-        console.log(pin);
-
         try {
             setIsPinLoading(true);
 
@@ -188,14 +197,11 @@ export default function checkout({
                 decryptData(token)
             );
 
-            console.log(response);
-
             closePopup();        // close the PIN modal
             makepayment();        // start payment loading immediately
 
         } catch (error: any) {
             Alert.alert("Error", error.response?.data?.message || "PIN validation failed");
-            console.log(error.response?.data?.message);
 
         } finally {
             setIsPinLoading(false);
@@ -212,7 +218,6 @@ export default function checkout({
                 formData.cityName, formData.countryName, user?.customer_id, paymentmethod, decryptData(token)
             );
 
-            console.log(response)
             Alert.alert('Successful', 'item purchased successfully', [
                 {
                     text: 'OK',
@@ -220,11 +225,8 @@ export default function checkout({
                 }
             ])
 
-            console.log(response);
-
         } catch (error: any) {
             Alert.alert("Error", error.response?.data.message || "Payment failed");
-            console.log(error.response);
 
         } finally {
             setIsPaymentLoading(false);

@@ -65,7 +65,7 @@ export default function billspaymentBetting({
   const router = useRouter()
   const [isloading, setIsLoading] = useState(false)
   const [betPlatform, setBetPlatform] = useState<any>([])
-  const { user, token } = useAuth()
+  const { user, token, logout } = useAuth()
   const { billid } = useLocalSearchParams()
 
   const slideAnim = React.useRef(new Animated.Value(height)).current; // Start below the screen
@@ -158,7 +158,6 @@ export default function billspaymentBetting({
           },
         };
         const response = await axios(config);
-        // console.log(response)
         const data = response.data;
         const countryArray = data.map((item: any) => ({
           label: item.name,
@@ -166,8 +165,14 @@ export default function billspaymentBetting({
           flag: item.imagePath
         }));
         setBetPlatform(countryArray);
-      } catch (error) {
-        console.error("Country fetch error:", error);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
+        } else {
+          Alert.alert('Error', 'An error occurred. Please try again later.')
+        }
       } finally {
         setIsLoading(false)
       }
@@ -192,7 +197,6 @@ export default function billspaymentBetting({
 
     if (Object.keys(validationErrors).length > 0) {
       // stop signup — show all errors
-      console.log("Validation Errors:", validationErrors);
 
       // Join all error messages together
       const allErrors = Object.values(validationErrors).join("\n");
@@ -205,7 +209,6 @@ export default function billspaymentBetting({
   };
 
   const validatehandler = async () => {
-    console.log(formData)
     try {
       setIsLoading(true)
       const response = await validatebetting(user?.customer_id, formData.platform, formData.betid, formData.imagepath, decryptData(token));
@@ -225,7 +228,6 @@ export default function billspaymentBetting({
         }
       ]);
     } catch (error: any) {
-      console.log("Failed to validate betting details:", error.response?.data || error);
       Alert.alert("Error", "Failed to validate betting details.");
     } finally {
       setIsLoading(false)
@@ -233,8 +235,6 @@ export default function billspaymentBetting({
   }
 
   const pinvalidation = async (pin: any) => {
-    console.log(pin);
-
     try {
       setIsPinLoading(true);
 
@@ -244,15 +244,11 @@ export default function billspaymentBetting({
         decryptData(token)
       );
 
-      console.log(response);
-
       closePopup1();        // close the PIN modal
       makepayment();        // start payment loading immediately
 
     } catch (error: any) {
       Alert.alert("Error", error.response?.data?.message || "PIN validation failed");
-      console.log(error.response?.data?.message);
-
     } finally {
       setIsPinLoading(false);
     }
@@ -270,13 +266,10 @@ export default function billspaymentBetting({
         formData.commission
       );
 
-      console.log(response);
       setVisible(true);
 
     } catch (error: any) {
       Alert.alert("Error", error.response?.data.message || "Payment failed");
-      console.log(error.response);
-
     } finally {
       setIsPaymentLoading(false);
     }
@@ -286,14 +279,13 @@ export default function billspaymentBetting({
   const commissionget = async (id: any) => {
     try {
       const response = await customerbillercommission(id, decryptData(token));
-      console.log(response);
 
       setFormData(prev => ({
         ...prev,
         commission: response
       }));
     } catch (error: any) {
-      console.log(error.response);
+      return;
     }
   };
 

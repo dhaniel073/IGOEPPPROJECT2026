@@ -24,6 +24,13 @@ export type Props = TextProps & {
     headerBackgroundColor: { dark: string; light: string };
 };
 
+const DetailRow = ({ label, value, isMultiline = false }: { label: string, value: any, isMultiline?: boolean }) => (
+    <View style={{ justifyContent: 'space-between', flexDirection: 'row', marginBottom: 5 }}>
+        <ThemedText style={{ color: '#000' }} type='small'>{label}</ThemedText>
+        <ThemedText style={{ color: Colors.wallet, maxWidth: isMultiline ? 210 : 'auto', textAlign: 'right' }} type='small'>{value || "N/A"}</ThemedText>
+    </View>
+);
+
 
 export default function bookings1({
     lightColor,
@@ -58,13 +65,12 @@ export default function bookings1({
                 const response = await fetchrequestbyid(bookingId, decryptData(token));
                 setFetchedRequest(response);
             } catch (error: any) {
-                console.error("Error fetching pending requests:", error);
                 if (error.response?.status === 401) {
                     Alert.alert("Session expired", "Please log in again.");
-                    await logout(); // from your AuthContext
-                    router.replace("/login"); // navigate to login screen
+                    await logout();
+                    router.replace("/login");
                 } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
+                    Alert.alert('Error', 'An error occured.')
                 }
             } finally {
                 setIsFetching(false);
@@ -81,10 +87,9 @@ export default function bookings1({
         try {
             setIsFetching(true);
             const response = await cancelrequests(bookingId, decryptData(token), reason);
-            console.log(response);
             openPopup();
         } catch (error) {
-            console.error("Error cancelling request:", error);
+            return;
         } finally {
             setIsFetching(false);
         }
@@ -103,24 +108,22 @@ export default function bookings1({
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const handleRequest = () => {
-        console.log(formData)
+    const handleRequest = async () => {
         const validationErrors = validateSatisfyRequest(formData);
         setErrors(validationErrors);
 
         if (Object.keys(validationErrors).length > 0) {
-            // stop signup — show all errors
-            console.log("Validation Errors:", validationErrors);
 
             // Join all error messages together
             const allErrors = Object.values(validationErrors).join("\n");
 
             Alert.alert("❌ Validation Errors", allErrors);
-            return;
+            return false;
         }
 
         // proceed to API call, etc.
-        return satisfyhandle();
+        await satisfyhandle();
+        return true;
     };
 
     const satisfyhandle = async () => {
@@ -144,11 +147,11 @@ export default function bookings1({
                 );
             }
 
-            console.log(response);
+            closePopup3()
             Alert.alert('Successful', 'You have successfully satisfied the handyman', [
                 {
                     text: "OK",
-                    onPress: () => router.push('/(protected)/(tabs)')
+                    onPress: () => router.push('/(protected)/(tabs)/bookings')
                 }
             ])
 
@@ -156,7 +159,6 @@ export default function bookings1({
             alert(
                 "Booking failed. Please try again or contact support if the issue continues."
             );
-            console.log(error.response);
             return;
         } finally {
             setIsFetching(false);
@@ -231,9 +233,6 @@ export default function bookings1({
             useNativeDriver: true,
         }).start(() => setModalVisible3(false)); // Close after animation
     };
-
-
-    console.log(fetchedRequest);
 
     if (isFetching) {
         return <LogoSpinner lightColor='' darkColor='' />
@@ -550,119 +549,38 @@ export default function bookings1({
                 animationType="slide"
                 onRequestClose={closePopup1}
             >
-                <ThemedView
-                    style={{
-                        width: '85%',
-                        backgroundColor: '#fff',
-                        borderRadius: 15,
-                        padding: 20,
-                        shadowColor: '#000',
-                        shadowOpacity: 0.2,
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowRadius: 4,
-                        elevation: 5,
-                    }}
+                <TouchableOpacity style={styles.overlay} onPress={closePopup1} activeOpacity={1} />
+                <Animated.View
+                    style={[
+                        styles.popup1,
+                        { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%" },
+                    ]}
                 >
-                    <ThemedText type="title" style={{ marginBottom: 10, color: "#000" }}>
-                        Satisfy  Request
-                    </ThemedText>
-
-                    <TouchableOpacity style={styles.overlay} onPress={() => [closePopup1()]} />
-
-                    <Animated.View
-                        style={[
-                            styles.popup1,
-                            { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%" },
-                        ]}
-                    >
-
-                        <View style={{ margin: 10 }} />
-                        <ThemedText type='subtitle' style={{ textAlign: 'center', flex: 1 }}>Request Details</ThemedText>
-                        <FlatList
-                            data={fetchedRequest}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({ item }) => (
-
-                                <ThemedView style={{ backgroundColor: Colors.gray6, marginHorizontal: 10, paddingHorizontal: 20, paddingVertical: 20, borderRadius: 10 }}>
-
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Id</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet }} type='small'>{item.id}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Price</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet }} type='small'>{item.agreed_price === null ? '0.00' : item.agreed_price}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Description</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet }} type='small'>{item.help_desc}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Help Intervals</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet, textAlign: 'right', }} type='small'>{item.help_frequency}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Landmark</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet, textAlign: 'right', }} type='small'>{item.help_landmark}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Request Type</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet, textAlign: 'right', }} type='small'>{item.preassessment_flg === "N" ? "Normal Request" : "Preassessment Request"}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Address</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet, maxWidth: 210, textAlign: 'right', }} type='small'>{item.help_location}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Country</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet, textAlign: 'right', }} type='small'>{item.help_country}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>State</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet, textAlign: 'right', }} type='small'>{item.help_state}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>L.G.A</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet }} type='small'>{item.help_lga}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Help Size</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet }} type='small'>{item.help_size}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Status</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet }} type='small'>{item.help_status === "A" ? "Active" : item.help_status === "N" ? "Negotiating" : item.help_status === "C" ? "Completed" : "Cancelled"}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Date</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet }} type='small'>{item.help_date}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Time</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet }} type='small'>{item.help_time}</ThemedText>
-                                    </View>
-
-                                    <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                                        <ThemedText style={{ color: '#000' }} type='small'>Security Code</ThemedText>
-                                        <ThemedText style={{ color: Colors.wallet }} type='small'>{item.security_code}</ThemedText>
-                                    </View>
-                                </ThemedView>
-                            )} />
-                    </Animated.View>
+                    <View style={{ margin: 10 }} />
+                    <ThemedText type='subtitle' style={{ textAlign: 'center' }}>Request Details</ThemedText>
+                    <FlatList
+                        data={fetchedRequest}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={({ item }) => (
+                            <ThemedView style={{ backgroundColor: Colors.gray6, marginHorizontal: 10, paddingHorizontal: 20, paddingVertical: 20, borderRadius: 10 }}>
+                                <DetailRow label="Id" value={item.id} />
+                                <DetailRow label="Price" value={item.agreed_price === null ? '0.00' : item.agreed_price} />
+                                <DetailRow label="Description" value={item.help_desc} isMultiline />
+                                <DetailRow label="Help Intervals" value={item.help_frequency} />
+                                <DetailRow label="Landmark" value={item.help_landmark} />
+                                <DetailRow label="Request Type" value={item.preassessment_flg === "N" ? "Normal Request" : "Preassessment Request"} />
+                                <DetailRow label="Address" value={item.help_location} isMultiline />
+                                <DetailRow label="Country" value={item.help_country} />
+                                <DetailRow label="State" value={item.help_state} />
+                                <DetailRow label="L.G.A" value={item.help_lga} />
+                                <DetailRow label="Help Size" value={item.help_size} />
+                                <DetailRow label="Status" value={item.help_status === "A" ? "Active" : item.help_status === "N" ? "Negotiating" : item.help_status === "C" ? "Completed" : "Cancelled"} />
+                                <DetailRow label="Date" value={item.help_date} />
+                                <DetailRow label="Time" value={item.help_time} />
+                                <DetailRow label="Security Code" value={item.security_code} />
+                            </ThemedView>
+                        )} />
+                </Animated.View>
             </Modal>
 
             <Modal
@@ -841,7 +759,12 @@ export default function bookings1({
                                     paddingHorizontal: 15,
                                     borderRadius: 8,
                                 }}
-                                onPress={() => [handleRequest(), closePopup3()]}
+                                onPress={async () => {
+                                    const success = await handleRequest();
+                                    // if (success) {
+                                    //     closePopup3();
+                                    // }
+                                }}
                             >
                                 <ThemedText style={{ color: '#fff' }}>Submit</ThemedText>
                             </ThemedButton>
@@ -878,6 +801,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
+
     popup1: {
         position: 'absolute',
         bottom: 0,

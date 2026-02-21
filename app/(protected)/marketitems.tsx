@@ -38,7 +38,7 @@ export default function marketitems({
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text')
   const router = useRouter()
   const { catname, catid } = useLocalSearchParams()
-  const { user, token, updateUserFields } = useAuth()
+  const { user, token, updateUserFields, logout } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [category, setCategory] = useState<any>([])
   const navigation = useNavigation()
@@ -58,11 +58,9 @@ export default function marketitems({
       try {
         setIsLoading(true)
         const response = await cartitem(catid, decryptData(token))
-        console.log(response)
         setCategory(response)
       } catch (error: any) {
-        console.log(error)
-        Alert.alert('Error', 'Error fetching Market Items')
+        Alert.alert('Error', error.response.data.message ?? 'An error occured')
       } finally {
         setIsLoading(false)
       }
@@ -77,7 +75,13 @@ export default function marketitems({
         const response = await cartshow(user?.customer_id, decryptData(token))
         updateUserFields({ cartcount: response.length })
       } catch (error: any) {
-        console.log(error.response)
+        if (error.response?.status === 401) {
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
+        } else {
+          Alert.alert('Error', 'An error occurred. Please try again later.')
+        };
       } finally {
         setIsLoading(false)
       }
@@ -89,11 +93,9 @@ export default function marketitems({
     const quantity = quantities[itemId] || 1;
 
     // You can handle the actual cart logic here:
-    console.log('Adding to cart:', { id: itemId, quantity });
     try {
       setIsLoading(true)
       const response = await cartitemstore(itemId, quantity, user?.customer_id, supplier_id, decryptData(token))
-      console.log(response)
       Alert.alert('Success', `Added ${quantity} item(s) to your cart`, [
         {
           text: 'Continue',
@@ -105,7 +107,6 @@ export default function marketitems({
         },
       ]);
     } catch (error: any) {
-      console.log(error.response)
       Alert.alert("Error", "Error Purchasing Item, Please Try Again Later")
     } finally {
       setIsLoading(false)

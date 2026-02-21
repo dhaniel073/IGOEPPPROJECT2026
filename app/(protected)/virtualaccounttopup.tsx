@@ -60,11 +60,8 @@ export default function virtualaccounttopup({
                     setIsloading(true)
                     const response = await virtualaccount(encryptData(amount), user?.customer_id, decryptData(token))
                     setPayload(response.data.provider_response)
-                    console.log(response.data.provider_response)
                     setIsloading(false)
                 } catch (error: any) {
-
-                    console.log(error.response)
                     Alert.alert('Failed', 'Account generation failed. Please try again later', [
                         {
                             text: 'Ok',
@@ -79,23 +76,19 @@ export default function virtualaccounttopup({
                     setIsloading(true)
                     const response = await vfdvirtualaccount(encryptData(amount), user?.customer_id, decryptData(token))
                     setPayload(response.data)
-                    console.log(response.data)
                 } catch (error: any) {
                     if (error.response?.status === 401) {
                         Alert.alert("Session expired", "Please log in again.");
                         await logout(); // from your AuthContext
                         router.replace("/login"); // navigate to login screen
                     } else {
-                        Alert.alert('Error', 'Unable to load notification settings.')
+                        Alert.alert('Failed', 'Account generation failed. Try again later', [
+                            {
+                                text: 'Ok',
+                                onPress: () => navigation.goBack()
+                            }
+                        ])
                     }
-                    console.log(error.response)
-                    Alert.alert('Failed', 'Account generation failed. Try again later', [
-                        {
-                            text: 'Ok',
-                            onPress: () => navigation.goBack()
-                        }
-                    ])
-                    console.log(error.response)
                     return;
                 } finally {
                     setIsloading(false);
@@ -110,10 +103,8 @@ export default function virtualaccounttopup({
             try {
                 setIsloading(true)
                 const response = await validatetransaction(encryptData(amount), payload.reference, user?.customer_id, user?.email, payload.account_number, decryptData(token))
-                console.log(response)
                 setIsVisible(true)
             } catch (error: any) {
-                console.log(error.response.data.message)
                 Alert.alert('Failed', error.response.data.message)
             } finally {
                 setIsloading(false);
@@ -122,10 +113,8 @@ export default function virtualaccounttopup({
             try {
                 setIsloading(true)
                 const response = await vfdvalidatetransaction(encryptData(amount), payload.reference, user?.customer_id, user?.email, payload.accountNumber, decryptData(token))
-                console.log(response)
                 setIsVisible1(true)
             } catch (error: any) {
-                console.log(error.response)
                 Alert.alert('Failed', error.response.data.message)
             } finally {
                 setIsloading(false);

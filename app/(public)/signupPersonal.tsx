@@ -78,9 +78,6 @@ export default function signupPersonal({
         setErrors(validationErrors);
 
         if (Object.keys(validationErrors).length > 0) {
-            // stop signup — show all errors
-            console.log("Validation Errors:", validationErrors);
-
             // Join all error messages together
             const allErrors = Object.values(validationErrors).join("\n");
 
@@ -109,15 +106,10 @@ export default function signupPersonal({
                 formData.referral_code
             );
 
-
-            console.log("✅ Signup successful:", response);
-
             // Log in immediately after signup
             await login(encryptData(response.access_token), response);
 
         } catch (error: any) {
-            console.log("❌ Signup failed:", error.response.data);
-
             // Safe error extraction
             const errorMessage =
                 error?.response?.data?.email ||
@@ -136,12 +128,10 @@ export default function signupPersonal({
             try {
                 setisloading(true)
                 const response = await termsandconditons()
-                console.log(response)
                 setHtmlContent(response)
                 setisloading(false)
             } catch (error: any) {
                 setisloading(true)
-                console.log(error.response)
                 Alert.alert('Error', "An error occured while fetching terms and conditions", [
                     {
                         text: "Ok",
@@ -149,7 +139,6 @@ export default function signupPersonal({
                     }
                 ])
                 setisloading(false)
-                // return;
             }
         })
         return unsubscribe;

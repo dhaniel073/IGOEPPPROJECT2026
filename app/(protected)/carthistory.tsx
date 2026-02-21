@@ -38,7 +38,6 @@ export default function carthistory({
       try {
         setIsLoading(true)
         const response = await cartpurchase(user?.customer_id, decryptData(token))
-        console.log(response)
         setCartItems(response)
       } catch (error: any) {
         if (error.response?.status === 401) {
@@ -46,9 +45,8 @@ export default function carthistory({
           await logout(); // from your AuthContext
           router.replace("/login"); // navigate to login screen
         } else {
-          Alert.alert('Error', 'Unable to load categories.')
+          Alert.alert('Error', 'Unable to load cart history.')
         }
-        console.log(error.response)
       } finally {
         setIsLoading(false)
       }

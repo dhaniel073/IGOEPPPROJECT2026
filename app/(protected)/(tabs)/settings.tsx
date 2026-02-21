@@ -47,13 +47,10 @@ export default function settings({
 
     const slideAnim = React.useRef(new Animated.Value(height)).current;
 
-    console.log(user?.biometric_setup)
-
     useEffect(() => {
         if (Platform.OS === 'android' && modalVisible3) {
             const backAction = () => {
                 // Prevent closing modal with back button
-                console.log('Back button pressed — modal stays open');
                 return true; // <- this stops Android from closing the modal
             };
 
@@ -88,17 +85,14 @@ export default function settings({
             }
             if (status === 'Y') {
                 const response = await biometricsetup(user?.customer_id, encryptData(deviceToken), decryptData(token))
-                console.log("Biometric setup updated:", response);
                 await updateUserFields({ biometric_setup: "Y" });
             } else {
                 const response = await disablebiometric(user?.customer_id, decryptData(token))
                 await updateUserFields({ biometric_setup: "N" });
-                console.log("Biometric setup updated:", response);
             }
             await refreshUser(true);
 
         } catch (error: any) {
-            console.error("Failed to update biometric setup:", error.response?.data || error);
             Alert.alert("Error", "Failed to update biometric setting on server.");
         } finally {
             setLoading(false)
@@ -126,7 +120,6 @@ export default function settings({
                 await AsyncStorage.setItem("biometricEnabled", "true");
                 await updateBiometricOnServer("Y");
                 setEnabled(true);
-                console.log(result.success)
                 Alert.alert("Success", "Biometric login enabled!");
             } else {
                 setEnabled(false);
@@ -191,7 +184,6 @@ export default function settings({
             const response = await deleteaccount(user?.customer_id, decryptData(token));
             openPopup1()
         } catch (error: any) {
-            console.log("Error in SuccessHandler:", error.response);
             Alert.alert("Sorry", "An error occurred. Please try again later", [{ text: "Ok", onPress: () => router.push("/"), },]);
         } finally {
             setLoading(false)

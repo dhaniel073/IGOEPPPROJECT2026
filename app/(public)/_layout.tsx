@@ -39,10 +39,6 @@ export default function PublicLayout() {
     // return <LogoSpinner lightColor='' darkColor=''/>
   }
 
-  console.log(isLoading)
-  // if (token) return null;
-
-
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <StatusBar style="auto" />

@@ -133,7 +133,6 @@ export default function bidspending({
             try {
                 setIsFetching(true);
                 const response = await bidrequests(bookingId, decryptData(token));
-                console.log(response);
                 setFetchedRequest(response);
             } catch (error: any) {
                 if (error.response?.status === 401) {
@@ -141,9 +140,8 @@ export default function bidspending({
                     await logout(); // from your AuthContext
                     router.replace("/login"); // navigate to login screen
                 } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
+                    Alert.alert('Error', 'An error occurred. Please try again later.')
                 }
-                console.error("Error fetching pending requests:", error);
             } finally {
                 setIsFetching(false);
             }
@@ -159,7 +157,6 @@ export default function bidspending({
             try {
                 setIsFetching(true);
                 const response = await getbanks(decryptData(token));
-                console.log(response)
                 setBank(response);
             } catch (error: any) {
                 if (error.response?.status === 401) {
@@ -169,7 +166,6 @@ export default function bidspending({
                 } else {
                     Alert.alert('Error', 'Unable to load notification settings.')
                 }
-                console.error("Error fetching pending requests:", error);
             } finally {
                 setIsFetching(false);
             }
@@ -185,9 +181,8 @@ export default function bidspending({
                 setIsFetching(true);
                 const response = await getsession(user?.email, decryptData(token));
                 setSessionId(response.login_session_id)
-                console.log('Session response:', response);
             } catch (error) {
-                console.error('Error fetching session:', error);
+                return;
             } finally {
                 setIsFetching(false);
             }
@@ -201,28 +196,22 @@ export default function bidspending({
         try {
             setIsFetching(true);
             const response = await bidacceptdebitcard(bidid, sessionid, decryptData(token));
-            console.log("Wallet update response:", response);
             setAmount1(null)
             Alert.alert("Success", "Payment was successful", [{ text: "Ok", onPress: () => router.push("/bookings"), },]);
         } catch (error: any) {
-            console.log("Error in SuccessHandler:", error.response);
             Alert.alert("Sorry", "An error occurred. Please try again later", [{ text: "Ok", onPress: () => router.push("/bookings"), },]);
             setIsFetching(false);
         }
     }
-    // router.push('/BillPayment')
 
-    console.log(user?.status)
     //for cash payment
     const paybycash = async () => {
         try {
             setIsFetching(true);
             const response = await bidacceptcash(bidid, sessionid, decryptData(token));
-            console.log("Wallet update response:", response);
             setAmount1(null)
             Alert.alert("Success", "You have accepted the bid. Please ensure you have enough cash on hand to pay the artisan on service delivery", [{ text: "Ok", onPress: () => router.push("/bookings"), },]);
         } catch (error: any) {
-            console.log("Error in SuccessHandler:", error.response);
             Alert.alert("Sorry", "An error occurred. Please try again later", [{ text: "Ok", onPress: () => router.push("/bookings"), },]);
             setIsFetching(false);
         }
@@ -235,19 +224,16 @@ export default function bidspending({
             const response = await bidaccept(bidid, sessionid, decryptData(token));
             Alert.alert("Success", "Payment was successful", [{ text: "Ok", onPress: () => router.push("/bookings"), },]);
         } catch (error: any) {
-            console.log("Error in SuccessHandler:", error.response);
             Alert.alert("Sorry", error.response.data.message || "An error occurred. Please try again later", [{ text: "Ok", onPress: () => router.push("/bookings"), },]);
         }
     }
 
     const paybyinvoice = async () => {
-        // console.log(bidid, sessionid, decryptData(token))
         try {
             setIsFetching(true);
             const response = await bidacceptinvoice(bidid, sessionid, decryptData(token));
             Alert.alert("Success", "Payment was successful", [{ text: "Ok", onPress: () => router.push("/bookings"), },]);
         } catch (error: any) {
-            console.log("Error in SuccessHandler:", error.response);
             Alert.alert("Sorry", error.response.data.message || "An error occurred. Please try again later", [{ text: "Ok", onPress: () => router.push("/bookings"), },]);
         }
     }
@@ -259,14 +245,13 @@ export default function bidspending({
             reference: `TNX_${Date.now()}`,
             onSuccess: async (res: any) => {
                 await SuccessHandler();
-                console.log("Payment success:", res);
             },
             onCancel: () => {
                 Alert.alert("Cancelled", "Transaction Cancelled")
             },
-            onLoad: (res: any) => console.log("Webview loading"),
+            onLoad: (res: any) => { },
             onError: (err: any) => {
-                console.log("An error occured while per", err)
+                Alert.alert("Error", "An error occured while per")
             }
         })
     }
@@ -286,12 +271,11 @@ export default function bidspending({
                 await paybywallet();
             }
         } catch (error) {
-            console.error('Payment error:', error);
+            return;
         }
     };
 
     const pinvalidation = async (pin: any) => {
-        console.log(pin);
 
         try {
             setIsPinLoading(true);
@@ -302,15 +286,11 @@ export default function bidspending({
                 decryptData(token)
             );
 
-            console.log(response);
-
             //   closePopup2();        // close the PIN modal
             makepayment();        // start payment loading immediately
 
         } catch (error: any) {
             Alert.alert("Error", error.response?.data?.message || "PIN validation failed");
-            console.log(error.response?.data?.message);
-
         } finally {
             setIsPinLoading(false);
         }
@@ -325,7 +305,6 @@ export default function bidspending({
             const response = await bidnegotiate(bidid, amount, decryptData(token));
             Alert.alert("Success", "Your offer has been sent to the artisan", [{ text: "Ok", onPress: () => [setAmount(null), setFormattedAmount(''), closePopup(), router.back()], },]);
         } catch (error: any) {
-            console.error("Renegotiate error:", error);
             Alert.alert("Error", error.response.data.message || "An error occurred. Please try again later");
             setIsFetching(false);
         }
@@ -438,7 +417,6 @@ export default function bidspending({
             const response = await biddecline(id, token);
             Alert.alert("Success", "You have sucessfully declined the artisan's bid", [{ text: "Ok", onPress: () => [router.back()], },]);
         } catch (error: any) {
-            console.error("Renegotiate error:", error.response);
             Alert.alert("Error", error.response.data.message || "An error occurred. Please try again later");
             setIsFetching(false);
         }

@@ -50,7 +50,7 @@ export default function ProtectedLayout() {
         const response = await getpaystackkey(decryptData(token));
         setPaystackKey(response.public_key);
       } catch (error) {
-        console.error("Error fetching Paystack key:", error);
+        return;
       }
     };
 
@@ -130,8 +130,7 @@ export default function ProtectedLayout() {
           <Stack.Screen name="dispute" options={{ headerShown: false }} />
           <Stack.Screen name="customerrating" options={{ headerShown: false }} />
           <Stack.Screen name="inactivescreen" options={{ headerShown: false }} />
-
-          {/* <Stack.Screen name="+not-found" /> */}
+          <Stack.Screen name="attachment" options={{ headerShown: false }} />
         </Stack>
         {/* </InactivityProvider> */}
       </ThemeProvider>

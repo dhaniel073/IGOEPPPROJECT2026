@@ -50,26 +50,26 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
     // Listen for incoming notifications
     notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
-      console.log("🔔 Notification Received while the app is running: ", notification);
+      // console.log("🔔 Notification Received while the app is running: ", notification);
       setNotification(notification);
     });
 
     // Listen for interactions with notifications
     responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log("🔔 Notification Response: user interacts with a notification", 
+      console.log("🔔 Notification Response: user interacts with a notification",
         JSON.stringify(response, null, 2),
         JSON.stringify(response.notification.request.content.data, null, 2)
       );
     });
 
     return () => {
-      if(notificationListener.current){
+      if (notificationListener.current) {
         notificationListener.current.remove
       }
 
-      if(responseListener.current){
+      if (responseListener.current) {
         // Notifications.removeNotificationSubscription(
-          responseListener.current.remove    
+        responseListener.current.remove
         // )
       }
       // notificationListener.current?.remove();

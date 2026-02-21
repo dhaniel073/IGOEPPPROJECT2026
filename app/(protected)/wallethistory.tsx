@@ -44,7 +44,6 @@ export default function wallethistory({
       try {
         setIsFetching(true);
         const response = await customerwallethistory(user?.customer_id, decryptData(token));
-        console.log(response)
         sethistory(response.data);
       } catch (error: any) {
         if (error.response?.status === 401) {
@@ -52,7 +51,7 @@ export default function wallethistory({
           await logout(); // from your AuthContext
           router.replace("/login"); // navigate to login screen
         } else {
-          Alert.alert('Error', 'Unable to load notification settings.')
+          Alert.alert('Error', 'Unable to load wallet history.')
         }
       } finally {
         setIsFetching(false);

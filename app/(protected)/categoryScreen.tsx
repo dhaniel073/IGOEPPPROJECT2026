@@ -9,7 +9,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Animated, Dimensions, FlatList, Image, ImageBackground, Modal, StyleSheet, Text, TextInput, TextProps, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Dimensions, FlatList, Image, ImageBackground, Modal, StyleSheet, Text, TextInput, TextProps, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { height } = Dimensions.get('window');
@@ -34,7 +34,7 @@ export default function categoryScreen({
   const [modalVisible, setModalVisible] = useState(false);
   const [responseData, setresponseData] = useState<any>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const { user, token } = useAuth()
+  const { user, token, logout } = useAuth()
   const [filteredData, setFilteredData] = useState(responseData);
   const [searchQuery, setSearchQuery] = useState('');
   const { lga } = useLocalSearchParams()
@@ -67,14 +67,20 @@ export default function categoryScreen({
       try {
         setIsLoading(true)
         const response = await categoriesbylga(lga, decryptData(token))
-        console.log(response)
         if (response.length === 0) {
           alert(response.message)
         }
         setresponseData(response.categories || [])
         setIsLoading(false)
       } catch (error: any) {
-        console.log(error.response)
+        if (error.response?.status === 401) {
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
+        } else {
+          Alert.alert('Error', 'Unable to load categories.')
+        }
+      } finally {
         setIsLoading(false)
       }
     })

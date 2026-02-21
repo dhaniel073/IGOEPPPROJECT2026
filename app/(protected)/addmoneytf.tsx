@@ -78,7 +78,6 @@ export default function addmoneytf({
             try {
                 setisloading(true);
                 const response = await getbanks(decryptData(token));
-                console.log(response)
                 setBank(response);
             } catch (error: any) {
                 if (error.response?.status === 401) {
@@ -88,7 +87,6 @@ export default function addmoneytf({
                 } else {
                     Alert.alert('Error', 'An error occurred while loading banks.')
                 }
-                console.error("Error fetching pending requests:", error);
             } finally {
                 setisloading(false);
             }

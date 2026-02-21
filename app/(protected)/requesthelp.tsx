@@ -184,8 +184,14 @@ export default function categoryScreen({
           value: item.id,
         }));
         setCountryData(countryArray);
-      } catch (error) {
-        console.error("Country fetch error:", error);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
+        } else {
+          Alert.alert('Error', 'Unable to load requests.')
+        };
       }
     };
     fetchCountries();
@@ -210,7 +216,7 @@ export default function categoryScreen({
       }));
       setStateData(stateArray);
     } catch (error) {
-      console.error("State fetch error:", error);
+      return;
     }
   };
 
@@ -233,7 +239,7 @@ export default function categoryScreen({
       }));
       setCityData(cityArray);
     } catch (error) {
-      console.error("City fetch error:", error);
+      return;
     }
   };
 
@@ -264,7 +270,6 @@ export default function categoryScreen({
       setFormData({ ...formData, uploadUrl: `data:image/jpeg;base64,${image.base64}` })
       setImage(image.uri)
     } catch (error) {
-      console.error('Camera error:', error);
       Alert.alert('Error', 'Unable to open camera.');
     }
   };
@@ -296,7 +301,6 @@ export default function categoryScreen({
       setImage(image.uri)
       setFormData({ ...formData, uploadUrl: `data:image/jpeg;base64,${image.base64}` })
     } catch (error) {
-      console.error('Image picker error:', error);
       Alert.alert('Error', 'Unable to select image.');
     }
   };
@@ -320,13 +324,11 @@ export default function categoryScreen({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleRequest = () => {
-    console.log(formData)
     const validationErrors = validateRequest(formData);
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
       // stop signup — show all errors
-      console.log("Validation Errors:", validationErrors);
 
       // Join all error messages together
       const allErrors = Object.values(validationErrors).join("\n");
@@ -340,18 +342,15 @@ export default function categoryScreen({
   };
 
   const makerequest = async () => {
-    console.log(formData)
     try {
       setisloading(true)
       const response = await requestinfo(user?.customer_id, formData.interest, formData.no_of_helper, formData.addressfield, formData.countryName, formData.stateName, formData.cityName, formData.landmark,
         formData.helpsize, formData.vehiclerequest, formData.description, catid, subcatid, formData.helptime, formData.helpdate, formData.frequency, formData.start_date, formData.end_date,
         formData.payment_frequency, preassessment_flg, request_type, helperid, formData.uploadUrl, enable_go_to_artisan, decryptData(token)
       )
-      console.log(response)
       return openPopup()
     } catch (error: any) {
       alert("Booking failed. Please try again or contact support if the issue continues.")
-      console.log(error.response)
       return;
     } finally {
       setisloading(false)

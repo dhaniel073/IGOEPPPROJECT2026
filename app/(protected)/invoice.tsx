@@ -43,10 +43,8 @@ export default function invoice({
             try {
                 setIsFetching(true);
                 const response = await getpendinginvoices(user?.business_id, decryptData(token));
-                console.log(response)
                 setInvoiceList(response);
             } catch (error: any) {
-                console.error("Error fetching pending requests:", error);
                 if (error.response?.status === 401) {
                     Alert.alert("Session expired", "Please log in again.");
                     await logout(); // from your AuthContext

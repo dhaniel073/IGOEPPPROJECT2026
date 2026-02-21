@@ -40,16 +40,14 @@ export default function notificationview({
             try {
                 setIsFetching(true);
                 const response = await notification(user?.userid, decryptData(token));
-                console.log(response);
                 setFetchedMessage(response);
             } catch (error: any) {
-                console.error("Error fetching pending requests:", error);
                 if (error.response?.status === 401) {
                     Alert.alert("Session expired", "Please log in again.");
                     await logout(); // from your AuthContext
                     router.replace("/login"); // navigate to login screen
                 } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
+                    Alert.alert('Error', 'An error occurred. Please try again later.')
                 }
             } finally {
                 setIsFetching(false);
@@ -73,10 +71,8 @@ export default function notificationview({
     const reload = async () => {
         try {
             const response = await notification(user?.userid, decryptData(token))
-            console.log(response)
             setFetchedMessage(response)
         } catch (error: any) {
-            console.log(error)
             Alert.alert('Error', 'Sorry an error occured')
             return;
         }
@@ -86,10 +82,8 @@ export default function notificationview({
         try {
             setIsFetching(true)
             const response = await notificationbyid(id, decryptData(token))
-            console.log(response)
             setFetchedMessageById(response)
         } catch (error: any) {
-            console.log(error)
             Alert.alert('Error', 'Sorry an error occured')
             return;
         } finally {

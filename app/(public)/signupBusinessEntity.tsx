@@ -78,9 +78,6 @@ export default function signupBusinessEntity({
         setErrors(validationErrors);
 
         if (Object.keys(validationErrors).length > 0) {
-            // stop signup — show all errors
-            console.log("Validation Errors:", validationErrors);
-
             // Join all error messages together
             const allErrors = Object.values(validationErrors).join("\n");
 
@@ -109,8 +106,6 @@ export default function signupBusinessEntity({
                 formData.businessid
             );
 
-            console.log("✅ Signup successful:", response);
-
             Alert.alert("✅ Signup Successful", "Your account has been created successfully.", [
                 {
                     text: "OK",
@@ -124,7 +119,6 @@ export default function signupBusinessEntity({
             // await login(encryptData(response.access_token), response);
 
         } catch (error: any) {
-            console.log("❌ Signup failed:", error.response.data);
 
             // Safe error extraction
             const errorMessage =
@@ -144,12 +138,10 @@ export default function signupBusinessEntity({
             try {
                 setisloading(true)
                 const response = await termsandconditons()
-                console.log(response)
                 setHtmlContent(response)
                 setisloading(false)
             } catch (error: any) {
                 setisloading(true)
-                console.log(error.response)
                 Alert.alert('Error', "An error occured while fetching terms and conditions", [
                     {
                         text: "Ok",
@@ -157,7 +149,6 @@ export default function signupBusinessEntity({
                     }
                 ])
                 setisloading(false)
-                // return;
             }
         })
         return unsubscribe;

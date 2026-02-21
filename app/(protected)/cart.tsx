@@ -53,11 +53,10 @@ export default function cart({
     const [cart, setCart] = useState<any>([1]);
     const [isloading, setIsLoading] = useState(false);
     const [cartitem, setCartItems] = useState<any>([])
-    const { user, token } = useAuth()
+    const { user, token, logout } = useAuth()
     const [totalPrice, setTotalPrice] = useState(0);
     let priceArray = 0
 
-    console.log(avail)
     const calculateTotal = (items: any) => {
         return items.reduce((total: any, item: any) => total + Number(item.sub_total_amount || 0), 0);
     };
@@ -67,12 +66,15 @@ export default function cart({
             try {
                 setIsLoading(true)
                 const response = await cartshow(user?.customer_id, decryptData(token))
-                console.log(response)
                 setCartItems(response)
             } catch (error: any) {
-                console.log(error.response)
-                Alert.alert('Error', 'Sorry an error occured')
-                return;
+                if (error.response?.status === 401) {
+                    Alert.alert("Session expired", "Please log in again.");
+                    await logout(); // from your AuthContext
+                    router.replace("/login"); // navigate to login screen
+                } else {
+                    Alert.alert('Error', 'An error occurred. Please try again later.')
+                }
             } finally {
                 setIsLoading(false)
             }
@@ -89,12 +91,9 @@ export default function cart({
     }, [cartitem]);
 
     const updateCart = async (itemId: number | string, supplier_id: number | string, quantity: any) => {
-        console.log("productid" + itemId, "supplierID" + supplier_id, "quantity" + quantity)
-        console.log('Adding to cart:', { id: itemId, quantity });
         try {
             setIsLoading(true)
             const response = await cartitemupdate(itemId, quantity, user?.customer_id, supplier_id, decryptData(token),)
-            console.log(response)
             Alert.alert('Success', `Added ${quantity} item(s) to your cart`, [
                 {
                     text: 'Continue',
@@ -118,8 +117,6 @@ export default function cart({
         try {
             setIsLoading(true);
             const response = await deletefromcart(id, decryptData(token));
-            console.log(response);
-
             Alert.alert('Success', 'Item(s) deleted from your cart');
             await reload();
         } catch (error) {
@@ -133,10 +130,8 @@ export default function cart({
         try {
             setIsLoading(true)
             const response = await cartshow(user?.customer_id, decryptData(token))
-            console.log(response)
             setCartItems(response)
         } catch (error: any) {
-            console.log(error)
             Alert.alert('Error', 'Sorry an error occured')
             return;
         } finally {

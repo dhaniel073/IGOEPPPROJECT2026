@@ -105,14 +105,11 @@ export default function CustomerRatingScreen() {
         { text: 'OK', onPress: () => router.push('/(protected)/(tabs)/bookings') },
       ])
     } catch (error: any) {
-      console.log(error.response?.data)
       Alert.alert('Error', error.response?.data?.message || 'An error occurred.')
     } finally {
       setIsLoading(false)
     }
   }
-
-  console.log(helper_rating)
 
   if (isLoading) return <LogoSpinner lightColor='' darkColor='' />
 

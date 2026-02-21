@@ -68,7 +68,7 @@ export default function payments({
         const response = await walletbal(user?.customer_id, decryptData(token));
         updateUserFields({ wallet_balance: response.wallet_balance })
       } catch (error) {
-        console.log(error);
+        return;
       }
     };
 
@@ -83,7 +83,6 @@ export default function payments({
         setIsFetching(true);
         const response = await getbillsHistory(user?.customer_id, decryptData(token));
         setFetchedHistory(response);
-        console.log(response)
       } catch (error: any) {
         if (error.response?.status === 401) {
           Alert.alert("Session expired", "Please log in again.");
@@ -92,7 +91,6 @@ export default function payments({
         } else {
           Alert.alert('Error', 'Unable to load bills history')
         }
-        console.error("Error fetching bills history", error.response);
       } finally {
         setIsFetching(false);
       }
@@ -115,7 +113,6 @@ export default function payments({
         } else {
           Alert.alert('Error', 'Unable to load bills history')
         }
-        console.error("Error fetching bills history", error);
       } finally {
         setIsFetching(false);
       }
@@ -139,7 +136,6 @@ export default function payments({
       } else {
         Alert.alert('Error', 'Unable to load bills history')
       }
-      console.error("Error fetching bills history", error);
     } finally {
       setIsFetching(false);
     }

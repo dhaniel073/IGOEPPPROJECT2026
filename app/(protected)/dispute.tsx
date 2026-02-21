@@ -39,7 +39,6 @@ export default function dispute({
         try {
             setisloading(true)
             const response = await disputelog(requestid, formData.description, decryptData(token))
-            console.log(response)
             Alert.alert('Success', 'Your dispute has been logged successfully', [
                 {
                     text: "OK",
@@ -47,7 +46,6 @@ export default function dispute({
                 }
             ])
         } catch (error: any) {
-            console.log(error.response.data.message)
             Alert.alert('Error', error.response.data.message || 'An error occured try again later', [
                 {
                     text: "OK",

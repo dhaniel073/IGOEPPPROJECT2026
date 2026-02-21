@@ -41,7 +41,7 @@ export default function billspaymentEducation({
   const router = useRouter()
   const [isloading, setIsLoading] = useState(false)
   const slideAnim = React.useRef(new Animated.Value(height)).current;
-  const { user, token } = useAuth()
+  const { user, token, logout } = useAuth()
   const { billid } = useLocalSearchParams()
   const [bouquets, setBouquets] = useState<any>([])
 
@@ -111,8 +111,14 @@ export default function billspaymentEducation({
           flag: item.imagePath
         }));
         setEducationPlatform(countryArray);
-      } catch (error) {
-        console.error("Country fetch error:", error);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
+        } else {
+          Alert.alert('Error', 'An error occurred. Please try again later.')
+        }
       } finally {
         setIsLoading(false)
       }
@@ -121,7 +127,6 @@ export default function billspaymentEducation({
   }, []);
 
   const getBouquets = async (value: string) => {
-    console.log(value)
     try {
       const response = await axios.get(
         `${YOUR_API_BASE_URL}auth/billpayment/getAllBouquetByBillerID/${billid}/${value}`,
@@ -132,8 +137,6 @@ export default function billspaymentEducation({
           },
         }
       );
-
-      console.log(response.data.data)
       const data = response.data.data.bouquets;
       const cityArray = data.map((item: any) => ({
         label: item.name,
@@ -145,7 +148,6 @@ export default function billspaymentEducation({
     } catch (error: any) {
       Alert.alert("Error", `No bouquet fetched for current option selected`)
       setBouquets([])
-      // console.error("Bousquest fetch error:", error.response);
     }
   };
 
@@ -155,7 +157,6 @@ export default function billspaymentEducation({
 
     if (Object.keys(validationErrors).length > 0) {
       // stop signup — show all errors
-      console.log("Validation Errors:", validationErrors);
 
       // Join all error messages together
       const allErrors = Object.values(validationErrors).join("\n");
@@ -177,8 +178,6 @@ export default function billspaymentEducation({
   }
 
   const pinvalidation = async (pin: any) => {
-    console.log(pin);
-
     try {
       setIsPinLoading(true);
 
@@ -188,14 +187,11 @@ export default function billspaymentEducation({
         decryptData(token)
       );
 
-      console.log(response);
-
       closePopup1();
       makepayment();
 
     } catch (error: any) {
       Alert.alert("Error", error.response?.data?.message || "PIN validation failed");
-      console.log(error.response?.data?.message);
 
     } finally {
       setIsPinLoading(false);
@@ -217,7 +213,6 @@ export default function billspaymentEducation({
         formData.commission
       );
 
-      console.log(response);
       setFormData(prev => ({
         ...prev,
         reference: response.data.requestID
@@ -226,8 +221,6 @@ export default function billspaymentEducation({
 
     } catch (error: any) {
       Alert.alert("Error", error.response?.data.message || "Payment failed");
-      console.log(error.response);
-
     } finally {
       setIsPaymentLoading(false);
     }
@@ -237,14 +230,12 @@ export default function billspaymentEducation({
   const commissionget = async (id: any) => {
     try {
       const response = await customerbillercommission(id, decryptData(token));
-      console.log(response);
-
       setFormData(prev => ({
         ...prev,
         commission: response
       }));
     } catch (error: any) {
-      console.log(error.response);
+      return;
     }
   };
 

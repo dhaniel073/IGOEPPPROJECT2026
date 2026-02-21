@@ -38,7 +38,7 @@ export default function helpandsupport1({
           Alert.alert("Error", "Unable to make a call on this device.");
         }
       })
-      .catch((err) => console.error("Error occurred", err));
+      .catch((err) => { });
   };
 
   return (

@@ -88,9 +88,7 @@ export default function NotificationSetup({
         headers,
       });
 
-      console.log('Response:', res.data);
     } catch (err: any) {
-      console.log(err.response.data);
       Alert.alert('Error', `Unable to set  ${type === 'EA' ? 'email' : type === 'PA' ? "push" : 'sms'} notifications.`);
 
       // revert state since request failed

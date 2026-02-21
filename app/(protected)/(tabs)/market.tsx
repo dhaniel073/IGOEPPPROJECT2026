@@ -3,7 +3,7 @@ import LoadingScreen from '@/components/LoadingScreen'
 import { ThemedText } from '@/components/ThemedText'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { cartshow, category, PUBLIC_API_BASE_URL, walletbal } from '@/hooks/AuthRoutes'
+import { cartshow, globalproductcategory, PUBLIC_API_BASE_URL, walletbal } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useNavigation, useRouter } from 'expo-router'
@@ -31,7 +31,7 @@ export default function Market() {
     const unsubscribe = navigation.addListener('focus', async () => {
       try {
         setIsLoading(true)
-        const response = await category()
+        const response = await globalproductcategory(decryptData(token))
         setFetchedCategory(response)
       } catch (error: any) {
         if (error.response?.status === 401) {
@@ -41,7 +41,6 @@ export default function Market() {
         } else {
           Alert.alert('Error', 'Unable to load categories.')
         }
-        console.log(error.response)
       } finally {
         setIsLoading(false)
       }
@@ -57,7 +56,7 @@ export default function Market() {
         const wallet = await walletbal(user?.customer_id, decryptData(token));
         updateUserFields({ cartcount: response.length, wallet_balance: wallet.wallet_balance })
       } catch (error: any) {
-        console.log(error.response)
+        return;
       } finally {
         setIsLoading(false)
       }
@@ -147,12 +146,12 @@ export default function Market() {
             onPress={() => router.push({ pathname: "/marketitems", params: { catname: item.cat_name, catid: item.id } })}
           >
             <ImageBackground
-              source={{ uri: `${PUBLIC_API_BASE_URL}category/${item.image}` }}
+              source={{ uri: `${PUBLIC_API_BASE_URL}uploads/${item.picture}` }}
               style={styles.imageBackground}
               imageStyle={styles.imageStyle}
             >
               <ThemedText style={styles.categoryText} type='small'>
-                {item.cat_name}
+                {item.name}
               </ThemedText>
             </ImageBackground>
           </TouchableOpacity>

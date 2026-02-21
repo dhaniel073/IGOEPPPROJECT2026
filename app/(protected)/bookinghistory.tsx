@@ -41,13 +41,12 @@ export default function bookinghistory({
                 const response = await showcompletedrequestbycustomerid(user?.customer_id, decryptData(token));
                 setFetchedRequest(response);
             } catch (error: any) {
-                console.error("Error fetching pending requests:", error);
                 if (error.response?.status === 401) {
                     Alert.alert("Session expired", "Please log in again.");
                     await logout(); // from your AuthContext
                     router.replace("/login"); // navigate to login screen
                 } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
+                    Alert.alert('Error', 'Unable to load booking history.')
                 }
             } finally {
                 setIsFetching(false);

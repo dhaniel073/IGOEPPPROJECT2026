@@ -37,7 +37,6 @@ export default function changepassword({
     try {
       setisLoading(true)
       const response = await resettoken(user?.customer_id, decryptData(token))
-      console.log(response)
       router.push('/changepassword1')
     } catch (error: any) {
       if (error.response?.status === 401) {
@@ -45,7 +44,7 @@ export default function changepassword({
         await logout(); // from your AuthContext
         router.replace("/login"); // navigate to login screen
       } else {
-        Alert.alert('Error', 'Unable to load notification settings.')
+        Alert.alert('Error', 'Unable to send token.')
       }
       Alert.alert("Error", `${error.response.data.message}`)
     } finally {

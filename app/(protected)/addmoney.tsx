@@ -38,18 +38,8 @@ export default function addmoney({
             : "Y"
     );
 
-    // useEffect(() => {
-    //     const backHandler = BackHandler.addEventListener(
-    //         'hardwareBackPress',
-    //         () => true // ⛔ block back button
-    //         );
-
-    //     return () => backHandler.remove();
-    // }, []);
-
     const copyToClipboard = async (number: string) => {
         await Clipboard.setStringAsync(number);
-        // Alert.alert('copied')
     };
 
     const handlePlay = () => {
@@ -63,7 +53,6 @@ export default function addmoney({
         const fetchPendingRequests = async () => {
             try {
                 const response = await customerinfocheck(user?.customer_id, decryptData(token));
-                console.log(response)
                 updateUser(response)
             } catch (error: any) {
                 if (error.response?.status === 401) {
@@ -71,11 +60,10 @@ export default function addmoney({
                     await logout(); // from your AuthContext
                     router.replace("/login"); // navigate to login screen
                 } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
+                    Alert.alert('Error', 'An error occurred. Please try again later.')
                 }
-                console.error("Error fetching pending requests:", error.response);
             } finally {
-                // setisloading(false);
+                return
             }
         };
 

@@ -71,7 +71,7 @@ export default function billspaymentAirtime({
   const [activeTab, setActiveTab] = useState<'self' | 'thirdparty'>('self');
   const [isInvalid, setIsInvalid] = useState(false)
   const { billid } = useLocalSearchParams()
-  const { user, token } = useAuth()
+  const { user, token, logout } = useAuth()
   const [modalVisible2, setModalVisible2] = useState(false);
   const [tvPlatform, setTvPlatform] = useState<any>([])
   const [bouquets, setBouquets] = useState<any>([])
@@ -182,7 +182,6 @@ export default function billspaymentAirtime({
           },
         };
         const response = await axios(config);
-        console.log(response.data)
         const data = response.data;
         const countryArray = data.map((item: any) => ({
           label: item.name,
@@ -191,8 +190,14 @@ export default function billspaymentAirtime({
           service: item.isBouquetService
         }));
         setTvPlatform(countryArray);
-      } catch (error) {
-        console.error("Country fetch error:", error);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          Alert.alert("Session expired", "Please log in again.");
+          await logout(); // from your AuthContext
+          router.replace("/login"); // navigate to login screen
+        } else {
+          Alert.alert('Error', 'An error occurred. Please try again later.')
+        }
       } finally {
         setIsLoading(false)
       }
@@ -202,10 +207,8 @@ export default function billspaymentAirtime({
 
   const getBouquets = async (value: string, service: any) => {
     const isAirtime = (v: string) => v?.toLowerCase().includes("airtime");
-    console.log(service)
     // check the selected value
     if (isAirtime(value) && service.toLowerCase() === 'no') {
-      console.log("Airtime selected, skipping bouquet fetch:", value);
       setBouquets([]); // optional: clear dropdown
       return;
     }
@@ -237,7 +240,6 @@ export default function billspaymentAirtime({
     }
   };
 
-  console.log(formData)
   const handleValidation = () => {
     let validationErrors = {};
 
@@ -252,7 +254,6 @@ export default function billspaymentAirtime({
 
     // Handle errors
     if (Object.keys(validationErrors).length > 0) {
-      console.log("Validation Errors:", validationErrors);
 
       const allErrors = Object.values(validationErrors).join("\n");
       Alert.alert("❌ Validation Errors", allErrors);
@@ -265,7 +266,6 @@ export default function billspaymentAirtime({
   };
 
   const validatehandler = async () => {
-    console.log(formData);
 
     let response: any; // <-- use let instead of const
 
@@ -287,8 +287,6 @@ export default function billspaymentAirtime({
         );
       }
 
-      console.log(response.data);
-
       setFormData(prev => ({
         ...prev,
         reference: response.requestID,
@@ -306,7 +304,6 @@ export default function billspaymentAirtime({
       );
 
     } catch (error: any) {
-      console.log("Validation failed:", error.response?.data || error);
       Alert.alert(
         "Error",
         error.response?.data.message || "Failed to validate phone number."
@@ -317,8 +314,6 @@ export default function billspaymentAirtime({
   };
 
   const pinvalidation = async (pin: any) => {
-    console.log(pin);
-
     try {
       setIsPinLoading(true);
 
@@ -328,15 +323,11 @@ export default function billspaymentAirtime({
         decryptData(token)
       );
 
-      console.log(response);
-
       closePopup1();        // close the PIN modal
       makepayment();        // start payment loading immediately
 
     } catch (error: any) {
       Alert.alert("Error", error.response?.data?.message || "PIN validation failed");
-      console.log(error.response?.data?.message);
-
     } finally {
       setIsPinLoading(false);
     }
@@ -368,9 +359,6 @@ export default function billspaymentAirtime({
           formData.commission
         );
       }
-
-      console.log(response);
-
       // Update your formData with the response
       setFormData(prev => ({
         ...prev,
@@ -381,8 +369,6 @@ export default function billspaymentAirtime({
 
     } catch (error: any) {
       Alert.alert("Error", error.response?.data.message || "Payment failed");
-      console.log(error.response);
-
     } finally {
       setIsPaymentLoading(false);
     }
@@ -391,25 +377,19 @@ export default function billspaymentAirtime({
   const commissionget = async (id: any) => {
     try {
       const response = await customerbillercommission(id, decryptData(token));
-      console.log(response);
 
       setFormData(prev => ({
         ...prev,
         commission: response
       }));
     } catch (error: any) {
-      console.log(error.response);
+      return;
     }
   };
 
   if (isloading || isPinLoading || isPaymentLoading) {
     return <LogoSpinner lightColor='' darkColor='' />
   }
-
-  const handleSubmit = (pin: any) => {
-    console.log("Entered PIN:", pin);
-    // handle verification here
-  };
 
   return (
     <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>

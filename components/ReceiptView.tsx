@@ -89,7 +89,6 @@ export default function ReceiptView({
 
       Alert.alert("✅ Saved!", "Receipt has been saved to your gallery.");
     } catch (err) {
-      console.error("Save error:", err);
       Alert.alert("Error", "Failed to save receipt.");
     }
   };
@@ -123,7 +122,6 @@ export default function ReceiptView({
       });
 
     } catch (error) {
-      console.error("Share error:", error);
       Alert.alert("Error", "Failed to share receipt.");
     }
   };
@@ -132,14 +130,10 @@ export default function ReceiptView({
     try {
       const response = await customerinfocheck(user?.customer_id, decryptData(token))
       updateUser(response);
-      console.log(response)
     } catch (error: any) {
-      console.log(error.response)
       return;
     }
   }
-
-  console.log(imageuri)
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={() => { }}>

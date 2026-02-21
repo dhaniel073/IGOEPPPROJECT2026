@@ -48,13 +48,12 @@ export default function bookingshistorydetails({
                 const response = await fetchrequestbyid(bookingId, decryptData(token));
                 setFetchedRequest(response);
             } catch (error: any) {
-                console.error("Error fetching pending requests:", error);
                 if (error.response?.status === 401) {
                     Alert.alert("Session expired", "Please log in again.");
-                    await logout(); // from your AuthContext
-                    router.replace("/login"); // navigate to login screen
+                    await logout();
+                    router.replace("/login");
                 } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
+                    Alert.alert('Error', 'Unable to load booking details.')
                 }
             } finally {
                 setIsFetching(false);
@@ -83,8 +82,6 @@ export default function bookingshistorydetails({
             useNativeDriver: true,
         }).start(() => setModalVisible1(false)); // Close after animation
     };
-
-    console.log(fetchedRequest);
 
     if (isFetching) {
         return <LogoSpinner lightColor='' darkColor='' />

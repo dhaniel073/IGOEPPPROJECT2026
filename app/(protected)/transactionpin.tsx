@@ -52,9 +52,8 @@ export default function TransactionPin({
           await logout(); // from your AuthContext
           router.replace("/login"); // navigate to login screen
         } else {
-          Alert.alert('Error', 'Unable to load notification settings.')
+          Alert.alert('Error', 'Unable to load transaction pin settings.')
         }
-        // console.error("Error fetching user info:", error.response || error);
         setStep('create');
       } finally {
         setLoading(false);
@@ -73,7 +72,6 @@ export default function TransactionPin({
   const handleSetNewPin = async (pin: string) => {
     try {
       setLoading(true);
-      console.log("Setting new PIN:", pin);
       // await api.post('/set-pin', { pin });
       const response = await setuppin(user?.customer_id, encryptData(pin), decryptData(token))
       Alert.alert("Success", "PIN set successfully!", [
@@ -84,7 +82,7 @@ export default function TransactionPin({
       ]);
       router.back();
     } catch (error) {
-      // console.error("Error setting PIN:", error);
+      return;
     } finally {
       setLoading(false);
     }
@@ -94,17 +92,13 @@ export default function TransactionPin({
   const handleVerifyOldPin = async (pin: string) => {
     try {
       setLoading(true)
-      console.log("Verifying old PIN:", pin);
       const verified = await validatepin(user?.customer_id, encryptData(pin), decryptData(token));
-      console.log(verified)
-      // const verified = true; // mock
       if (verified) {
         setStep('newPin');
       } else {
         alert("Incorrect old PIN");
       }
     } catch (error: any) {
-      // console.error("Error verifying old pin:", error.response);
       alert(error.response.data.message || "Incorrect old PIN")
     } finally {
       setLoading(false);
@@ -125,7 +119,6 @@ export default function TransactionPin({
     }
     try {
       setLoading(true)
-      console.log("Updating new PIN:", pin);
       await updatepin(user?.customer_id, encryptData(pin), decryptData(token))
       Alert.alert("Success", "PIN reset successfully!", [
         {
@@ -135,7 +128,6 @@ export default function TransactionPin({
       ]);
 
     } catch (error: any) {
-      console.error("Error updating PIN:", error.response.data.message);
       Alert.alert("Error", error.response.data.message || "PIN reset failed!", [
         {
           text: "ok",

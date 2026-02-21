@@ -36,8 +36,6 @@ export default function artisan({
   const { request_type, invoice_type, catid, subcatid, preassessment_flg, name, helperid, enable_go_to_artisan } = useLocalSearchParams()
   const [isloading, setisloading] = useState(false)
 
-  console.log(request_type, invoice_type, catid, subcatid, preassessment_flg, name, helperid, enable_go_to_artisan)
-
   const [rating, setrating] = useState<any[]>([])
 
   const averageRating =
@@ -55,7 +53,6 @@ export default function artisan({
       try {
         setisloading(true)
         const response = await helperget(helperid, decryptData(token));
-        console.log(response.data.data)
         setData(response.data.data)
       } catch (error: any) {
         if (error.response?.status === 401) {
@@ -63,9 +60,8 @@ export default function artisan({
           await logout(); // from your AuthContext
           router.replace("/login"); // navigate to login screen
         } else {
-          Alert.alert('Error', 'Unable to load notification settings.')
+          Alert.alert('Error', 'Unable to load helper details.')
         }
-        console.error("Error fetching pending requests:", error.response);
       } finally {
         setisloading(false);
       }
@@ -79,10 +75,9 @@ export default function artisan({
       try {
         setisloading(true)
         const response = await showhelperrating(helperid, decryptData(token));
-        console.log(response)
         setrating(response)
       } catch (error: any) {
-        console.error("Error fetching pending requests:", error.response);
+        Alert.alert('Error', 'Unable to load helper rating.')
       } finally {
         setisloading(false);
       }
