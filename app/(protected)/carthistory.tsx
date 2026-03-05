@@ -40,13 +40,7 @@ export default function carthistory({
         const response = await cartpurchase(user?.customer_id, decryptData(token))
         setCartItems(response)
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'Unable to load cart history.')
-        }
+        Alert.alert('Error', 'Unable to load cart history.')
       } finally {
         setIsLoading(false)
       }

@@ -77,19 +77,12 @@ export default function virtualaccountrequest({
                     const response = await bidaccepttransfer(bidid, user?.customer_id, encryptData(amount), decryptData(token))
                     setPayload(response.data)
                 } catch (error: any) {
-                    if (error.response?.status === 401) {
-                        Alert.alert("Session expired", "Please log in again.");
-                        await logout(); // from your AuthContext
-                        router.replace("/login"); // navigate to login screen
-                    } else {
-                        Alert.alert('Failed', 'Account generation failed. Try again later', [
-                            {
-                                text: 'Ok',
-                                onPress: () => navigation.goBack()
-                            }
-                        ])
-                    }
-                    return;
+                    Alert.alert('Failed', 'Account generation failed. Try again later', [
+                        {
+                            text: 'Ok',
+                            onPress: () => navigation.goBack()
+                        }
+                    ])
                 } finally {
                     setIsloading(false);
                 }

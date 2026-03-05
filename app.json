@@ -10,11 +10,13 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "jsEngine": "hermes",
       "infoPlist": {
         "NSUserTrackingUsageDescription": "We use notifications to keep you updated."
       }
     },
     "android": {
+      "jsEngine": "hermes",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/icon1.png",
@@ -30,7 +32,8 @@
       ],
       "package": "com.dhanieldcoder.igoeppCus",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "allowBackup": false
     },
     "web": {
       "output": "static",
@@ -50,7 +53,15 @@
           }
         }
       ],
-      "expo-build-properties",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": false,
+            "minSdkVersion": 29
+          }
+        }
+      ],
       "expo-secure-store",
       "expo-web-browser"
     ],

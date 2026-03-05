@@ -336,6 +336,30 @@ async function bidaccepttransfer(Id: any, customerid: any, amount: any, token: a
   return data
 }
 
+async function getVFDVirtualAccountCustomerInvoiceApp(id: any, token: any) {
+  const url = `${YOUR_API_BASE_URL}auth/getVFDVirtualAccountCustomerInvoiceApp/${id}`
+  const response = await axios.get(url, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  })
+  const data = response.data
+  return data;
+}
+
+async function updateinvoice(id: any, token: any) {
+  const url = `${YOUR_API_BASE_URL}auth/updateinvoice/${id}`
+  const response = await axios.get(url, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  })
+  const data = response.data
+  return data;
+}
+
 async function bidnegotiate(Id: any, budget: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/negotiate/${Id}`
   const response = await axios.put(url,
@@ -1650,15 +1674,31 @@ async function sessioncheckcustomer(email: any, token: any) {
   return data
 }
 
+async function inquirehelperproofbyproofimageRequestID(id: any, token: any) {
+  const url = `${YOUR_API_BASE_URL}auth/hrequest/inquirehelperproofbyproofimageRequestID/${id}`
+
+  const response = await axios.get(url,
+    {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    })
+  const data = response.data
+  return data
+}
+
+
+
+
 export {
   authenticateLogin, authenticateSignUp, authenticateSignUpBusiness, authenticateSignUpBusniessEntity, betpay, bidaccept, bidacceptcash, bidacceptdebitcard, bidacceptinvoice, bidaccepttransfer,
   biddecline, bidnegotiate, bidrequests, billcategory, biometricsetup, cancelrecurringrequestbyid, cancelrequests, cartcheckout, cartcheckoutcash, cartitem, cartitemstore, cartitemupdate, cartpurchase, cartshow, categoriesbylga,
   category, csutomerwallet, customerbillercommission, customerinfocheck, customernotsatisfied, customerRequestRating, customerresetpassword, customersatisfied, customerupdateid, customeruploadAddressproof, customeruploadCAC, customeruploadIdcard,
   customerwallethistory, customerwallethistoryall, deleteaccount, deletefromcart, disablealert, disablebiometric, discopayment, disputelog, educationpay, enablealert, fetchrequestbyid, forgotpass, frequentlyusedartisans,
-  getbanks, getbillsHistory, getbillsHistoryById, getlatestinvoices, getmaterialdetailsbyrequestidmobile, getpaystackkey, getpendinginvoices,
-  getsession, getsubcathelper, gettotalamountnmaterialrequestid, getVFDVirtualAccountCustomerMaterial, globalproductcategory, helperget, internetPayment, loginwithbiometric, marketplaceitemsget,
+  getbanks, getbillsHistory, getbillsHistoryById, getlatestinvoices, getmaterialdetailsbyrequestidmobile, getpaystackkey, getpendinginvoices, getsession, getsubcathelper, gettotalamountnmaterialrequestid, getVFDVirtualAccountCustomerInvoiceApp, getVFDVirtualAccountCustomerMaterial, globalproductcategory, helperget, inquirehelperproofbyproofimageRequestID, internetPayment, loginwithbiometric, marketplaceitemsget,
   materialpaymentbycustomer, movecommissiontocustomerwallet, notification, notificationbyid, notificationunread, profileupdate, requestinfo, resettoken, sessioncheckcustomer, sessionId, setuppin, showcompletedrequestbycustomerid, showhelperrating,
-  showpendingrequestbycustomerid, showrecurringrequestbycustomerid, subcategory, termsandconditons, tvpay, tvrenewalpay, updateExpoToken, updatepin, uploadprofileimage, validatebetting, validatecustomerpasswordchangetoken,
+  showpendingrequestbycustomerid, showrecurringrequestbycustomerid, subcategory, termsandconditons, tvpay, tvrenewalpay, updateExpoToken, updateinvoice, updatepin, uploadprofileimage, validatebetting, validatecustomerpasswordchangetoken,
   validatecustomerself, validatecustomerthirdparty, validatedisco, validateinternets, validatepin, validatetelevision, validatetransaction, vfdvalidatetransaction, vfdvirtualaccount,
   viewalertsetup, virtualaccount, vtupayairtime, vtupaydata, walletbal, walletupdate
 };

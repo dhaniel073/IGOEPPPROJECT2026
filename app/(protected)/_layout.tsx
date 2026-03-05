@@ -131,6 +131,8 @@ export default function ProtectedLayout() {
           <Stack.Screen name="customerrating" options={{ headerShown: false }} />
           <Stack.Screen name="inactivescreen" options={{ headerShown: false }} />
           <Stack.Screen name="attachment" options={{ headerShown: false }} />
+          <Stack.Screen name="requestcompletedimages" options={{ headerShown: false }} />
+          <Stack.Screen name="virtualaccountinvoice" options={{ headerShown: false }} />
         </Stack>
         {/* </InactivityProvider> */}
       </ThemeProvider>

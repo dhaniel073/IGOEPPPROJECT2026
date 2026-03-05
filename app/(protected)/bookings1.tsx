@@ -65,13 +65,7 @@ export default function bookings1({
                 const response = await fetchrequestbyid(bookingId, decryptData(token));
                 setFetchedRequest(response);
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert("Session expired", "Please log in again.");
-                    await logout();
-                    router.replace("/login");
-                } else {
-                    Alert.alert('Error', 'An error occured.')
-                }
+                Alert.alert('Error', 'An error occured.')
             } finally {
                 setIsFetching(false);
             }

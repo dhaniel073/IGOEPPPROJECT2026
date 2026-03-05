@@ -42,13 +42,8 @@ export default function bookings({
                 const response = await showpendingrequestbycustomerid(user?.customer_id, decryptData(token));
                 setFetchedRequest(response);
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert("Session expired", "Please log in again.");
-                    await logout(); // from your AuthContext
-                    router.replace("/login"); // navigate to login screen
-                } else {
-                    Alert.alert('Error', 'Unable to load requests.')
-                }
+                console.log(error.response)
+                Alert.alert('Error', 'Unable to load bookings.')
             } finally {
                 setIsFetching(false);
             }

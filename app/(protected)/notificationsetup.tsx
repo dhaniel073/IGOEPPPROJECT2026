@@ -41,13 +41,7 @@ export default function NotificationSetup({
         setSmsEnabled(res.data.sms === 1 ? true : false)
         setPushEnabled(res.data.pushN === 1 ? true : false)
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'Unable to load notification settings.')
-        }
+        Alert.alert('Error', 'Unable to load notification settings.')
       } finally {
         setIsLoading(false)
       }

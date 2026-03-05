@@ -34,13 +34,7 @@ export default function Market() {
         const response = await globalproductcategory(decryptData(token))
         setFetchedCategory(response)
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'Unable to load categories.')
-        }
+        Alert.alert('Error', 'Unable to load categories.')
       } finally {
         setIsLoading(false)
       }

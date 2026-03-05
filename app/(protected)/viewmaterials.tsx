@@ -179,13 +179,7 @@ export default function viewmaterials({
                 // setSession(session);
                 updateUserFields({ session_id: session.login_session_id })
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert("Session expired", "Please log in again.");
-                    await logout();
-                    router.replace("/login");
-                } else {
-                    Alert.alert("Error", "Unable to load data. Please try again later.");
-                }
+                Alert.alert("Error", "Unable to load data. Please try again later.");
             } finally {
                 setIsFetching(false);
             }
@@ -209,13 +203,7 @@ export default function viewmaterials({
             // setSession(session);
             updateUserFields({ session_id: session.login_session_id })
         } catch (error: any) {
-            if (error.response?.status === 401) {
-                Alert.alert("Session expired", "Please log in again.");
-                await logout();
-                router.replace("/login");
-            } else {
-                Alert.alert("Error", "Unable to load data. Please try again later.");
-            }
+            Alert.alert("Error", "Unable to load data. Please try again later.");
         } finally {
             setIsFetching(false);
         }
@@ -358,7 +346,7 @@ export default function viewmaterials({
 
             <View
                 style={{
-                    marginBottom: 20,
+                    marginBottom: 10,
                     flexDirection: 'row',
                     alignItems: 'center'
                 }}

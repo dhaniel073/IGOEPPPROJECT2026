@@ -46,13 +46,7 @@ export default function wallethistory({
         const response = await customerwallethistory(user?.customer_id, decryptData(token));
         sethistory(response.data);
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'Unable to load wallet history.')
-        }
+        Alert.alert('Error', 'Unable to load wallet history.')
       } finally {
         setIsFetching(false);
       }

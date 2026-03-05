@@ -1,7 +1,9 @@
 import LogoSpinner from "@/components/LoadingScreen";
 import { decryptData } from "@/constants/Colors";
+import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { Alert } from "react-native";
 import { customerinfocheck } from "./AuthRoutes";
 
 
@@ -77,6 +79,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     restoreSession();
   }, []);
 
+  // GLOBAL 401 INTERCEPTOR
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        if (error.response?.status === 401 && error.config?.headers?.Authorization) {
+          // If we get a 401, the token is invalid/expired
+          Alert.alert("Session Expired", "Your session has expired. Please login again.");
+          await logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      // Cleanup interceptor on unmount
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, []);
 
   // LOGIN
   const login = async (token: string, userData: UserData) => {
@@ -86,6 +107,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(stamped);
       setToken(token);
 
+      // Security: Expo SecureStore is used here to store the token in a platform-specific 
+      // encrypted storage (Keychain on iOS, Keystore on Android). This prevents users 
+      // or malicious actors from easily extracting the token from regular file storage.
       await SecureStore.setItemAsync("userToken", token);
       await SecureStore.setItemAsync("userData", JSON.stringify(stamped));
     } finally {
@@ -111,6 +135,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // UPDATE TOKEN
   const updateToken = async (newToken: string) => {
     setToken(newToken);
+    // Security: Updating the token in the encrypted SecureStore.
     await SecureStore.setItemAsync("userToken", newToken);
   };
 

@@ -40,13 +40,7 @@ export default function ChatScreen() {
             const response = await helperget(helperId, decryptData(token))
             setHelperData(response.data.data)
         } catch (error: any) {
-            if (error.response?.status === 401) {
-                Alert.alert("Session expired", "Please log in again.");
-                await logout(); // from your AuthContext
-                router.replace("/login"); // navigate to login screen
-            } else {
-                Alert.alert('Error', 'An error occurred. Please try again later.')
-            }
+            Alert.alert('Error', 'An error occurred. Please try again later.')
         } finally {
             setLoading(false)
         }

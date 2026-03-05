@@ -40,9 +40,6 @@ export default function CustomerRatingScreen() {
   const starFilled = 'https://raw.githubusercontent.com/tranhonghan/images/main/star_filled.png'
   const starEmpty = 'https://raw.githubusercontent.com/tranhonghan/images/main/star_corner.png'
 
-  // ------------------------
-  // FETCH HELPER DETAILS
-  // ------------------------
   useLayoutEffect(() => {
     const fetchHelper = async () => {
       try {
@@ -50,13 +47,7 @@ export default function CustomerRatingScreen() {
         const response = await helperget(assigned_helper, decryptData(token))
         setHelperDetails(response.data.data)
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert('Session expired', 'Please log in again.')
-          await logout()
-          router.replace('/login')
-        } else {
-          Alert.alert('Error', 'Unable to load helper details')
-        }
+        Alert.alert('Error', 'Unable to load helper details')
       } finally {
         setIsLoading(false)
       }
@@ -66,9 +57,6 @@ export default function CustomerRatingScreen() {
     return unsubscribe
   }, [])
 
-  // ------------------------
-  // RATING COMPONENT
-  // ------------------------
   const RatingStars = () => (
     <View style={styles.ratingContainer}>
       {[1, 2, 3, 4, 5].map((num) => (
@@ -83,9 +71,6 @@ export default function CustomerRatingScreen() {
     </View>
   )
 
-  // ------------------------
-  // SUBMIT RATING
-  // ------------------------
   const submitRating = async () => {
     if (defaultRating === 0) {
       Alert.alert('Rating Required', 'Please select a rating before submitting.')

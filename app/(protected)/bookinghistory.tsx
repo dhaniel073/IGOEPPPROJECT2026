@@ -41,13 +41,7 @@ export default function bookinghistory({
                 const response = await showcompletedrequestbycustomerid(user?.customer_id, decryptData(token));
                 setFetchedRequest(response);
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert("Session expired", "Please log in again.");
-                    await logout(); // from your AuthContext
-                    router.replace("/login"); // navigate to login screen
-                } else {
-                    Alert.alert('Error', 'Unable to load booking history.')
-                }
+                Alert.alert('Error', 'Unable to load booking history.')
             } finally {
                 setIsFetching(false);
             }
@@ -68,7 +62,7 @@ export default function bookinghistory({
                 <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
             </GoBack>
             <View style={{ margin: 6 }} />
-            <ThemedText type="titleMedium">Bookings</ThemedText>
+            <ThemedText type="titleMedium">Bookings History</ThemedText>
             <ThemedText style={{ color: Colors.gray9 }}>View bookings</ThemedText>
 
             <View style={{ margin: 10 }} />

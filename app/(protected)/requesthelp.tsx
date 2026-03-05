@@ -185,13 +185,7 @@ export default function categoryScreen({
         }));
         setCountryData(countryArray);
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'Unable to load requests.')
-        };
+        Alert.alert('Error', 'Unable to request help.')
       }
     };
     fetchCountries();

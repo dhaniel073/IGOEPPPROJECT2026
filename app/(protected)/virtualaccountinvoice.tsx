@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { Colors, decryptData, encryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { validatetransaction, vfdvalidatetransaction, vfdvirtualaccount, virtualaccount } from '@/hooks/AuthRoutes'
+import { getVFDVirtualAccountCustomerInvoiceApp, validatetransaction, vfdvalidatetransaction, virtualaccount } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import * as Clipboard from 'expo-clipboard'
@@ -23,7 +23,7 @@ export type Props = TextProps & {
 };
 
 
-export default function virtualaccounttopup({
+export default function virtualaccountinvoice({
     lightColor,
     darkColor,
     headerBackgroundColor,
@@ -33,13 +33,15 @@ export default function virtualaccounttopup({
     const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
     const router = useRouter()
     const [payload, setPayload] = useState<any>([])
-    const { bank, formattedamount, amount } = useLocalSearchParams<any>()
+    const { bank, formattedamount, amount, invoiceid } = useLocalSearchParams<any>()
     const [isloading, setIsloading] = useState<any>()
     const navigation = useNavigation()
     const { user, token, logout } = useAuth()
 
     const [visible, setIsVisible] = useState(false)
     const [visible1, setIsVisible1] = useState(false)
+
+    console.log(bank, formattedamount, amount, invoiceid);
 
     const copyToClipboard = async (number: any) => {
         await Clipboard.setStringAsync(number);
@@ -74,8 +76,8 @@ export default function virtualaccounttopup({
             } else {
                 try {
                     setIsloading(true)
-                    const response = await vfdvirtualaccount(encryptData(amount), user?.customer_id, decryptData(token))
-                    setPayload(response.data)
+                    const response = await getVFDVirtualAccountCustomerInvoiceApp(invoiceid, decryptData(token))
+                    setPayload(response)
                 } catch (error: any) {
                     Alert.alert('Failed', 'Account generation failed. Try again later', [
                         {
@@ -83,7 +85,6 @@ export default function virtualaccounttopup({
                             onPress: () => navigation.goBack()
                         }
                     ])
-                    return;
                 } finally {
                     setIsloading(false);
                 }
@@ -128,7 +129,7 @@ export default function virtualaccounttopup({
                 </GoBack>
                 <View style={{ margin: 6 }} />
 
-                <ThemedText type="titleMedium">Transfer</ThemedText>
+                <ThemedText type="titleMedium">Request transfer payment</ThemedText>
                 <View style={{ marginTop: 20 }} />
 
                 <SafeAreaView style={{ marginHorizontal: 5 }}>
@@ -138,7 +139,7 @@ export default function virtualaccounttopup({
 
                     <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between', borderBottomWidth: 0.5, borderBottomColor: Colors.gray7, paddingTop: 30, paddingBottom: 30 }}>
                         <ThemedText>Amount</ThemedText>
-                        <ThemedText><MaterialCommunityIcons name="currency-ngn" size={15} color={color} />{formattedamount.toLocaleString()}</ThemedText>
+                        <ThemedText><MaterialCommunityIcons name="currency-ngn" size={15} color={color} />{Number(amount).toLocaleString()}</ThemedText>
                     </View>
 
                     <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between', borderBottomWidth: 0.5, borderBottomColor: Colors.gray7, paddingTop: 30, paddingBottom: 30 }}>
@@ -183,9 +184,9 @@ export default function virtualaccounttopup({
 
                 <FullScreenModal
                     visible={visible1}
-                    onClose={() => [setIsVisible1(false), router.replace('/addmoney')]}
+                    onClose={() => [setIsVisible1(false), router.push('/(protected)/(tabs)/bookings')]}
                     mainText="Transaction Successful!"
-                    subText={`₦${formattedamount} has been added to your wallet`}
+                    subText={`Payment of ₦${Number(amount).toLocaleString()} has been received successfully`}
                 />
             </Animated.ScrollView>
         </SafeAreaView>

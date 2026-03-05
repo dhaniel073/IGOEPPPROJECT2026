@@ -4,7 +4,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors, decryptamount, decryptData, DIMENSION, encryptData, formatDate } from '@/constants/Colors';
 import { useNotification } from '@/context/NotificationContext';
 import { useAuth } from '@/hooks/AuthContext';
-import { frequentlyusedartisans, getlatestinvoices, notificationunread, PUBLIC_API_BASE_URL, updateExpoToken } from '@/hooks/AuthRoutes';
+import { frequentlyusedartisans, getlatestinvoices, notificationunread, PUBLIC_API_BASE_URL, updateExpoToken, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { AntDesign, Entypo, Feather, FontAwesome, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
@@ -54,8 +54,20 @@ export default function HomeScreen({
   useEffect(() => {
     const checkVersion = async () => {
       try {
-        const response = await fetch(`${PUBLIC_API_BASE_URL}api/getcustomerappversion`);
+        const response = await fetch(`${YOUR_API_BASE_URL}auth/getAppVersion/android/customer`, {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${decryptData(token)}`,
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.log("App Version Check Failed:", response.status, errorData);
+          return;
+        }
+
         const data = await response.json();
+        console.log("appversion", data)
 
         const currentAppVersion = Constants.expoConfig?.version ?? "unknown";
         const required = data.version;
@@ -68,7 +80,8 @@ export default function HomeScreen({
         } else {
           return;
         }
-      } catch (error) {
+      } catch (error: any) {
+        console.log("App Version error:", error.message);
         return;
       }
     };
@@ -134,11 +147,7 @@ export default function HomeScreen({
           });
         }
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        }
+        return
       }
     };
 

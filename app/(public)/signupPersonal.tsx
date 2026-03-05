@@ -14,7 +14,7 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 import { Octicons } from '@expo/vector-icons'
 import { useNavigation, useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { Alert, Animated, Dimensions, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TextProps, TouchableOpacity, View } from 'react-native'
+import { Alert, Animated, Dimensions, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TextProps, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 
@@ -74,6 +74,8 @@ export default function signupPersonal({
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleSignup = () => {
+        console.log("handleSignup triggered");
+        Keyboard.dismiss();
         const validationErrors = validateSignup(formData);
         setErrors(validationErrors);
 
@@ -92,6 +94,8 @@ export default function signupPersonal({
 
 
     const signupHandler = async () => {
+        console.log("signupHandler triggered");
+        Keyboard.dismiss();
         try {
             setisloading(true);
 
@@ -155,7 +159,7 @@ export default function signupPersonal({
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
             >
-                <Animated.ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+                <Animated.ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps='always'>
                     <GoBack lightColor='' darkColor='' onClick={() => router.back()}>
                         <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
                     </GoBack>
@@ -323,43 +327,50 @@ export default function signupPersonal({
                             {
                                 transform: [{ translateY: slideAnim }],
                                 backgroundColor: color1,
-                                maxHeight: "80%", // limit height so it can scroll
+                                maxHeight: "85%", // limit height so it can scroll
                                 borderTopLeftRadius: 20,
                                 borderTopRightRadius: 20,
+                                paddingBottom: 20,
                             },
                         ]}
                     >
-                        <ScrollView
-                            style={{ flexGrow: 0 }}
-                            contentContainerStyle={{ padding: 10 }}
-                            showsVerticalScrollIndicator={true}
-                        >
-                            <ThemedText>{htmlContent}</ThemedText>
+                        <View style={{ flexShrink: 1 }}>
+                            <ScrollView
+                                style={{ flexGrow: 0 }}
+                                contentContainerStyle={{ padding: 10 }}
+                                showsVerticalScrollIndicator={true}
+                                keyboardShouldPersistTaps='always'
+                            >
+                                <ThemedText>{htmlContent}</ThemedText>
+                            </ScrollView>
+                        </View>
 
-
+                        <View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
                             <ThemedButton
+                                activeOpacity={0.7}
                                 onPress={() => {
+                                    console.log("I Agree clicked");
                                     closePopup();
                                     signupHandler();
                                 }}
-                                style={{ paddingHorizontal: 30, paddingVertical: 13, borderRadius: 30, alignSelf: "center", backgroundColor: Colors.green }}
+                                style={{ paddingHorizontal: 30, paddingVertical: 13, borderRadius: 30, alignSelf: "center", backgroundColor: Colors.green, width: '100%' }}
                             >
-                                <ThemedText style={{ color: '#fff' }}>I Agree</ThemedText>
+                                <ThemedText style={{ color: '#fff', textAlign: 'center' }}>I Agree</ThemedText>
                             </ThemedButton>
 
                             <View style={{ margin: 5 }} />
 
                             <ThemedButton
+                                activeOpacity={0.7}
                                 onPress={() => {
+                                    console.log("I Disagree clicked");
                                     closePopup();
                                 }}
-                                style={{ paddingHorizontal: 30, paddingVertical: 13, alignSelf: "center" }}
+                                style={{ paddingHorizontal: 30, paddingVertical: 13, alignSelf: "center", width: '100%' }}
                             >
-                                <ThemedText style={{ color: Colors.green }}>I Disagree</ThemedText>
+                                <ThemedText style={{ color: Colors.green, textAlign: 'center' }}>I Disagree</ThemedText>
                             </ThemedButton>
-
-                            <View style={{ margin: 10 }} />
-                        </ScrollView>
+                        </View>
                     </Animated.View>
                 </Modal>
             </KeyboardAvoidingView>

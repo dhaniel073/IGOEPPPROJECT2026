@@ -102,6 +102,7 @@ export default function profileEdit({
       try {
         setIsLoading(true);
         const res = await customerinfocheck(user?.customer_id, decryptData(token));
+        console.log(res)
 
 
         if (res) {

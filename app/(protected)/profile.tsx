@@ -158,11 +158,12 @@ export default function profile({
             setIsLoading(true);
 
             const response = await uploadFn(imageUrl);
-
+            console.log(response)
             Alert.alert("Success", successMessage, [
                 { text: "Ok", onPress: reload },
             ]);
         } catch (error: any) {
+            console.log(error.response.data)
             Alert.alert("Error", "An error occurred. Please try again later.");
         } finally {
             setIsLoading(false);
@@ -297,7 +298,12 @@ export default function profile({
                         user?.account_type === "B" || user?.account_type === "E" ?
                             <>
                                 <ThemedText style={{ color: Colors.blacktext }}>Business id</ThemedText>
-                                <ThemedText style={{ color: '#000' }}>{user?.business_id}</ThemedText>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <ThemedText style={{ color: '#000' }}>{user?.business_id}</ThemedText>
+                                    <TouchableOpacity style={{ paddingLeft: 8 }} onPress={() => [handlePlay(), copyToClipboard(user?.business_id)]}>
+                                        <Ionicons name="copy" size={15} color={Colors.gray9} />
+                                    </TouchableOpacity>
+                                </View>
                                 <View style={{ borderWidth: 0.2, borderColor: Colors.gray9 }} />
 
                                 <View style={{ margin: 1 }} />

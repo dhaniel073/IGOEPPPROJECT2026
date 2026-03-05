@@ -73,21 +73,15 @@ export default function virtualaccounttopup({
                 }
 
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert('Session expired', 'Please log in again.');
-                    await logout();
-                    router.replace('/login');
-                } else {
-                    const message =
-                        error.response?.data?.message ||
-                        'Account generation failed. Please try again later';
-                    Alert.alert('Failed', message, [
-                        {
-                            text: 'OK',
-                            onPress: () => navigation.goBack?.(),
-                        },
-                    ]);
-                }
+                const message =
+                    error.response?.data?.message ||
+                    'Account generation failed. Please try again later';
+                Alert.alert('Failed', message, [
+                    {
+                        text: 'OK',
+                        onPress: () => navigation.goBack?.(),
+                    },
+                ]);
             } finally {
                 setIsloading(false);
             }

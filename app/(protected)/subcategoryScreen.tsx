@@ -55,13 +55,7 @@ export default function subcategoryScreen({
                 const response = await subcategory(id);
                 setFetchedCategory(response)
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert("Session expired", "Please log in again.");
-                    await logout(); // from your AuthContext
-                    router.replace("/login"); // navigate to login screen
-                } else {
-                    Alert.alert('Error', 'Unable to load sub categories.')
-                }
+                Alert.alert('Error', 'Unable to load sub categories.')
             } finally {
                 setisloading(false);
             }

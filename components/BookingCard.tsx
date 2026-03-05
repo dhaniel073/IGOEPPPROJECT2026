@@ -1,6 +1,6 @@
 import { Colors, convertToReadableDateTime, decryptData } from '@/constants/Colors';
 import { useAuth } from '@/hooks/AuthContext';
-import { cancelrecurringrequestbyid } from '@/hooks/AuthRoutes';
+import { cancelrecurringrequestbyid, PUBLIC_API_BASE_URL } from '@/hooks/AuthRoutes';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { AntDesign, Entypo, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -25,6 +25,7 @@ export const BookingCard = ({ item, onPress }: any) => {
   const [formData, setFormData] = useState({
     id: "",
     assigned_helper: "",
+    help_frequency: "",
     cancel_frequency: "",
   });
 
@@ -91,7 +92,7 @@ export const BookingCard = ({ item, onPress }: any) => {
           {
             item.image === null ? <Image source={require('@/assets/images/bookings.png')} style={{ width: '100%', height: 150, borderRadius: 10 }} />
               :
-              <Image source={{ uri: `https://igoeppms.com/igoepp/public/subcategory/${item.image}` }} style={{ width: '100%', height: 150, borderRadius: 10 }} />
+              <Image source={{ uri: `${PUBLIC_API_BASE_URL}subcategory/${item.image}` }} style={{ width: '100%', height: 150, borderRadius: 10 }} />
           }
 
           <View style={{ margin: 10 }} />
@@ -211,54 +212,73 @@ export const BookingCard = ({ item, onPress }: any) => {
           <View style={{ margin: 10 }} />
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            {item.help_status !== 'A' && item.help_status !== 'C' && item.help_status !== 'X' ?
-              <ThemedButton
-                style={{
-                  backgroundColor: Colors.green4,
-                  alignSelf: 'flex-start',
-                  padding: 7,
-                  borderRadius: 25,
-                }}
-                onPress={() => router.push({ pathname: '/bidspending', params: { bookingId: item.id } })}
-              >
-                <ThemedText style={{ color: '#fff' }} type="defaultSemiBold">
-                  View Offer({item.bid_count})
-                </ThemedText>
-              </ThemedButton>
-              : item.help_status === 'C' && item.customer_statisfy === null ?
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              {item.help_status !== 'A' && item.help_status !== 'C' && item.help_status !== 'X' ?
                 <ThemedButton
                   style={{
-                    backgroundColor: Colors.wallet,
+                    backgroundColor: Colors.green4,
                     alignSelf: 'flex-start',
                     padding: 7,
                     borderRadius: 25,
                   }}
-                  onPress={() => router.push({ pathname: '/bookings1', params: { bookingId: item.id } })}
+                  onPress={() => router.push({ pathname: '/bidspending', params: { bookingId: item.id } })}
                 >
                   <ThemedText style={{ color: '#fff' }} type="defaultSemiBold">
-                    Satisfy Request
+                    View Offer({item.bid_count})
                   </ThemedText>
                 </ThemedButton>
-                : item.customer_statisfy !== null && item.helper_rating === null ?
+                : item.help_status === 'C' && item.customer_statisfy === null ?
                   <ThemedButton
                     style={{
-                      backgroundColor: Colors.yellow,
+                      backgroundColor: Colors.wallet,
                       alignSelf: 'flex-start',
-                      flexDirection: 'row',
-                      alignItems: 'center',
                       padding: 7,
                       borderRadius: 25,
                     }}
-                    onPress={() => [closePopup(), router.push({ pathname: '/(protected)/customerrating', params: { requestid: item.id, assigned_helper: item.assigned_helper, helper_rating: item.custom_rating } })]}
+                    onPress={() => router.push({ pathname: '/bookings1', params: { bookingId: item.id } })}
                   >
-                    <ThemedText style={{ color: '#fff', marginRight: 3 }} type="defaultSemiBold">
-                      Rate Helper
+                    <ThemedText style={{ color: '#fff' }} type="defaultSemiBold">
+                      Satisfy Request
                     </ThemedText>
-                    <MaterialIcons name="star-rate" size={15} color="white" />
                   </ThemedButton>
-                  :
-                  <View></View>
-            }
+                  : item.customer_statisfy !== null && item.helper_rating === null ?
+                    <ThemedButton
+                      style={{
+                        backgroundColor: Colors.yellow,
+                        alignSelf: 'flex-start',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        padding: 7,
+                        borderRadius: 25,
+                      }}
+                      onPress={() => [closePopup(), router.push({ pathname: '/(protected)/customerrating', params: { requestid: item.id, assigned_helper: item.assigned_helper, helper_rating: item.custom_rating } })]}
+                    >
+                      <ThemedText style={{ color: '#fff', marginRight: 3 }} type="defaultSemiBold">
+                        Rate Helper
+                      </ThemedText>
+                      <MaterialIcons name="star-rate" size={15} color="white" />
+                    </ThemedButton>
+                    :
+                    <View></View>
+              }
+
+              {item.help_status === 'C' &&
+                <ThemedButton
+                  style={{
+                    backgroundColor: Colors.green11,
+                    alignSelf: 'flex-start',
+                    padding: 7,
+                    borderRadius: 25,
+                  }}
+                  onPress={() => router.push({ pathname: '/(protected)/requestcompletedimages', params: { id: item.id } })}
+                >
+                  <ThemedText style={{ color: '#fff' }} type="defaultSemiBold">
+                    Proof Images
+                  </ThemedText>
+                </ThemedButton>
+              }
+            </View>
+
 
             {item.help_status !== 'N' &&
               <TouchableOpacity style={{ alignContent: 'flex-end' }} onPress={() => [openPopup(), setFormData(prev => ({ ...prev, id: item.id, assigned_helper: item.assigned_helper, cancel_frequency: item.cancel_frequency }))]}>
@@ -341,20 +361,19 @@ export const BookingCard = ({ item, onPress }: any) => {
           }
 
           {
-            formData.cancel_frequency === "Y" &&
-            <>
-              {/* <View style={{marginTop:20}}/> */}
-              <TouchableOpacity style={{ flexDirection: 'row', }} onPress={() => [closePopup(), cancelfrequncyhandler()]}>
-                <MaterialIcons name="mode" size={16} color={color} />
-                <View style={{ margin: 5 }} />
-                <View style={{ alignItems: 'center', alignContent: 'center', alignSelf: 'center' }}>
-                  <ThemedText>{"Cancel Recurring Request"}</ThemedText>
-                </View>
-              </TouchableOpacity>
-            </>
+            item.help_frequency !== "One-off" && item.cancel_frequency === "N" ?
+              <>
+                <TouchableOpacity style={{ flexDirection: 'row', }} onPress={() => [closePopup(), cancelfrequncyhandler()]}>
+                  <MaterialIcons name="mode" size={16} color={color} />
+                  <View style={{ margin: 5 }} />
+                  <View style={{ alignItems: 'center', alignContent: 'center', alignSelf: 'center' }}>
+                    <ThemedText>{"Cancel Recurring Request"} </ThemedText>
+                  </View>
+                </TouchableOpacity>
+              </>
+              : null
           }
         </Animated.View>
-        {/* </Pressable> */}
       </Modal>
     </>
   );

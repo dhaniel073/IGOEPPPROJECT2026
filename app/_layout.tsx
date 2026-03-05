@@ -5,6 +5,8 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-get-random-values';
 import 'react-native-reanimated';
 
+import { NetworkMonitor } from '@/components/NetworkMonitor';
+import { SecurityWrapper } from '@/components/SecurityWrapper';
 import { NotificationProvider } from '@/context/NotificationContext';
 import { AuthProvider } from '@/hooks/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -48,9 +50,8 @@ export default function RootLayout() {
     // If not granted, ask the user
     if (status !== 'granted') {
       const { status: newStatus } = await Notifications.requestPermissionsAsync();
-      console.log("Notification permission:", newStatus);
     } else {
-      console.log("Notification already granted");
+      return;
     }
   };
 
@@ -62,16 +63,19 @@ export default function RootLayout() {
   // }
 
   return (
-    <NotificationProvider>
+    <SecurityWrapper>
       <AuthProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <StatusBar style="auto" />
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(public)" />
-            <Stack.Screen name="(protected)" />
-          </Stack>
-        </ThemeProvider>
+        <NotificationProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <StatusBar style="auto" />
+            <NetworkMonitor />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(public)" />
+              <Stack.Screen name="(protected)" />
+            </Stack>
+          </ThemeProvider>
+        </NotificationProvider>
       </AuthProvider>
-    </NotificationProvider>
+    </SecurityWrapper>
   );
 }

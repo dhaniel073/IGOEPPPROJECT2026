@@ -73,13 +73,7 @@ export default function categoryScreen({
         setresponseData(response.categories || [])
         setIsLoading(false)
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'Unable to load categories.')
-        }
+        Alert.alert('Error', 'Unable to load categories.')
       } finally {
         setIsLoading(false)
       }

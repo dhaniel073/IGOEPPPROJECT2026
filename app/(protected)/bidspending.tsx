@@ -347,6 +347,14 @@ export default function bidspending({
         }).start();
     };
 
+    const closePopup1 = () => {
+        Animated.timing(slideAnim, {
+            toValue: height, // Slide back down
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => setModalVisible1(false)); // Close after animation
+    };
+
     const closePopup2 = () => {
         Animated.timing(slideAnim, {
             toValue: height, // Slide back down
@@ -364,13 +372,6 @@ export default function bidspending({
         }).start();
     };
 
-    const closePopup1 = () => {
-        Animated.timing(slideAnim, {
-            toValue: height, // Slide back down
-            duration: 300,
-            useNativeDriver: true,
-        }).start(() => setModalVisible1(false)); // Close after animation
-    };
 
     const openPopup3 = () => {
         setModalVisible3(true);
@@ -822,42 +823,6 @@ export default function bidspending({
                         { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "15%" },
                     ]}
                 >
-
-                    <Modal
-                        transparent
-                        visible={modalVisible4}
-                        animationType="slide"
-                        onRequestClose={closePopup2}
-                    >
-                        <KeyboardAvoidingView
-                            style={{ flex: 1 }}
-                            behavior={Platform.OS === "ios" ? "padding" : "height"}
-                            keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0} // adjust for header height if needed
-                        >
-                            <TouchableOpacity style={styles.overlay} onPress={() => [closePopup2()]} />
-
-                            <Animated.View
-                                style={[
-                                    styles.popup,
-                                    { transform: [{ translateY: slideAnim }], backgroundColor: color1, paddingBottom: "5%" },
-                                ]}
-                            >
-                                <ThemedText type='titleMedium' style={{ textAlign: 'center' }}>Enter Pin</ThemedText>
-                                <View style={{ margin: 8 }} />
-
-                                <ThemedText style={{ textAlign: 'center', color: Colors.gray9 }}>Enter Transaction PIN</ThemedText>
-                                <View style={{ margin: 10 }} />
-                                <View style={{ margin: 5 }} />
-
-
-                                <PinInput length={4} secure={true} onSubmit={(pin) => { closePopup2(), pinvalidation(pin) }} />
-                                <View style={{ margin: 10 }} />
-                            </Animated.View>
-                        </KeyboardAvoidingView>
-                    </Modal>
-
-
-
                     <View style={{ margin: 5 }} />
 
                     <ThemedView style={{ flexDirection: 'row', alignItems: 'center' }}>

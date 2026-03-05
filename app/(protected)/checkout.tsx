@@ -103,13 +103,7 @@ export default function checkout({
                 }));
                 setCountryData(countryArray);
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert("Session expired", "Please log in again.");
-                    await logout(); // from your AuthContext
-                    router.replace("/login"); // navigate to login screen
-                } else {
-                    Alert.alert('Error', 'An error occurred. Please try again later.')
-                }
+                Alert.alert('Error', 'An error occurred. Please try again later.')
             }
         };
         fetchCountries();
@@ -134,13 +128,7 @@ export default function checkout({
             }));
             setStateData(stateArray);
         } catch (error: any) {
-            if (error.response?.status === 401) {
-                Alert.alert("Session expired", "Please log in again.");
-                await logout(); // from your AuthContext
-                router.replace("/login"); // navigate to login screen
-            } else {
-                Alert.alert('Error', 'An error occurred. Please try again later.')
-            }
+            Alert.alert('Error', 'An error occurred. Please try again later.')
             return;
         }
     };

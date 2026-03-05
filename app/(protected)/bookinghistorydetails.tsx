@@ -48,13 +48,7 @@ export default function bookingshistorydetails({
                 const response = await fetchrequestbyid(bookingId, decryptData(token));
                 setFetchedRequest(response);
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert("Session expired", "Please log in again.");
-                    await logout();
-                    router.replace("/login");
-                } else {
-                    Alert.alert('Error', 'Unable to load booking details.')
-                }
+                Alert.alert('Error', 'Unable to load booking details.')
             } finally {
                 setIsFetching(false);
             }

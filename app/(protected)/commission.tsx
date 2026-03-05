@@ -91,13 +91,6 @@ export default function addmoneycard({
                 updateUserFields({ session_id: sessionRes.login_session_id });
 
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert("Session expired", "Please log in again.");
-                    await logout();
-                    router.replace("/login");
-                    return;
-                }
-
                 Alert.alert("Error", "An error occurred. Please try again later.");
             } finally {
                 setisloading(false);
@@ -207,12 +200,6 @@ export default function addmoneycard({
             updateUser(infoRes);
             router.replace("/(protected)/(tabs)")
         } catch (error: any) {
-            if (error.response?.status === 401) {
-                Alert.alert("Session expired", "Please log in again.");
-                await logout();
-                router.replace("/login");
-                return;
-            }
             Alert.alert("Error", "An error occurred.");
         } finally {
             setisloading(false);

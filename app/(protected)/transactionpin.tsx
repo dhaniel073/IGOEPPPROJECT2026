@@ -47,13 +47,7 @@ export default function TransactionPin({
           setStep('create');
         }
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'Unable to load transaction pin settings.')
-        }
+        Alert.alert('Error', 'Unable to verify status.')
         setStep('create');
       } finally {
         setLoading(false);

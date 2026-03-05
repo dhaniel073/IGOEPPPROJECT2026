@@ -58,13 +58,7 @@ export default function changepassword1({
       setisLoading(true)
       const response = await resettoken(user?.customer_id, decryptData(token))
     } catch (error: any) {
-      if (error.response?.status === 401) {
-        Alert.alert("Session expired", "Please log in again.");
-        await logout(); // from your AuthContext
-        router.replace("/login"); // navigate to login screen
-      } else {
-        Alert.alert("Error", `${error.response.data.message}`)
-      }
+      Alert.alert('Error', error.response.data.message ?? 'Unable to change password.')
     } finally {
       setisLoading(false)
     }
