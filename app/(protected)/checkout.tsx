@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/AuthContext';
 import { cartcheckout, validatepin, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Entypo, MaterialIcons, Octicons } from '@expo/vector-icons';
-import axios from 'axios';
+import axiosClient from '@/api/axiosClient';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Animated, Dimensions, Image, KeyboardAvoidingView, Modal, Platform, StyleSheet, TextProps, TouchableOpacity, View } from 'react-native';
@@ -95,7 +95,7 @@ export default function checkout({
                         Authorization: `Bearer ${decryptData(token)}`,
                     },
                 };
-                const response = await axios(config);
+                const response = await axiosClient(config);
                 const data = response.data.data;
                 const countryArray = data.map((item: any) => ({
                     label: item.country_name,
@@ -111,7 +111,7 @@ export default function checkout({
 
     const handleState = async (countryCode: string) => {
         try {
-            const response = await axios.get(
+            const response = await axiosClient.get(
                 `${YOUR_API_BASE_URL}auth/general/state/${countryCode}`,
                 {
                     headers: {
@@ -135,7 +135,7 @@ export default function checkout({
 
     const handleCity = async (stateCode: string) => {
         try {
-            const response = await axios.get(
+            const response = await axiosClient.get(
                 `${YOUR_API_BASE_URL}auth/general/lga/${stateCode}`,
                 {
                     headers: {

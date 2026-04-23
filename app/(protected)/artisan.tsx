@@ -7,7 +7,7 @@ import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { helperget, PUBLIC_API_BASE_URL, showhelperrating } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
-import { AntDesign, Feather, FontAwesome, Octicons } from '@expo/vector-icons'
+import { AntDesign, Feather, FontAwesome, MaterialCommunityIcons, Octicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import React, { useLayoutEffect, useState } from 'react'
 import { Alert, Animated, Dimensions, Image, StyleSheet, TextProps, View } from 'react-native'
@@ -55,13 +55,7 @@ export default function artisan({
         const response = await helperget(helperid, decryptData(token));
         setData(response.data.data)
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'Unable to load helper details.')
-        }
+        Alert.alert('Error', 'Unable to load helper details.')
       } finally {
         setisloading(false);
       }
@@ -77,7 +71,7 @@ export default function artisan({
         const response = await showhelperrating(helperid, decryptData(token));
         setrating(response)
       } catch (error: any) {
-        Alert.alert('Error', 'Unable to load helper rating.')
+        Alert.alert('Error', error?.response?.data?.message || 'No ratings found for this helper')
       } finally {
         setisloading(false);
       }
@@ -117,13 +111,9 @@ export default function artisan({
               :
               <Image style={[styles.image1,]} source={{ uri: `${PUBLIC_API_BASE_URL}handyman/${data.photo}` }} />
           }
-          {/* <Image
-            source={require("@/assets/images/cleaning.jpg")}
-            style={styles.image1}
-          /> */}
+
           <View>
             <ThemedText type='subtitle'>{data.first_name} {data.last_name}</ThemedText>
-            {/* <ThemedText>{data.first_name} {data.last_name}</ThemedText> */}
             <ThemedText style={{ backgroundColor: Colors.green, paddingHorizontal: 10, textAlign: 'center' }}>{name}</ThemedText>
           </View>
         </ThemedView>
@@ -171,70 +161,77 @@ export default function artisan({
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <ThemedText type="subtitle">Reviews</ThemedText>
-          <ThemedText type="subtitle" style={{ color: Colors.gray9 }}>View all</ThemedText>
+          <ThemedText type="smallMedium" style={{ color: Colors.gray9 }}>View all</ThemedText>
         </View>
 
         <View style={{ margin: 5 }} />
 
-        {rating.map((item, index) => {
-          const rawRating = parseFloat(item.custom_rating) || 0;
-          const safeRating = Math.min(Math.max(rawRating, 0), 5);
+        {rating.length === 0 ? (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <MaterialCommunityIcons name="star-off-outline" size={40} color={Colors.gray8} />
+            <ThemedText style={{ color: Colors.gray9, marginTop: 10 }}>No reviews yet for this artisan.</ThemedText>
+          </View>
+        ) : (
+          rating.map((item, index) => {
+            const rawRating = parseFloat(item.custom_rating) || 0;
+            const safeRating = Math.min(Math.max(rawRating, 0), 5);
 
-          const fullStars = Math.floor(safeRating);
-          const hasHalfStar = safeRating - fullStars >= 0.5;
-          const totalStars = 5;
+            const fullStars = Math.floor(safeRating);
+            const hasHalfStar = safeRating - fullStars >= 0.5;
+            const totalStars = 5;
 
-          // ⭐ Derived rating from displayed stars
-          const displayedRating = fullStars + (hasHalfStar ? 0.5 : 0);
+            // ⭐ Derived rating from displayed stars
+            const displayedRating = fullStars + (hasHalfStar ? 0.5 : 0);
 
-          const date = new Date(item.created_at);
-          const formattedDate = date.toLocaleDateString('en-US', {
-            day: '2-digit',
-            month: 'short',
-          });
+            const date = new Date(item.created_at);
+            const formattedDate = date.toLocaleDateString('en-US', {
+              day: '2-digit',
+              month: 'short',
+            });
 
-          return (
-            <ThemedView
-              key={item.id ?? index}
-              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}
-            >
-              {!item.picture ? (
-                <Image
-                  source={require('@/assets/images/img1.png')}
-                  style={styles.image2}
-                />
-              ) : (
-                <Image
-                  source={{ uri: `${PUBLIC_API_BASE_URL}customers/${item.picture}` }}
-                  style={styles.image2}
-                />
-              )}
+            return (
+              <ThemedView
+                key={item.id ?? index}
+                style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}
+              >
+                {!item.picture ? (
+                  <Image
+                    source={require('@/assets/images/img1.png')}
+                    style={styles.image2}
+                  />
+                ) : (
+                  <Image
+                    source={{ uri: `${PUBLIC_API_BASE_URL}customers/${item.picture}` }}
+                    style={styles.image2}
+                  />
+                )}
 
-              <View>
-                <ThemedText type="smallMedium">
-                  {item.customer_name} • {formattedDate}
-                </ThemedText>
+                <View>
+                  <ThemedText type="smallMedium">
+                    {item.customer_name} • {formattedDate}
+                  </ThemedText>
 
-                <View style={{ marginVertical: 3 }} />
+                  <View style={{ marginVertical: 3 }} />
 
-                <ThemedText>
-                  {[...Array(fullStars)].map((_, i) => (
-                    <AntDesign key={`full-${i}`} name="star" size={16} color="#FFD700" />
-                  ))}
+                  <ThemedText>
+                    {[...Array(fullStars)].map((_, i) => (
+                      <AntDesign key={`full-${i}`} name="star" size={16} color="#FFD700" />
+                    ))}
 
-                  {hasHalfStar && (
-                    <FontAwesome name="star-half" size={16} color="#FFD700" />
-                  )}
+                    {hasHalfStar && (
+                      <FontAwesome name="star-half" size={16} color="#FFD700" />
+                    )}
 
-                  {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
-                    <FontAwesome key={`empty-${i}`} name="star-o" size={16} color="#FFD700" />
-                  ))}{' '}
-                  {displayedRating.toFixed(1)}
-                </ThemedText>
-              </View>
-            </ThemedView>
-          );
-        })}
+                    {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
+                      <FontAwesome key={`empty-${i}`} name="star-o" size={16} color="#FFD700" />
+                    ))}{' '}
+                    {displayedRating.toFixed(1)}
+                  </ThemedText>
+                </View>
+              </ThemedView>
+            );
+          })
+        )}
 
 
 

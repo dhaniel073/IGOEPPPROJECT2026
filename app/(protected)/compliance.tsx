@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/AuthContext'
 import { customerinfocheck, customerupdateid, customeruploadAddressproof, customeruploadCAC, customeruploadIdcard, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Octicons } from '@expo/vector-icons'
-import axios from 'axios'
+import axios from '@/api/axiosClient';
 import * as ImagePicker from 'expo-image-picker'
 import { useNavigation, useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'

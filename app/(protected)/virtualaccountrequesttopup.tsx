@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { Colors, decryptData, encryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { getVFDVirtualAccountCustomerInvoiceApp, validatetransaction, vfdvalidatetransaction } from '@/hooks/AuthRoutes'
+import { acceptTopupTransfer, validatetransaction, vfdvalidatetransaction } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import * as Clipboard from 'expo-clipboard'
@@ -23,7 +23,7 @@ export type Props = TextProps & {
 };
 
 
-export default function virtualaccountinvoice({
+export default function virtualaccountrequesttopup({
     lightColor,
     darkColor,
     headerBackgroundColor,
@@ -32,8 +32,8 @@ export default function virtualaccountinvoice({
     const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
     const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
     const router = useRouter()
-    const [payload, setPayload] = useState<any>([])
-    const { bank, formattedamount, amount, invoiceid } = useLocalSearchParams<any>()
+    const [payload, setPayload] = useState<any>("")
+    const { bank, formattedamount, amount, requestid } = useLocalSearchParams<any>()
     const [isloading, setIsloading] = useState<any>()
     const navigation = useNavigation()
     const { user, token, logout } = useAuth()
@@ -41,13 +41,9 @@ export default function virtualaccountinvoice({
     const [visible, setIsVisible] = useState(false)
     const [visible1, setIsVisible1] = useState(false)
 
-    console.log(bank, formattedamount, amount, invoiceid);
-
     const copyToClipboard = async (number: any) => {
         await Clipboard.setStringAsync(number);
     };
-
-    console.log(amount)
 
     const handlePlay = () => {
 
@@ -59,67 +55,69 @@ export default function virtualaccountinvoice({
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', async () => {
-            if (bank === 'OPTIMUS BANK') {
-                try {
-                    setIsloading(true)
-                    const response = await getVFDVirtualAccountCustomerInvoiceApp(encryptData(invoiceid), decryptData(token))
-                    setPayload(response.data.provider_response)
-                    setIsloading(false)
-                } catch (error: any) {
-                    console.log("getVFDVirtualAccountCustomerInvoiceApp", error.response)
-                    Alert.alert('Failed', 'Account generation failed. Please try again later', [
-                        {
-                            text: 'Ok',
-                            onPress: () => { }
-                        }
-                    ])
-                } finally {
-                    setIsloading(false);
+            setIsloading(true);
+
+            try {
+                const response = await acceptTopupTransfer(
+                    encryptData(amount),
+                    user?.customer_id,
+                    requestid,
+                    decryptData(token)
+                );
+
+                // Different payload structure per bank
+                if (bank === 'OPTIMUS BANK') {
+                    setPayload(response);
+                } else {
+                    setPayload(response);
                 }
-            } else {
-                try {
-                    setIsloading(true)
-                    const response = await getVFDVirtualAccountCustomerInvoiceApp(encryptData(invoiceid), decryptData(token))
-                    setPayload(response)
-                } catch (error: any) {
-                    console.log(error.response)
-                    Alert.alert('Failed', 'Account generation failed. Try again later', [
-                        {
-                            text: 'Ok',
-                            onPress: () => navigation.goBack()
-                        }
-                    ])
-                } finally {
-                    setIsloading(false);
-                }
+
+            } catch (error: any) {
+                console.log(error.response);
+                const message =
+                    error.response?.data?.message ||
+                    'Account generation failed. Please try again later';
+                Alert.alert('Failed', message, [
+                    {
+                        text: 'OK',
+                        onPress: () => navigation.goBack?.(),
+                    },
+                ]);
+            } finally {
+                setIsloading(false);
             }
-            return unsubscribe;
         });
-    }, [navigation]);
+
+        return unsubscribe;
+    }, [navigation, bank, amount, requestid, token]);
 
     const validate = async () => {
-        if (bank === 'OPTIMUS BANK') {
-            try {
-                setIsloading(true)
-                const response = await validatetransaction(encryptData(amount), payload.reference, user?.customer_id, user?.email, payload.account_number, decryptData(token))
-                setIsVisible(true)
-            } catch (error: any) {
-                Alert.alert('Failed', error.response.data.message)
-            } finally {
-                setIsloading(false);
-            }
-        } else {
-            try {
-                setIsloading(true)
-                const response = await vfdvalidatetransaction(encryptData(amount), payload.reference, user?.customer_id, user?.email, payload.accountNumber, decryptData(token))
-                setIsVisible1(true)
-            } catch (error: any) {
-                Alert.alert('Failed', error.response.data.message)
-            } finally {
-                setIsloading(false);
-            }
+        try {
+            setIsloading(true);
+
+            const isOptimus = bank === 'OPTIMUS BANK';
+            const validateFn = isOptimus ? validatetransaction : vfdvalidatetransaction;
+            const accountNumber = isOptimus ? payload.account_number : payload.accountNumber;
+
+            const response = await validateFn(
+                encryptData(amount),
+                payload.reference,
+                user?.customer_id,
+                user?.email,
+                accountNumber,
+                decryptData(token)
+            );
+
+            isOptimus ? setIsVisible(true) : setIsVisible1(true);
+
+        } catch (error: any) {
+            const message = error.response?.data?.message || "An unexpected error occurred";
+            Alert.alert('Failed', message);
+        } finally {
+            setIsloading(false);
         }
-    }
+    };
+
 
     if (isloading) {
         return <LogoSpinner lightColor='' darkColor='' />
@@ -133,7 +131,7 @@ export default function virtualaccountinvoice({
                 </GoBack>
                 <View style={{ margin: 6 }} />
 
-                <ThemedText type="titleMedium">Request transfer payment</ThemedText>
+                <ThemedText type="titleMedium">Transfer</ThemedText>
                 <View style={{ marginTop: 20 }} />
 
                 <SafeAreaView style={{ marginHorizontal: 5 }}>
@@ -143,7 +141,7 @@ export default function virtualaccountinvoice({
 
                     <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between', borderBottomWidth: 0.5, borderBottomColor: Colors.gray7, paddingTop: 30, paddingBottom: 30 }}>
                         <ThemedText>Amount</ThemedText>
-                        <ThemedText><MaterialCommunityIcons name="currency-ngn" size={15} color={color} />{Number(amount).toLocaleString()}</ThemedText>
+                        <ThemedText><MaterialCommunityIcons name="currency-ngn" size={15} color={color} />{formattedamount.toLocaleString()}</ThemedText>
                     </View>
 
                     <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between', borderBottomWidth: 0.5, borderBottomColor: Colors.gray7, paddingTop: 30, paddingBottom: 30 }}>
@@ -188,9 +186,9 @@ export default function virtualaccountinvoice({
 
                 <FullScreenModal
                     visible={visible1}
-                    onClose={() => [setIsVisible1(false), router.push('/(protected)/(tabs)')]}
+                    onClose={() => [setIsVisible1(false), router.push({ pathname: '/(protected)/(tabs)/bookings' })]}
                     mainText="Transaction Successful!"
-                    subText={`Payment of ₦${Number(amount).toLocaleString()} has been received successfully`}
+                    subText={`₦${formattedamount} has been received for material purchase`}
                 />
             </Animated.ScrollView>
         </SafeAreaView>

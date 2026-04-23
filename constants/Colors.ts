@@ -67,7 +67,7 @@ export const decryptData = (payload: any): string => {
 };
 
 export const encryptAmount = (text: any) => {
-  const iv = CryptoJS.lib.WordArray.random(16); // random IV each time
+  const iv = generateIv(); // random IV each time using robust generation
   const encrypted = CryptoJS.AES.encrypt(text, keyBytes, {
     iv,
     mode: CryptoJS.mode.CBC,

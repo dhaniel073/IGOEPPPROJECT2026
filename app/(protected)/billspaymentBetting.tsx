@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/AuthContext'
 import { betpay, customerbillercommission, validatebetting, validatepin, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
-import axios from 'axios'
+import axios from '@/api/axiosClient';
 import dayjs from "dayjs"
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -166,13 +166,7 @@ export default function billspaymentBetting({
         }));
         setBetPlatform(countryArray);
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'An error occurred. Please try again later.')
-        }
+        Alert.alert('Error', 'An error occurred. Please try again later.')
       } finally {
         setIsLoading(false)
       }

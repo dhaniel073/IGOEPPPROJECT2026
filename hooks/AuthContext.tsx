@@ -1,10 +1,10 @@
 import LogoSpinner from "@/components/LoadingScreen";
 import { decryptData } from "@/constants/Colors";
-import axios from "axios";
 import * as SecureStore from "expo-secure-store";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Alert } from "react-native";
-import { customerinfocheck } from "./AuthRoutes";
+import axiosClient from "../api/axiosClient";
+import { customerinfocheck, logoutcustomer } from "./AuthRoutes";
 
 
 type UserData = {
@@ -79,15 +79,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     restoreSession();
   }, []);
 
+  const isLogoutInProgress = useRef(false);
+
   // GLOBAL 401 INTERCEPTOR
   useEffect(() => {
-    const interceptor = axios.interceptors.response.use(
+    const interceptor = axiosClient.interceptors.response.use(
       (response) => response,
       async (error) => {
         if (error.response?.status === 401 && error.config?.headers?.Authorization) {
-          // If we get a 401, the token is invalid/expired
-          Alert.alert("Session Expired", "Your session has expired. Please login again.");
-          await logout();
+          if (!isLogoutInProgress.current) {
+            isLogoutInProgress.current = true;
+            // If we get a 401, the token is invalid/expired
+            Alert.alert("Session Expired", "Your session has expired. Please login again.");
+            await logout();
+          }
         }
         return Promise.reject(error);
       }
@@ -95,7 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => {
       // Cleanup interceptor on unmount
-      axios.interceptors.response.eject(interceptor);
+      axiosClient.interceptors.response.eject(interceptor);
     };
   }, []);
 
@@ -122,6 +127,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async () => {
     try {
       setIsLoading(true);
+      if (token) {
+        try {
+          await logoutcustomer(decryptData(token));
+        } catch (error: any) {
+          console.log("Backend logout failed or session already dead:", error.response);
+        }
+      }
       setToken(null);
       setUser(null);
       await SecureStore.deleteItemAsync("userToken");

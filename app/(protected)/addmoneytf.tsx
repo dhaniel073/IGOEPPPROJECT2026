@@ -80,13 +80,7 @@ export default function addmoneytf({
                 const response = await getbanks(decryptData(token));
                 setBank(response);
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert("Session expired", "Please log in again.");
-                    await logout(); // from your AuthContext
-                    router.replace("/login"); // navigate to login screen
-                } else {
-                    Alert.alert('Error', 'An error occurred while loading banks.')
-                }
+                Alert.alert('Error', 'An error occurred while loading banks.')
             } finally {
                 setisloading(false);
             }

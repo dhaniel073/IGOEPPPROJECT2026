@@ -106,17 +106,11 @@ export default function signupBusinessEntity({
                 formData.businessid
             );
 
-            Alert.alert("✅ Signup Successful", "Your account has been created successfully.", [
-                {
-                    text: "OK",
-                    onPress: () => {
-                        // Navigate to login or home screen
-                        router.replace('/(public)/login')
-                    },
-                },
-            ]);
-            // Log in immediately after signup
-            // await login(encryptData(response.access_token), response);
+            Alert.alert(
+                "✅ Signup Successful",
+                "Account created and a verification mail has been sent.",
+                [{ text: "OK", onPress: () => router.replace("/(public)/login") }]
+            );
 
         } catch (error: any) {
 

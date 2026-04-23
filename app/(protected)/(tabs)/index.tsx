@@ -1,7 +1,7 @@
 import { StatusModal } from '@/components/StatusModal';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Colors, decryptamount, decryptData, DIMENSION, encryptData, formatDate } from '@/constants/Colors';
+import { Colors, decryptamount, decryptData, encryptData, formatDate } from '@/constants/Colors';
 import { useNotification } from '@/context/NotificationContext';
 import { useAuth } from '@/hooks/AuthContext';
 import { frequentlyusedartisans, getlatestinvoices, notificationunread, PUBLIC_API_BASE_URL, updateExpoToken, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes';
@@ -62,12 +62,10 @@ export default function HomeScreen({
         });
         if (!response.ok) {
           const errorData = await response.json();
-          console.log("App Version Check Failed:", response.status, errorData);
           return;
         }
 
         const data = await response.json();
-        console.log("appversion", data)
 
         const currentAppVersion = Constants.expoConfig?.version ?? "unknown";
         const required = data.version;
@@ -81,7 +79,6 @@ export default function HomeScreen({
           return;
         }
       } catch (error: any) {
-        console.log("App Version error:", error.message);
         return;
       }
     };
@@ -140,13 +137,15 @@ export default function HomeScreen({
           user?.userid,
           decryptData(token)
         );
+        console.log("notificationcount", response)
         // Only update if the count has actually changed to prevent infinite loops
         if (response !== user?.notificationcount) {
           updateUserFields({
-            notificationcount: response,
+            notificationcount: response.count,
           });
         }
       } catch (error: any) {
+        console.log("notificationcount error", error.response)
         return
       }
     };
@@ -209,7 +208,6 @@ export default function HomeScreen({
     }, [token])
   );
 
-
   useEffect(() => {
     const interval = setInterval(() => {
       if (user?.transaction_pin_setup === "N") {
@@ -258,8 +256,6 @@ export default function HomeScreen({
     updateUserFields({ isBalanceHidden: newState })
   };
 
-
-
   const now = new Date();
   const hour = now.getHours();
 
@@ -271,7 +267,7 @@ export default function HomeScreen({
         : 'Good Evening';
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, backgroundColor: color1, maxHeight: DIMENSION.HEIGHT }} edges={['top', 'bottom']}>
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, backgroundColor: color1 }} edges={['top']}>
       <Animated.ScrollView showsVerticalScrollIndicator={false}>
         <ThemedView style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           {/* avatar and name */}

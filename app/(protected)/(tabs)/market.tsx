@@ -65,7 +65,7 @@ export default function Market() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: color1 }}
-      edges={['top', 'bottom']}
+      edges={['top']}
     >
       <FlatList
         keyExtractor={(item: any) => item.id.toString()}

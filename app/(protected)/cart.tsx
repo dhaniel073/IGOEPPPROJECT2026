@@ -7,7 +7,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
-import { cartitemupdate, cartshow, deletefromcart, PUBLIC_API_BASE_URL } from '@/hooks/AuthRoutes'
+import { cartitemstore, cartitemupdate, cartshow, deletefromcart, PUBLIC_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { FontAwesome5, Fontisto, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import { useNavigation, useRouter } from 'expo-router'
@@ -31,6 +31,11 @@ const dataBusiness = [
     {
         id: "C",
         name: "Pay with cash",
+        icon: <FontAwesome5 name="money-bill-wave" size={20} color={Colors.white} />
+    },
+    {
+        id: "DC",
+        name: "Pay with Debit Card",
         icon: <FontAwesome5 name="money-bill-wave" size={20} color={Colors.white} />
     },
 ]
@@ -84,26 +89,36 @@ export default function cart({
         }
     }, [cartitem]);
 
-    const updateCart = async (itemId: number | string, supplier_id: number | string, quantity: any) => {
+    const updateCart = async (itemId: number | string, supplier_id: number | string, newQuantity: number, currentQuantity: number, cartId: any) => {
+        if (newQuantity === 0) {
+            await deleteCartItem(cartId);
+            return;
+        }
+
         try {
-            setIsLoading(true)
-            const response = await cartitemupdate(itemId, quantity, user?.customer_id, supplier_id, decryptData(token),)
-            Alert.alert('Success', `Added ${quantity} item(s) to your cart`, [
-                {
-                    text: 'Continue',
-                    onPress: () => { },
-                },
-            ]);
+            setIsLoading(true);
+            const diff = Math.abs(newQuantity - currentQuantity);
+            let action = "";
+
+            if (newQuantity > currentQuantity) {
+                await cartitemstore(itemId, diff, user?.customer_id, supplier_id, decryptData(token));
+                action = "Added";
+            } else {
+                await cartitemupdate(itemId, diff, user?.customer_id, supplier_id, decryptData(token));
+                action = "Removed";
+            }
+
+            Alert.alert('Success', `${action} ${diff} item(s) ${action === "Added" ? "to" : "from"} your cart`);
             setQuantities(prev => {
                 const updated = { ...prev };
-                delete updated[itemId]; // remove that item so it falls back to item.quantity
+                delete updated[itemId];
                 return updated;
             });
             await reload();
         } catch (error) {
-            Alert.alert("Error", "Error Purchasing Item, Please Try Again Later")
+            Alert.alert("Error", "Error updating cart, please try again later.");
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
     };
 
@@ -144,7 +159,7 @@ export default function cart({
                 cartitem.find((item: any) => String(item.product_id) === key)?.quantity ??
                 1;
 
-            const updated = Math.max(1, current + change); // Prevent 0 or negative
+            const updated = Math.max(0, current + change); // Allow 0 for removal
             return { ...prev, [key]: updated };
         });
     };
@@ -238,16 +253,16 @@ export default function cart({
 
                                     {/* Right Side: Delete Button */}
                                     {(quantities[item.product_id] ?? item.quantity) !== item.quantity ? (
-                                        // Quantity changed → Show Update button
+                                        // Quantity changed → Show Update/Remove button
                                         <View style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
                                             <TouchableOpacity
                                                 style={{ flexDirection: 'row', alignItems: 'center' }}
-                                                onPress={() => updateCart(item.product_id, item.supplier_id, quantities[item.product_id])}
+                                                onPress={() => updateCart(item.product_id, item.supplier_id, quantities[item.product_id] ?? item.quantity, item.quantity, item.id)}
                                             >
-                                                <ThemedText style={{ color: Colors.green, fontSize: 12 }}>
-                                                    Update cart
+                                                <ThemedText style={{ color: (quantities[item.product_id] ?? item.quantity) === 0 ? Colors.red : Colors.green, fontSize: 12 }}>
+                                                    {(quantities[item.product_id] ?? item.quantity) === 0 ? "Remove item" : "Update cart"}
                                                 </ThemedText>
-                                                <MaterialIcons name="shopping-cart" size={20} color={Colors.green} />
+                                                <MaterialIcons name={(quantities[item.product_id] ?? item.quantity) === 0 ? "delete" : "shopping-cart"} size={20} color={(quantities[item.product_id] ?? item.quantity) === 0 ? Colors.red : Colors.green} />
                                             </TouchableOpacity>
                                         </View>
                                     ) : (

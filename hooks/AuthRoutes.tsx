@@ -1,15 +1,18 @@
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 
 export const YOUR_API_BASE_URL = `https://phixotech.com/igoeppms/public/api/`;
 export const PUBLIC_API_BASE_URL = `https://phixotech.com/igoeppms/public/`;
 
-async function authenticateLogin(email: any, password: any) {
+async function authenticateLogin(email: any, password: any, device_id: string, os: string, device_name: string) {
   const loginUrl = `${YOUR_API_BASE_URL}igoeppauth/logincustomer`
 
-  const response = await axios.post(loginUrl, {
+  const response = await axiosClient.post(loginUrl, {
     'username': email,
     'password': password,
-    'application': "mobileapp"
+    'application': "mobileapp",
+    'device_id': device_id,
+    'os': os,
+    'device_name': device_name
   })
   const data = response.data
   return data;
@@ -20,7 +23,7 @@ async function authenticateSignUp(email: any, password: any, gender: any, phone:
   let base = 'customer/store'
   const loginUrl = `${YOUR_API_BASE_URL}` + base
 
-  const response = await axios.post(loginUrl, {
+  const response = await axiosClient.post(loginUrl, {
     'first_name': firstname,
     'last_name': lastname,
     'email': email,
@@ -39,7 +42,7 @@ async function authenticateSignUpBusniessEntity(email: any, password: any, gende
   let base = 'customer/storebusinessentity'
   const loginUrl = `${YOUR_API_BASE_URL}` + base
 
-  const response = await axios.post(loginUrl, {
+  const response = await axiosClient.post(loginUrl, {
     'first_name': firstname,
     'last_name': lastname,
     'email': email,
@@ -59,7 +62,7 @@ async function authenticateSignUpBusiness(email: any, cemail: any, password: any
   let base = 'customer/storebusiness'
   const loginUrl = `${YOUR_API_BASE_URL}` + base
 
-  const response = await axios.post(loginUrl, {
+  const response = await axiosClient.post(loginUrl, {
     'company_name': company_name,
     'email': email,
     "company_email": cemail,
@@ -75,13 +78,13 @@ async function authenticateSignUpBusiness(email: any, cemail: any, password: any
 }
 
 async function category() {
-  const response = await axios.get(`${YOUR_API_BASE_URL}category`,)
+  const response = await axiosClient.get(`${YOUR_API_BASE_URL}category`,)
   const data = response.data.data
   return data;
 }
 
 async function globalproductcategory(token: any) {
-  const response = await axios.get(`${YOUR_API_BASE_URL}auth/globalproductcategory`, {
+  const response = await axiosClient.get(`${YOUR_API_BASE_URL}auth/globalproductcategory`, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -92,7 +95,7 @@ async function globalproductcategory(token: any) {
 }
 
 async function categoriesbylga(lga: any, token: any) {
-  const response = await axios.get(`${YOUR_API_BASE_URL}auth/categoriesbylga/${lga}`, {
+  const response = await axiosClient.get(`${YOUR_API_BASE_URL}auth/categoriesbylga/${lga}`, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -104,7 +107,7 @@ async function categoriesbylga(lga: any, token: any) {
 }
 
 async function marketplaceitemsget(token: any) {
-  const response = await axios.get(`${YOUR_API_BASE_URL}auth/globalproductcategory`, {
+  const response = await axiosClient.get(`${YOUR_API_BASE_URL}auth/globalproductcategory`, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -116,7 +119,7 @@ async function marketplaceitemsget(token: any) {
 
 async function termsandconditons() {
   const url = `${YOUR_API_BASE_URL}termsandconditons`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
     }
@@ -127,7 +130,7 @@ async function termsandconditons() {
 
 async function getpaystackkey(token: any) {
   const url = `${YOUR_API_BASE_URL}auth/general/getPaystackKey`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -139,7 +142,7 @@ async function getpaystackkey(token: any) {
 }
 
 async function walletupdate(id: any, token: any, amount: any) {
-  const response = await axios.post(
+  const response = await axiosClient.post(
     `${YOUR_API_BASE_URL}auth/customer/walletupdate`,
     {
       'wallet_balance': amount,
@@ -157,7 +160,7 @@ async function walletupdate(id: any, token: any, amount: any) {
 
 async function walletbal(customerId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/${customerId}/wallet`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -169,7 +172,7 @@ async function walletbal(customerId: any, token: any) {
 
 async function customerinfocheck(customer_id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/${customer_id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -180,7 +183,7 @@ async function customerinfocheck(customer_id: any, token: any) {
 }
 
 async function profileupdate(customerId: any, country: any, state: any, lga: any, address: any, dob: any, sex: any, phone: any, token: any) {
-  const response = await axios.put(
+  const response = await axiosClient.put(
     `${YOUR_API_BASE_URL}auth/customer/${customerId}/update`,
     {
       'dob': dob,
@@ -203,7 +206,7 @@ async function profileupdate(customerId: any, country: any, state: any, lga: any
 
 async function showpendingrequestbycustomerid(customerId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/showpendingrequestbycustomerid/${customerId}`
-  const response = await axios.get(url,
+  const response = await axiosClient.get(url,
     {
       headers: {
         Accept: 'application/json',
@@ -216,7 +219,7 @@ async function showpendingrequestbycustomerid(customerId: any, token: any) {
 }
 
 async function fetchrequestbyid(requestid: any, token: any) {
-  const response = await axios.get(
+  const response = await axiosClient.get(
     `${YOUR_API_BASE_URL}auth/hrequest/showrequestbyrequestid/${requestid}`,
     {
       headers: {
@@ -230,7 +233,7 @@ async function fetchrequestbyid(requestid: any, token: any) {
 }
 
 async function cancelrequests(id: any, token: any, reason: any) {
-  const response = await axios.post(`${YOUR_API_BASE_URL}auth/hrequest/cancelrequest`,
+  const response = await axiosClient.post(`${YOUR_API_BASE_URL}auth/hrequest/cancelrequest`,
     {
       'book_id': id,
       'cancel_reason': reason
@@ -248,7 +251,7 @@ async function cancelrequests(id: any, token: any, reason: any) {
 
 async function bidrequests(bid_id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/showbidrequestbyrequestid/${bid_id}`
-  const response = await axios.get(url,
+  const response = await axiosClient.get(url,
     {
       headers: {
         Accept: 'application/json',
@@ -263,7 +266,7 @@ async function bidrequests(bid_id: any, token: any) {
 async function bidacceptdebitcard(Id: any, sessionId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/acceptbiddebitcard`
 
-  const response = await axios.post(url,
+  const response = await axiosClient.post(url,
     {
       "bidid": Id,
       "payment_type": "DC",
@@ -283,7 +286,7 @@ async function bidacceptdebitcard(Id: any, sessionId: any, token: any) {
 async function bidacceptcash(Id: any, sessionId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/acceptbidcash`
 
-  const response = await axios.post(url,
+  const response = await axiosClient.post(url,
     {
       "bidid": Id,
       "payment_type": "C",
@@ -304,7 +307,7 @@ async function bidacceptcash(Id: any, sessionId: any, token: any) {
 async function getsession(email: any, token: any) {
   const sessionurl = `${YOUR_API_BASE_URL}auth/igoeppauth/sessioncheckcustomer`
 
-  const response = await axios.post(sessionurl, {
+  const response = await axiosClient.post(sessionurl, {
     'username': email,
     'application': "mobileapp"
   }, {
@@ -320,7 +323,7 @@ async function getsession(email: any, token: any) {
 async function bidaccepttransfer(Id: any, customerid: any, amount: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/vfd/acceptbidtransfer`
 
-  const response = await axios.post(url,
+  const response = await axiosClient.post(url,
     {
       "bidid": Id,
       "customer_id": customerid,
@@ -338,7 +341,7 @@ async function bidaccepttransfer(Id: any, customerid: any, amount: any, token: a
 
 async function getVFDVirtualAccountCustomerInvoiceApp(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/getVFDVirtualAccountCustomerInvoiceApp/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -350,7 +353,7 @@ async function getVFDVirtualAccountCustomerInvoiceApp(id: any, token: any) {
 
 async function updateinvoice(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/updateinvoice/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -362,7 +365,7 @@ async function updateinvoice(id: any, token: any) {
 
 async function bidnegotiate(Id: any, budget: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/negotiate/${Id}`
-  const response = await axios.put(url,
+  const response = await axiosClient.put(url,
     {
       "budget": budget,
     },
@@ -380,7 +383,7 @@ async function bidnegotiate(Id: any, budget: any, token: any) {
 async function biddecline(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/declinebidrequest/${id}`
 
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -393,7 +396,7 @@ async function biddecline(id: any, token: any) {
 async function bidaccept(Id: any, sessionId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/acceptbid`
 
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "bidid": Id,
     "payment_type": "W",
     // "payment_mode" : paymentmethod1,
@@ -414,7 +417,7 @@ async function bidaccept(Id: any, sessionId: any, token: any) {
 async function bidacceptinvoice(Id: any, sessionId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/acceptbidinvoice`
 
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "bidid": Id,
     "payment_type": "I",
     "session_id": sessionId,
@@ -433,7 +436,7 @@ async function bidacceptinvoice(Id: any, sessionId: any, token: any) {
 async function getlatestinvoices(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/getlatestinvoices/${id}`
 
-  const response = await axios.get(url,
+  const response = await axiosClient.get(url,
     {
       headers: {
         Accept: 'application/json',
@@ -447,7 +450,7 @@ async function getlatestinvoices(id: any, token: any) {
 async function getpendinginvoices(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/getpendinginvoices/${id}`
 
-  const response = await axios.get(url,
+  const response = await axiosClient.get(url,
     {
       headers: {
         Accept: 'application/json',
@@ -460,7 +463,7 @@ async function getpendinginvoices(id: any, token: any) {
 
 async function vfdvirtualaccount(amount: any, id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/getvfdvirtualaccountcustomer`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "amount": amount,
     "customer_id": id
   }, {
@@ -476,7 +479,7 @@ async function vfdvirtualaccount(amount: any, id: any, token: any) {
 
 async function vfdvalidatetransaction(amount: any, transaction_ref: any, customer_id: any, email: any, account_number: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/validatevfdtransaction`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "amount": amount,
     "transaction_ref": transaction_ref,
     "customer_id": customer_id,
@@ -495,7 +498,7 @@ async function vfdvalidatetransaction(amount: any, transaction_ref: any, custome
 
 async function virtualaccount(amount: any, id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/getvirtualaccountcustomer`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "transaction_desc": id,
     "amount": amount,
     "customer_id": id
@@ -512,7 +515,7 @@ async function virtualaccount(amount: any, id: any, token: any) {
 
 async function validatetransaction(amount: any, transaction_ref: any, customer_id: any, email: any, account_number: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/validatetransaction`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "amount": amount,
     "transaction_ref": transaction_ref,
     "customer_id": customer_id,
@@ -531,7 +534,7 @@ async function validatetransaction(amount: any, transaction_ref: any, customer_i
 
 async function getbanks(token: any) {
   const url = `${YOUR_API_BASE_URL}auth/general/getBanks`
-  const response = await axios.get(url,
+  const response = await axiosClient.get(url,
     {
       headers: {
         Accept: 'application/json',
@@ -546,7 +549,7 @@ async function getbanks(token: any) {
 
 async function validatepin(id: any, pin: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/validatepin`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "pin": pin,
     "customer_id": id
   }, {
@@ -561,7 +564,7 @@ async function validatepin(id: any, pin: any, token: any) {
 
 async function setuppin(id: any, pin: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/setuppin`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "pin": pin,
     "customer_id": id,
   }, {
@@ -576,7 +579,7 @@ async function setuppin(id: any, pin: any, token: any) {
 
 async function updatepin(id: any, pin: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/resetpin`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "pin": pin,
     "customer_id": id
   }, {
@@ -591,7 +594,7 @@ async function updatepin(id: any, pin: any, token: any) {
 
 async function biometricsetup(id: any, fingerprinttoken: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/setupbiometric`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "finger_print": fingerprinttoken,
     "customer_id": id
   }, {
@@ -607,7 +610,7 @@ async function biometricsetup(id: any, fingerprinttoken: any, token: any) {
 
 async function disablebiometric(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/${id}/disablebiometric`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -618,10 +621,13 @@ async function disablebiometric(id: any, token: any) {
   return data;
 }
 
-async function loginwithbiometric(fingerprinttoken: any) {
+async function loginwithbiometric(fingerprinttoken: any, device_id: string, os: string, device_name: string) {
   const url = `${YOUR_API_BASE_URL}igoeppauth/logincustomerbiometric`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "biometric": fingerprinttoken,
+    "device_id": device_id,
+    "os": os,
+    "device_name": device_name
   })
 
   const data = response.data;
@@ -630,7 +636,7 @@ async function loginwithbiometric(fingerprinttoken: any) {
 
 async function viewalertsetup(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/${id}/custalertsetupview`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: `application/json`,
       Authorization: `Bearer ${token}`
@@ -643,7 +649,7 @@ async function viewalertsetup(id: any, token: any) {
 
 async function enablealert(id: any, event_type: any, alert_type: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/custalertsetups`
-  const response = await axios.post(url,
+  const response = await axiosClient.post(url,
     {
       "customer_id": id,
       "event_type": event_type,
@@ -661,7 +667,7 @@ async function enablealert(id: any, event_type: any, alert_type: any, token: any
 
 async function disablealert(id: any, event_type: any, alert_type: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/removecustalertsetups/${id}/${event_type}/${alert_type}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: `application/json`,
       Authorization: `Bearer ${token}`
@@ -673,7 +679,7 @@ async function disablealert(id: any, event_type: any, alert_type: any, token: an
 
 async function customerupdateid(customer_id: any, identification_type: any, identification_num: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/updateiddetails`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     customer_id: customer_id,
     identification_type: identification_type,
     identification_num: identification_num
@@ -689,7 +695,7 @@ async function customerupdateid(customer_id: any, identification_type: any, iden
 
 async function customeruploadAddressproof(picture: any, id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/compliance/uploadcustomeraddressdoc`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     picture: picture,
     customerid: id,
   }, {
@@ -705,7 +711,7 @@ async function customeruploadAddressproof(picture: any, id: any, token: any) {
 
 async function customeruploadCAC(picture: any, id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/compliance/uploadcustomercacdocs`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     picture: picture,
     customerid: id,
   }, {
@@ -721,7 +727,7 @@ async function customeruploadCAC(picture: any, id: any, token: any) {
 
 async function customeruploadIdcard(picture: any, id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/compliance/uploadcustomeridcard`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     picture: picture,
     customerid: id,
   }, {
@@ -734,7 +740,7 @@ async function customeruploadIdcard(picture: any, id: any, token: any) {
 
 async function resettoken(id: string, token: string) {
   const url = `${YOUR_API_BASE_URL}auth/customer/customerchangepassword/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'appliction/json',
       Authorization: `Bearer ${token}`
@@ -746,7 +752,7 @@ async function resettoken(id: string, token: string) {
 
 async function validatecustomerpasswordchangetoken(id: string, token1: string, token: string) {
   const url = `${YOUR_API_BASE_URL}auth/customer/validatecustomerpasswordchangetoken`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     id: id,
     token: token1,
   }, {
@@ -761,7 +767,7 @@ async function validatecustomerpasswordchangetoken(id: string, token1: string, t
 
 async function customerresetpassword(email: any, password: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/customerpasswordreset`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "password": password,
     "email": email
   }, {
@@ -777,7 +783,7 @@ async function customerresetpassword(email: any, password: any, token: any) {
 //cart check endpoint
 async function cartshow(Id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/cart/${Id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -788,7 +794,7 @@ async function cartshow(Id: any, token: any) {
 }
 
 async function cartitem(categoryId: any, token: any) {
-  const response = await axios.get(`${YOUR_API_BASE_URL}auth/productbycatshow/${categoryId}`, {
+  const response = await axiosClient.get(`${YOUR_API_BASE_URL}auth/productbycatshow/${categoryId}`, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -803,7 +809,7 @@ async function cartitem(categoryId: any, token: any) {
 
 async function cartitemstore(productId: any, quantity: any, customerId: any, supplierId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/cart/store`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
 
     'product_id': productId,
     'quantity': quantity,
@@ -824,7 +830,7 @@ async function cartitemstore(productId: any, quantity: any, customerId: any, sup
 
 async function cartitemupdate(productId: any, quantity: any, customerId: any, supplierId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/cart/store`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
 
     'product_id': productId,
     'quantity': quantity,
@@ -846,7 +852,7 @@ async function cartitemupdate(productId: any, quantity: any, customerId: any, su
 async function deletefromcart(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/cart/${id}/delete`
   // const url = ''
-  const response = await axios.delete(url, {
+  const response = await axiosClient.delete(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -859,7 +865,7 @@ async function deletefromcart(id: any, token: any) {
 //cart history
 async function cartpurchase(customerId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/purchaseheaderbycustid/${customerId}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -873,7 +879,7 @@ async function cartpurchase(customerId: any, token: any) {
 async function cartcheckout(first_name: any, last_name: any, address: any, landmark: any, phone: any, email: any, stateName: any, cityName: any, countryName: any, customerId: any, paymentmethod: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/checkout/store`
 
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     'firstname': first_name,
     'lastname': last_name,
     'delivery_address': address,
@@ -898,7 +904,7 @@ async function cartcheckout(first_name: any, last_name: any, address: any, landm
 
 async function cartcheckoutcash(first_name: any, last_name: any, address: any, landmark: any, phone: any, email: any, stateName: any, cityName: any, countryName: any, customerId: any, paymentmethod: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/checkout/storecash`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     'firstname': first_name,
     'lastname': last_name,
     "delivery_address": address,
@@ -924,7 +930,7 @@ async function cartcheckoutcash(first_name: any, last_name: any, address: any, l
 
 async function showcompletedrequestbycustomerid(customerId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/showcompletedrequestbycustomerid/${customerId}`
-  const response = await axios.get(url,
+  const response = await axiosClient.get(url,
     {
       headers: {
         Accept: 'application/json',
@@ -938,7 +944,7 @@ async function showcompletedrequestbycustomerid(customerId: any, token: any) {
 
 async function showrecurringrequestbycustomerid(customerId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/showrecurringrequestbycustomerid/${customerId}`
-  const response = await axios.get(url,
+  const response = await axiosClient.get(url,
     {
       headers: {
         Accept: 'application/json',
@@ -952,7 +958,7 @@ async function showrecurringrequestbycustomerid(customerId: any, token: any) {
 
 async function cancelrecurringrequestbyid(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/cancelrecurringrequestbyid/${id}`
-  const response = await axios.get(url,
+  const response = await axiosClient.get(url,
     {
       headers: {
         Accept: 'application/json',
@@ -966,7 +972,7 @@ async function cancelrecurringrequestbyid(id: any, token: any) {
 
 async function notification(Id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/general/viewpushnotification/${Id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -979,7 +985,7 @@ async function notification(Id: any, token: any) {
 
 async function notificationbyid(Id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/general/viewpushnotificationbyid/${Id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -992,7 +998,7 @@ async function notificationbyid(Id: any, token: any) {
 
 async function getmaterialdetailsbyrequestidmobile(id: string, token: string) {
   const url = `${YOUR_API_BASE_URL}auth/getmaterialdetailsbyrequestidmobile/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'appliction/json',
       Authorization: `Bearer ${token}`
@@ -1004,7 +1010,7 @@ async function getmaterialdetailsbyrequestidmobile(id: string, token: string) {
 
 async function gettotalamountnmaterialrequestid(id: string, token: string) {
   const url = `${YOUR_API_BASE_URL}auth/gettotalamountnmaterialrequestid/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'appliction/json',
       Authorization: `Bearer ${token}`
@@ -1016,7 +1022,7 @@ async function gettotalamountnmaterialrequestid(id: string, token: string) {
 
 async function getVFDVirtualAccountCustomerMaterial(customerid: string, amount: any, requestid: string, token: string) {
   const url = `${YOUR_API_BASE_URL}auth/getVFDVirtualAccountCustomerMaterial`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     customer_id: customerid,
     requestid: requestid,
     amount: amount,
@@ -1032,7 +1038,7 @@ async function getVFDVirtualAccountCustomerMaterial(customerid: string, amount: 
 
 async function materialpaymentbycustomer(customerid: string, requestid: string, payment_type: string, session_id: string, token: string) {
   const url = `${YOUR_API_BASE_URL}auth/materialpaymentbycustomer`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     customer_id: customerid,
     requestid: requestid,
     payment_type: payment_type,
@@ -1050,7 +1056,7 @@ async function materialpaymentbycustomer(customerid: string, requestid: string, 
 async function sessionId(email: any, token: any) {
   const sessionurl = `${YOUR_API_BASE_URL}auth/igoeppauth/sessioncheckcustomer`
 
-  const response = await axios.post(sessionurl, {
+  const response = await axiosClient.post(sessionurl, {
     'username': email,
     'application': "mobileapp"
   }, {
@@ -1065,7 +1071,7 @@ async function sessionId(email: any, token: any) {
 
 async function helperget(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/helperfew/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -1077,7 +1083,7 @@ async function helperget(id: any, token: any) {
 
 async function csutomerwallet(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/wallet/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -1089,7 +1095,7 @@ async function csutomerwallet(id: any, token: any) {
 
 async function customerwallethistory(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/customerwallethistory/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -1101,7 +1107,7 @@ async function customerwallethistory(id: any, token: any) {
 
 async function customerwallethistoryall(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/customerwallethistoryall/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -1112,14 +1118,14 @@ async function customerwallethistoryall(id: any, token: any) {
 }
 
 async function subcategory(categoryId: any) {
-  const response = await axios.get(`${YOUR_API_BASE_URL}showsubcategorybycatid/${categoryId}`)
+  const response = await axiosClient.get(`${YOUR_API_BASE_URL}showsubcategorybycatid/${categoryId}`)
   const data = response.data.data
   return data;
 }
 
 async function getsubcathelper(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/getsubcat/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -1132,7 +1138,7 @@ async function getsubcathelper(id: any, token: any) {
 
 async function getbillsHistory(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/getbillsHistoryCustomer/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -1145,7 +1151,7 @@ async function getbillsHistory(id: any, token: any) {
 
 async function billcategory(token: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/getBillCategory`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -1159,7 +1165,7 @@ async function billcategory(token: any) {
 
 async function getbillsHistoryById(customerid: any, id: any, billerid: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/getbillsHistoryCustomerbyid/${customerid}/${id}/${billerid}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -1172,7 +1178,7 @@ async function getbillsHistoryById(customerid: any, id: any, billerid: any, toke
 
 async function deleteaccount(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/customer/deleteaccount`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "customer_id": id,
   }, {
     headers: {
@@ -1187,7 +1193,7 @@ async function deleteaccount(id: any, token: any) {
 
 async function showhelperrating(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/showhelperrating/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -1204,7 +1210,7 @@ async function requestinfo(customerId: any, interest: any, no_of_helper: any, ad
   frequency: any, start_date: any, end_date: any, payment_frequency: any, preassessment: any, request_type: any, assigned_helper: any, help_sample: any, go_to_artisan_location: any, token: any) {
 
   const url = `${YOUR_API_BASE_URL}auth/hrequest/store`
-  const response = await axios.post(url,
+  const response = await axiosClient.post(url,
     {
       'customer_id': customerId,
       'assigned_helper': assigned_helper,
@@ -1243,7 +1249,7 @@ async function requestinfo(customerId: any, interest: any, no_of_helper: any, ad
 
 async function customerbillercommission(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/getMyBillersByBillerID/${id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -1255,7 +1261,7 @@ async function customerbillercommission(id: any, token: any) {
 
 async function validatebetting(customerid: any, billerID: any, betnijaID: any, imagepath: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/validateCustomerBet`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "customerID": customerid,
     "billerID": billerID,
     "type": "C",
@@ -1274,7 +1280,7 @@ async function validatebetting(customerid: any, billerID: any, betnijaID: any, i
 // make payment for bet account endpoint
 async function betpay(requestID: any, amount: any, token: any, commission: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/betBillPayment`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "requestID": requestID,
     "amount": amount,
     "commission": commission
@@ -1290,7 +1296,7 @@ async function betpay(requestID: any, amount: any, token: any, commission: any) 
 
 async function educationpay(customerid: any, billerID: any, bouquetCode: any, imagepath: any, amount: any, token: any, commission: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/purchaseWaecPin`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "customerID": customerid,
     "billerID": billerID,
     "type": "C",
@@ -1310,7 +1316,7 @@ async function educationpay(customerid: any, billerID: any, bouquetCode: any, im
 
 async function validatedisco(customerid: any, billerID: any, meterID: any, meter_type: any, imagepath: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/validateCustomerDisco`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "customerID": customerid,
     "billerID": billerID,
     "type": "C",
@@ -1330,7 +1336,7 @@ async function validatedisco(customerid: any, billerID: any, meterID: any, meter
 
 async function discopayment(requestID: any, amount: any, token: any, commission: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/discoPayment`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "requestID": requestID,
     "amount": amount,
     "commission": commission
@@ -1347,7 +1353,7 @@ async function discopayment(requestID: any, amount: any, token: any, commission:
 
 async function validateinternets(id: any, billerId: any, smartCardID: any, imagepath: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/validateCustomerInternet`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "customerID": id,
     "billerID": billerId,
     "type": "C",
@@ -1366,7 +1372,7 @@ async function validateinternets(id: any, billerId: any, smartCardID: any, image
 //pay for internet endpoint
 async function internetPayment(requestID: any, amount: any, bouquetCode: any, token: any, commission: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/internetPayment`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "requestID": requestID,
     "amount": amount,
     "bouquetCode": bouquetCode,
@@ -1383,7 +1389,7 @@ async function internetPayment(requestID: any, amount: any, bouquetCode: any, to
 
 async function validatetelevision(id: any, billerID: any, smartCardID: any, imagepath: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/validateCustomerTv`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "customerID": id,
     "billerID": billerID,
     "type": "C",
@@ -1404,7 +1410,7 @@ async function validatetelevision(id: any, billerID: any, smartCardID: any, imag
 
 async function tvpay(requestID: any, amount: any, bouquetCode: any, token: any, commission: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/tvPayment`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "requestID": requestID,
     "amount": amount,
     "bouquetCode": bouquetCode,
@@ -1423,7 +1429,7 @@ async function tvpay(requestID: any, amount: any, bouquetCode: any, token: any, 
 //multichoice payment for renewal endpoint
 async function tvrenewalpay(requestID: any, amount: any, token: any, commission: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/tvPaymentRenewal`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "requestID": requestID,
     "amount": amount,
     "commission": commission
@@ -1440,7 +1446,7 @@ async function tvrenewalpay(requestID: any, amount: any, token: any, commission:
 
 async function validatecustomerthirdparty(id: any, imagepath: any, phone: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/validateCustomerPhoneThirdParty`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "customerID": id,
     "imagepath": imagepath,
     "phoneNumber": phone,
@@ -1458,7 +1464,7 @@ async function validatecustomerthirdparty(id: any, imagepath: any, phone: any, t
 
 async function validatecustomerself(id: any, imagepath: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/validateCustomerPhone`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "customerID": id,
     "type": "C",
     "imagepath": imagepath,
@@ -1474,7 +1480,7 @@ async function validatecustomerself(id: any, imagepath: any, token: any) {
 
 async function vtupayairtime(requestid: any, billerId: any, amount: any, token: any, commission: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/vtuPaymentAirtime`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "requestID": requestid,
     "billerId": billerId,
     "amount": amount,
@@ -1493,7 +1499,7 @@ async function vtupayairtime(requestid: any, billerId: any, amount: any, token: 
 //buy data endpoint, 
 async function vtupaydata(requestid: any, billerId: any, amount: any, bouquetCode: any, token: any, commission: any) {
   const url = `${YOUR_API_BASE_URL}auth/billpayment/vtuPaymentData`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "requestID": requestid,
     "billerId": billerId,
     "amount": amount,
@@ -1510,7 +1516,7 @@ async function vtupaydata(requestid: any, billerId: any, amount: any, bouquetCod
 }
 
 async function uploadprofileimage(uploadUrl: any, id: any, token: any) {
-  const response = await axios.post(`${YOUR_API_BASE_URL}auth/customer/uploadpicture`, {
+  const response = await axiosClient.post(`${YOUR_API_BASE_URL}auth/customer/uploadpicture`, {
     picture: uploadUrl,
     customerid: id
   }, {
@@ -1525,7 +1531,7 @@ async function uploadprofileimage(uploadUrl: any, id: any, token: any) {
 
 async function notificationunread(Id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/general/viewpushnotificationcount/${Id}`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`
@@ -1537,7 +1543,7 @@ async function notificationunread(Id: any, token: any) {
 
 async function updateExpoToken(id: any, expo_push_token: any, token: string) {
   const url = `${YOUR_API_BASE_URL}auth/updateExpoToken`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     user_id: id,
     user_type: 'C',
     expo_push_token: expo_push_token,
@@ -1554,7 +1560,7 @@ async function updateExpoToken(id: any, expo_push_token: any, token: string) {
 
 async function frequentlyusedartisans(token: string) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/frequentlyusedartisans`
-  const response = await axios.get(url, {
+  const response = await axiosClient.get(url, {
     headers: {
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -1566,7 +1572,7 @@ async function frequentlyusedartisans(token: string) {
 
 async function forgotpass(email: any) {
   const url = `${YOUR_API_BASE_URL}customer/forgetpassword`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     "email": email
   })
   const data = response.data
@@ -1575,7 +1581,7 @@ async function forgotpass(email: any) {
 
 async function customersatisfied(bookId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/customersatisfy`
-  const response = axios.post(url, {
+  const response = axiosClient.post(url, {
     "book_id": bookId,
     "customer_statisfy": "Y",
   }, {
@@ -1592,7 +1598,7 @@ async function customersatisfied(bookId: any, token: any) {
 //customer not satified endpoint
 async function customernotsatisfied(bookId: any, reason: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/customersatisfy`
-  const response = axios.post(url, {
+  const response = axiosClient.post(url, {
     "book_id": bookId,
     "customer_statisfy": "N",
     "customer_notstatisfy_reason": reason
@@ -1608,7 +1614,7 @@ async function customernotsatisfied(bookId: any, reason: any, token: any) {
 
 async function disputelog(id: any, description: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/dispute`
-  const response = await axios.post(url, {
+  const response = await axiosClient.post(url, {
     book_id: id,
     description: description
   }, {
@@ -1623,7 +1629,7 @@ async function disputelog(id: any, description: any, token: any) {
 
 async function customerRequestRating(id: any, rating: any, ratecomment: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/customerrating`
-  const response = axios.post(url, {
+  const response = axiosClient.post(url, {
     "book_id": id,
     "rating": rating,
     "rating_comment": ratecomment
@@ -1640,7 +1646,7 @@ async function customerRequestRating(id: any, rating: any, ratecomment: any, tok
 async function movecommissiontocustomerwallet(Id: any, amount: any, sessionId: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/movecommissiontocustomerwallet`
 
-  const response = await axios.post(url,
+  const response = await axiosClient.post(url,
     {
       "customer_id": Id,
       "amount": amount,
@@ -1656,10 +1662,21 @@ async function movecommissiontocustomerwallet(Id: any, amount: any, sessionId: a
   return data
 }
 
+async function logoutcustomer(token: any) {
+  const url = `${YOUR_API_BASE_URL}auth/logout`
+  const response = await axiosClient.get(url, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return response.data
+}
+
 async function sessioncheckcustomer(email: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/igoeppauth/sessioncheckcustomer`
 
-  const response = await axios.post(url,
+  const response = await axiosClient.post(url,
     {
       "username": email,
       "application": 'mobileapp',
@@ -1677,7 +1694,7 @@ async function sessioncheckcustomer(email: any, token: any) {
 async function inquirehelperproofbyproofimageRequestID(id: any, token: any) {
   const url = `${YOUR_API_BASE_URL}auth/hrequest/inquirehelperproofbyproofimageRequestID/${id}`
 
-  const response = await axios.get(url,
+  const response = await axiosClient.get(url,
     {
       headers: {
         Accept: 'application/json',
@@ -1688,15 +1705,51 @@ async function inquirehelperproofbyproofimageRequestID(id: any, token: any) {
   return data
 }
 
+async function acceptTopup(id: any, payment_type: any, sessionId: any, token: any) {
+  const url = `${YOUR_API_BASE_URL}auth/hrequest/acceptTopup`
 
+  const response = await axiosClient.post(url,
+    {
+      'help_id': id,
+      'payment_type': payment_type,
+      'application': 'mobileapp',
+      'session_id': sessionId,
+    },
+    {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    })
+  const data = response.data
+  return data
+}
 
+async function acceptTopupTransfer(amount: any, customer_id: any, request_id: any, token: any) {
+  const url = `${YOUR_API_BASE_URL}auth/vfd/acceptrequesttotuptransfer`
+
+  const response = await axiosClient.post(url,
+    {
+      'amount': amount,
+      'customer_id': customer_id,
+      'requestid': request_id,
+    },
+    {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    })
+  const data = response.data
+  return data
+}
 
 export {
-  authenticateLogin, authenticateSignUp, authenticateSignUpBusiness, authenticateSignUpBusniessEntity, betpay, bidaccept, bidacceptcash, bidacceptdebitcard, bidacceptinvoice, bidaccepttransfer,
+  acceptTopup, acceptTopupTransfer, authenticateLogin, authenticateSignUp, authenticateSignUpBusiness, authenticateSignUpBusniessEntity, betpay, bidaccept, bidacceptcash, bidacceptdebitcard, bidacceptinvoice, bidaccepttransfer,
   biddecline, bidnegotiate, bidrequests, billcategory, biometricsetup, cancelrecurringrequestbyid, cancelrequests, cartcheckout, cartcheckoutcash, cartitem, cartitemstore, cartitemupdate, cartpurchase, cartshow, categoriesbylga,
   category, csutomerwallet, customerbillercommission, customerinfocheck, customernotsatisfied, customerRequestRating, customerresetpassword, customersatisfied, customerupdateid, customeruploadAddressproof, customeruploadCAC, customeruploadIdcard,
   customerwallethistory, customerwallethistoryall, deleteaccount, deletefromcart, disablealert, disablebiometric, discopayment, disputelog, educationpay, enablealert, fetchrequestbyid, forgotpass, frequentlyusedartisans,
-  getbanks, getbillsHistory, getbillsHistoryById, getlatestinvoices, getmaterialdetailsbyrequestidmobile, getpaystackkey, getpendinginvoices, getsession, getsubcathelper, gettotalamountnmaterialrequestid, getVFDVirtualAccountCustomerInvoiceApp, getVFDVirtualAccountCustomerMaterial, globalproductcategory, helperget, inquirehelperproofbyproofimageRequestID, internetPayment, loginwithbiometric, marketplaceitemsget,
+  getbanks, getbillsHistory, getbillsHistoryById, getlatestinvoices, getmaterialdetailsbyrequestidmobile, getpaystackkey, getpendinginvoices, getsession, getsubcathelper, gettotalamountnmaterialrequestid, getVFDVirtualAccountCustomerInvoiceApp, getVFDVirtualAccountCustomerMaterial, globalproductcategory, helperget, inquirehelperproofbyproofimageRequestID, internetPayment, loginwithbiometric, logoutcustomer, marketplaceitemsget,
   materialpaymentbycustomer, movecommissiontocustomerwallet, notification, notificationbyid, notificationunread, profileupdate, requestinfo, resettoken, sessioncheckcustomer, sessionId, setuppin, showcompletedrequestbycustomerid, showhelperrating,
   showpendingrequestbycustomerid, showrecurringrequestbycustomerid, subcategory, termsandconditons, tvpay, tvrenewalpay, updateExpoToken, updateinvoice, updatepin, uploadprofileimage, validatebetting, validatecustomerpasswordchangetoken,
   validatecustomerself, validatecustomerthirdparty, validatedisco, validateinternets, validatepin, validatetelevision, validatetransaction, vfdvalidatetransaction, vfdvirtualaccount,

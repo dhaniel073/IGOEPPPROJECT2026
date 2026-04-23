@@ -195,7 +195,7 @@ export default function settings({
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+        <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top']}>
             <Animated.ScrollView showsVerticalScrollIndicator={false}>
                 <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
                     <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>

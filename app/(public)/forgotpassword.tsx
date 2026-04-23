@@ -60,7 +60,7 @@ export default function forgotpassword({
     try {
       setisLoading(true)
       const response = await forgotpass(formData.email)
-      Alert.alert('Success', 'A mail has been sent', [
+      Alert.alert('Success', response.message || 'A mail has been sent', [
         {
           text: "Ok",
           onPress: () => router.replace("/login")

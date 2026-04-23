@@ -106,8 +106,11 @@ export default function signupBusiness({
                 formData.referral_code
             );
 
-            // Log in immediately after signup
-            await login(encryptData(response.access_token), response);
+            Alert.alert(
+                "✅ Signup Successful",
+                "Account created and a verification mail has been sent.",
+                [{ text: "OK", onPress: () => router.replace("/(public)/login") }]
+            );
 
         } catch (error: any) {
             // Safe error extraction

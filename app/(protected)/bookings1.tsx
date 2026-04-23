@@ -63,6 +63,7 @@ export default function bookings1({
             try {
                 setIsFetching(true);
                 const response = await fetchrequestbyid(bookingId, decryptData(token));
+                console.log("fetchrequestbyid", response);
                 setFetchedRequest(response);
             } catch (error: any) {
                 Alert.alert('Error', 'An error occured.')

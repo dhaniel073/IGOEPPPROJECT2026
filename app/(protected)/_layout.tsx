@@ -95,6 +95,7 @@ export default function ProtectedLayout() {
           <Stack.Screen name="subcategoryScreen" options={{ headerShown: false }} />
           <Stack.Screen name="requesthelp" options={{ headerShown: false }} />
           <Stack.Screen name="selectartisan" options={{ headerShown: false }} />
+          <Stack.Screen name="selectartisanmap" options={{ headerShown: false }} />
           <Stack.Screen name="artisan" options={{ headerShown: false }} />
           <Stack.Screen name="marketitems" options={{ headerShown: false }} />
           <Stack.Screen name="transactionpin" options={{ headerShown: false }} />
@@ -133,6 +134,7 @@ export default function ProtectedLayout() {
           <Stack.Screen name="attachment" options={{ headerShown: false }} />
           <Stack.Screen name="requestcompletedimages" options={{ headerShown: false }} />
           <Stack.Screen name="virtualaccountinvoice" options={{ headerShown: false }} />
+          <Stack.Screen name='virtualaccountrequesttopup' options={{ headerShown: false }} />
         </Stack>
         {/* </InactivityProvider> */}
       </ThemeProvider>

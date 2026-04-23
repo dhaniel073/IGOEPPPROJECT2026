@@ -127,7 +127,7 @@ export default function payments({
     return <LogoSpinner lightColor='' darkColor='' />
   }
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal: 15, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 15, paddingTop: 10, backgroundColor: color1 }} edges={['top']}>
       <View style={{ margin: 6 }} />
       <ThemedText type="titleMedium">Bills Payment</ThemedText>
       <ThemedText style={{ color: Colors.gray9 }}>View your app activities here</ThemedText>

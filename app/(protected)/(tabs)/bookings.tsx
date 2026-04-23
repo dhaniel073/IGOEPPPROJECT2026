@@ -79,7 +79,7 @@ export default function bookings({
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top', 'bottom']}>
+        <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }} edges={['top']}>
             <View style={{ margin: 6 }} />
             <ThemedText type="titleMedium">Bookings</ThemedText>
             <ThemedText style={{ color: Colors.gray9 }}>View bookings</ThemedText>
@@ -96,11 +96,12 @@ export default function bookings({
                 ) : (
                     <FlatList
                         data={fetchedRequest}
-                        renderItem={({ item }) => <BookingCard item={item} />}
+                        renderItem={({ item }) => <BookingCard item={item} onPress={fetchData} />}
                         keyExtractor={(item: any) => item.id.toString()}
                         showsVerticalScrollIndicator={false}
                         refreshing={refreshing}
                         onRefresh={fetchData}
+                    // contentContainerStyle={{ paddingBottom: 100 }}
                     />
                 )
             }

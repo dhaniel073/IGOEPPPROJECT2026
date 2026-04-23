@@ -11,7 +11,7 @@ import { requestinfo, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Entypo, EvilIcons, Feather, Ionicons, MaterialIcons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import axios from 'axios'
+import axios from '@/api/axiosClient';
 import * as ImagePicker from 'expo-image-picker'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'

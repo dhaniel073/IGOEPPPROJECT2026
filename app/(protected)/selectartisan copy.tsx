@@ -6,7 +6,7 @@ import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { getsubcathelper, PUBLIC_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { Alert, Animated, Dimensions, FlatList, Image, Modal, StyleSheet, TextInput, TextProps, TouchableOpacity, View } from 'react-native'
@@ -49,6 +49,7 @@ export default function selectartisan({
       try {
         setisloading(true)
         const response = await getsubcathelper(subcatid, decryptData(token));
+        console.log("getsubcathelper", response)
         setresponseData(response.data)
         setFetchedRequest(response.data)
       } catch (error: any) {
@@ -104,7 +105,12 @@ export default function selectartisan({
       </GoBack>
       <View style={{ margin: 6 }} />
 
-      <ThemedText type="titleMedium">Select Artisan</ThemedText>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <ThemedText type="titleMedium">Select Artisan</ThemedText>
+        <TouchableOpacity onPress={() => router.push({ pathname: "/selectartisanmap", params: { request_type, catid, subcatid, preassessment_flg, name, enable_go_to_artisan } })}>
+          <FontAwesome name="map-o" size={24} color={color} />
+        </TouchableOpacity>
+      </View>
       <View style={{ margin: 5 }} />
 
       <View style={styles.searchRow}>
@@ -125,6 +131,7 @@ export default function selectartisan({
           <ThemedView style={styles.mainstyle}>
             <View style={{ flexDirection: 'row' }}>
               <View style={{ backgroundColor: Colors.clock1, alignSelf: 'center', borderRadius: 50, marginRight: 15 }}>
+                {/* <ThemedText style={{color: Colors.green}}>SM</ThemedText> */}
                 {
                   !item.photo ?
                     <Image style={[styles.image,]} source={require("@/assets/images/person-4.png")} />
@@ -135,6 +142,7 @@ export default function selectartisan({
               <View>
                 <ThemedText>{item.helper_name}</ThemedText>
                 <ThemedText type='small'>{item.helper_location}</ThemedText>
+                {/* <ThemedText type='small'>Lagos</ThemedText> */}
               </View>
             </View>
             <TouchableOpacity onPress={() => [setFormData({ helperid: item.helper_id }), openPopup()]}>

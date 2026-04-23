@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/AuthContext'
 import { customerbillercommission, educationpay, validatepin, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialIcons } from '@expo/vector-icons'
-import axios from 'axios'
+import axios from '@/api/axiosClient';
 import dayjs from "dayjs"
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'

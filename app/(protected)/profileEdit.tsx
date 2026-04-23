@@ -10,6 +10,7 @@ import { customerinfocheck, profileupdate, YOUR_API_BASE_URL } from '@/hooks/Aut
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialIcons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import axiosClient from '@/api/axiosClient'
 import axios from 'axios'
 import { useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
@@ -117,15 +118,15 @@ export default function profileEdit({
             lga: user.lga || "",
             address: user.address || "",
           });
+
+          if (user.sex === 'M') {
+            setFormData((prev) => ({ ...prev, gender: "Male" }));
+          } else if (user.sex === 'F') {
+            setFormData((prev) => ({ ...prev, gender: "Female" }));
+          }
         }
       } catch (err: any) {
-        if (err.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'Unable to fetch profile data.')
-        }
+        Alert.alert('Error', 'Unable to fetch profile data.')
       } finally {
         setIsLoading(false);
       }
@@ -142,7 +143,7 @@ export default function profileEdit({
       );
 
       if (matched) {
-        setFormData((prev) => ({ ...prev, country: matched.value }));
+        setFormData((prev) => ({ ...prev, country: matched.label }));
         setCountry(matched.label)
         handleState(matched.value); // fetch states for that country
       }
@@ -157,7 +158,7 @@ export default function profileEdit({
       );
 
       if (matched) {
-        setFormData((prev) => ({ ...prev, state: matched.value }));
+        setFormData((prev) => ({ ...prev, state: matched.label }));
         setState(matched.label)
         handleCity(matched.value); // fetch LGAs for that state
       }
@@ -171,7 +172,7 @@ export default function profileEdit({
       );
 
       if (matched) {
-        setFormData((prev) => ({ ...prev, lga: matched.value }));
+        setFormData((prev) => ({ ...prev, lga: matched.label }));
         setCity(matched.label)
       }
     }
@@ -190,7 +191,7 @@ export default function profileEdit({
             Authorization: `Bearer ${decryptData(token)}`,
           },
         };
-        const response = await axios(config);
+        const response = await axiosClient(config);
         const data = response.data.data;
         const countryArray = data.map((item: any) => ({
           label: item.country_name,
@@ -206,7 +207,7 @@ export default function profileEdit({
 
   const handleState = async (countryCode: string) => {
     try {
-      const response = await axios.get(
+      const response = await axiosClient.get(
         `${YOUR_API_BASE_URL}auth/general/state/${countryCode}`,
         {
           headers: {
@@ -229,7 +230,7 @@ export default function profileEdit({
 
   const handleCity = async (stateCode: string) => {
     try {
-      const response = await axios.get(
+      const response = await axiosClient.get(
         `${YOUR_API_BASE_URL}auth/general/lga/${stateCode}`,
         {
           headers: {
@@ -301,7 +302,7 @@ export default function profileEdit({
         city,
         formData.address,
         dobFormatted,
-        formData.gender,
+        formData.gender === "Male" ? "M" : formData.gender === "Female" ? "F" : formData.gender,
         cleanedPhone,
         decryptData(token)
       );
@@ -382,7 +383,7 @@ export default function profileEdit({
             searchPlaceholder="Search..."
             inputSearchStyle={{ color: Colors.gray9 }}
             onChange={(item) => {
-              setFormData({ ...formData, gender: item.value });
+              setFormData({ ...formData, gender: item.label });
             }}
             renderRightIcon={() => (
               <MaterialIcons name="keyboard-arrow-down" size={20} color={Colors.gray9} />

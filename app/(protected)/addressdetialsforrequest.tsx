@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/AuthContext';
 import { YOUR_API_BASE_URL } from '@/hooks/AuthRoutes';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { MaterialIcons } from '@expo/vector-icons';
-import axios from 'axios';
+import axiosClient from '@/api/axiosClient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, Animated, StyleSheet, TextProps, View } from 'react-native';
@@ -54,7 +54,7 @@ export default function addressdetialsforrequest({
             Authorization: `Bearer ${decryptData(token)}`,
           },
         };
-        const response = await axios(config);
+        const response = await axiosClient(config);
         const data = response.data.data;
         const countryArray = data.map((item: any) => ({
           label: item.country_name,
@@ -62,13 +62,7 @@ export default function addressdetialsforrequest({
         }));
         setCountryData(countryArray);
       } catch (error: any) {
-        if (error.response?.status === 401) {
-          Alert.alert("Session expired", "Please log in again.");
-          await logout(); // from your AuthContext
-          router.replace("/login"); // navigate to login screen
-        } else {
-          Alert.alert('Error', 'An error occurred. Please try again later.')
-        }
+        Alert.alert('Error', 'An error occurred. Please try again later.')
       }
     };
     fetchCountries();
@@ -76,7 +70,7 @@ export default function addressdetialsforrequest({
 
   const handleState = async (countryCode: string) => {
     try {
-      const response = await axios.get(
+      const response = await axiosClient.get(
         `${YOUR_API_BASE_URL}auth/general/state/${countryCode}`,
         {
           headers: {
@@ -98,7 +92,7 @@ export default function addressdetialsforrequest({
 
   const handleCity = async (stateCode: string) => {
     try {
-      const response = await axios.get(
+      const response = await axiosClient.get(
         `${YOUR_API_BASE_URL}auth/general/lga/${stateCode}`,
         {
           headers: {

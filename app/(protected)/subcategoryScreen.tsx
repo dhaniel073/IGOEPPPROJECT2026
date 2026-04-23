@@ -224,7 +224,7 @@ export default function subcategoryScreen({
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 10 }}>
 
                         <TouchableOpacity activeOpacity={0.6} style={[styles.card, { backgroundColor: Colors.yellow3, padding: 12, borderRadius: 12 }]} onPress={() => [closePopup1(), router.push(
-                            { pathname: '/selectartisan', params: { request_type: "P", name: name, catid: id, subcatid: formData.subcatid, preassessment_flg: formData.preassessment_flg, enable_go_to_artisan: formData.enable_go_to_artisan } })]}>
+                            { pathname: '/selectartisanmap', params: { request_type: "P", name: name, catid: id, subcatid: formData.subcatid, preassessment_flg: formData.preassessment_flg, enable_go_to_artisan: formData.enable_go_to_artisan } })]}>
                             <MaterialIcons name="person" size={28} color={Colors.yellow2} style={styles.icon} />
                             <Text style={styles.cardTitle}>
                                 Send to an Artisan

@@ -42,6 +42,7 @@ export default function notificationview({
                 const response = await notification(user?.userid, decryptData(token));
                 setFetchedMessage(response);
             } catch (error: any) {
+                console.log(error.response)
                 Alert.alert('Error', 'An error occurred. Please try again later.')
             } finally {
                 setIsFetching(false);

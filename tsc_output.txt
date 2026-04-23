@@ -1,0 +1,9 @@
+components/BookingCard.tsx(1,77): error TS2307: Cannot find module '@/constants/Colors' or its corresponding type declarations.
+components/BookingCard.tsx(2,25): error TS2307: Cannot find module '@/hooks/AuthContext' or its corresponding type declarations.
+components/BookingCard.tsx(3,131): error TS2307: Cannot find module '@/hooks/AuthRoutes' or its corresponding type declarations.
+components/BookingCard.tsx(4,31): error TS2307: Cannot find module '@/hooks/useThemeColor' or its corresponding type declarations.
+components/PinInput.tsx(1,24): error TS2307: Cannot find module '@/constants/Colors' or its corresponding type declarations.
+components/PinInput.tsx(2,31): error TS2307: Cannot find module '@/hooks/useThemeColor' or its corresponding type declarations.
+components/ThemedButton.tsx(1,31): error TS2307: Cannot find module '@/hooks/useThemeColor' or its corresponding type declarations.
+components/ThemedText.tsx(3,31): error TS2307: Cannot find module '@/hooks/useThemeColor' or its corresponding type declarations.
+components/ThemedView.tsx(3,31): error TS2307: Cannot find module '@/hooks/useThemeColor' or its corresponding type declarations.

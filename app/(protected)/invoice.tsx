@@ -124,6 +124,7 @@ export default function invoice({
             try {
                 setIsFetching(true);
                 const response = await getpendinginvoices(user?.business_id, decryptData(token));
+                console.log(response)
                 setInvoiceList(response);
             } catch (error: any) {
                 Alert.alert('Error', error.response.data.message || " Unable to load invoices")
@@ -145,13 +146,7 @@ export default function invoice({
                 console.log(response)
                 setBank(response);
             } catch (error: any) {
-                if (error.response?.status === 401) {
-                    Alert.alert("Session expired", "Please log in again.");
-                    await logout(); // from your AuthContext
-                    router.replace("/login"); // navigate to login screen
-                } else {
-                    Alert.alert('Error', 'Unable to load notification settings.')
-                }
+                Alert.alert('Error', 'Unable to load notification settings.')
             } finally {
                 setIsFetching(false);
             }
@@ -212,7 +207,7 @@ export default function invoice({
     const paynow = async () => {
         popup.newTransaction({
             email: user?.email,
-            amount: amount1,
+            amount: Number(amount1),
             reference: `TNX_${Date.now()}`,
             onSuccess: async (res: any) => {
                 await SuccessHandler();
@@ -229,90 +224,120 @@ export default function invoice({
 
 
 
-    const InvoiceItem = ({ item, expanded, onPress }: any) => (
-        <>
-            <TouchableOpacity onPress={onPress}>
-                <ThemedView style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    borderRadius: 8,
-                    paddingBottom: 10,
-                    paddingHorizontal: 5,
-                    boxShadow: '0px 2px 5px rgba(0,0,0,0.35)',
-                }}>
-                    <View>
-                        <ThemedText type="small">INVOICE NUMBER:</ThemedText>
-                        <ThemedText type="small">{item.invoice_id}</ThemedText>
-                    </View>
+    const StatusBadge = ({ status }: { status: string }) => {
+        const isPaid = status === 'S';
+        return (
+            <View style={[
+                styles.badge,
+                { backgroundColor: isPaid ? '#E8F5E9' : '#FFF3E0' }
+            ]}>
+                <View style={[
+                    styles.badgeDot,
+                    { backgroundColor: isPaid ? '#4CAF50' : '#FF9800' }
+                ]} />
+                <Text style={[
+                    styles.badgeText,
+                    { color: isPaid ? '#2E7D32' : '#E65100' }
+                ]}>
+                    {isPaid ? 'Paid' : 'Unpaid'}
+                </Text>
+            </View>
+        );
+    };
 
-                    <View>
-                        <ThemedText type="small">ISSUED:</ThemedText>
-                        <ThemedText type="small">{formatDate(item.issue_date)}</ThemedText>
-                    </View>
-
-                    <View>
-                        <ThemedText type="small">DUE DATE:</ThemedText>
-                        <ThemedText type="small">{formatDate(item.due_date)}</ThemedText>
-                    </View>
-
-                </ThemedView>
-            </TouchableOpacity>
-
-            {expanded && (
-                <ThemedView style={{
-                    borderRadius: 8,
-                    marginTop: 10,
-                    backgroundColor: Colors.invoicebrg,
-                    paddingHorizontal: 15,
-                    paddingVertical: 10,
-                    shadowColor: "#000",
-                    shadowOpacity: 0.35,
-                    shadowRadius: 6,
-                    shadowOffset: { width: 0, height: 4 }
-                }}>
-
-                    <ThemedView style={{
-                        borderRadius: 8,
-                        padding: 10,
-                        borderWidth: 1,
-                        borderColor: "#ccc",
-                        shadowColor: "#000",
-                        shadowOpacity: 0.35,
-                        shadowRadius: 6,
-                        shadowOffset: { width: 0, height: 2 }
-                    }}>
-                        <ThemedText>Amount Due</ThemedText>
-                        <ThemedText type='titleMedium'>NGN {Number(item.amount).toLocaleString()}</ThemedText>
-                        <ThemedText style={{ color: 'red' }}>{formatDate(item.due_date)}</ThemedText>
-                    </ThemedView>
-
-                    <View style={{ margin: 6 }} />
-
-                    <View>
-                        <ThemedText>INVOICE TO:</ThemedText>
-                        <ThemedText>Made by: {item.customer_name}</ThemedText>
-                        <ThemedText>Status: {item.payment_status === 'S' ? 'PAID' : 'NOT PAID'}</ThemedText>
-                        <ThemedText>Request Id: {item.request_id}</ThemedText>
-                        <ThemedText>Business Id: {item.business_id}</ThemedText>
-                        <ThemedText>Customer Id: {item.customer_id}</ThemedText>
-                        <ThemedText>Date Created : {formatDate(item.created_at)}</ThemedText>
-                    </View>
-
-                    <View style={{ margin: 6 }} />
-
-                    <TouchableOpacity onPress={() => [setAmount1(item.amount), setInvoiceid(item.invoice_id), openPopup1()]} style={{
-                        backgroundColor: Colors.green,
-                        padding: 10,
-                        borderRadius: 8,
-                        alignItems: 'center',
-                        marginTop: 10,
-                    }}>
-                        <ThemedText style={{ color: 'white' }}>Pay Now</ThemedText>
-                    </TouchableOpacity>
-                </ThemedView>
-            )}
-        </>
+    const DetailRow = ({ label, value, color }: any) => (
+        <View style={styles.detailRow}>
+            <ThemedText style={styles.detailLabel}>{label}</ThemedText>
+            <ThemedText style={[styles.detailValue, color ? { color } : {}]}>{value}</ThemedText>
+        </View>
     );
+
+    const InvoiceItem = ({ item, expanded, onPress }: any) => {
+        const now = new Date();
+        const dueDate = new Date(item.due_date);
+        const paymentDate = item.payment_date ? new Date(item.payment_date) : null;
+        const isUnpaid = item.payment_status !== 'S';
+
+        // Determine if we should use balance_due (for late payments or currently overdue)
+        const isPaidLate = !isUnpaid && paymentDate !== null && paymentDate.getTime() > dueDate.getTime();
+        const isCurrentlyOverdue = isUnpaid && now.getTime() > dueDate.getTime();
+        const shouldUseBalanceDue = isPaidLate || isCurrentlyOverdue;
+
+        const displayAmount = (shouldUseBalanceDue && item.balance_due) ? item.balance_due : item.amount;
+
+        return (
+            <View style={styles.cardContainer}>
+                <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={onPress}
+                    style={[
+                        styles.invoiceCard,
+                        expanded && styles.invoiceCardExpanded
+                    ]}
+                >
+                    <View style={styles.cardHeader}>
+                        <View style={styles.iconContainer}>
+                            <MaterialIcons name="receipt-long" size={24} color={Colors.green} />
+                        </View>
+                        <View style={{ flex: 1, marginLeft: 12 }}>
+                            <ThemedText style={styles.invoiceNumber}>Invoice #{item.invoice_id}</ThemedText>
+                            <ThemedText style={styles.invoiceDate}>{formatDate(item.issue_date)}</ThemedText>
+                        </View>
+                        <View style={{ alignItems: 'flex-end' }}>
+                            <ThemedText style={styles.invoiceAmount}>₦{Number(displayAmount).toLocaleString()}</ThemedText>
+                            <StatusBadge status={item.payment_status} />
+                        </View>
+                    </View>
+
+                    <View style={styles.expandIconContainer}>
+                        <MaterialIcons
+                            name={expanded ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+                            size={20}
+                            color={Colors.gray9}
+                        />
+                    </View>
+                </TouchableOpacity>
+
+                {expanded && (
+                    <View style={styles.detailsContainer}>
+                        <View style={styles.receiptHeader}>
+                            <ThemedText style={styles.receiptTitle}>Invoice Details</ThemedText>
+                            <View style={styles.divider} />
+                        </View>
+
+                        <View style={styles.detailsGrid}>
+                            <DetailRow label="Bill To" value={item.customer_name} />
+                            <DetailRow label="Request ID" value={item.request_id} />
+                            <DetailRow label="Business ID" value={item.business_id} />
+                            <DetailRow label="Issue Date" value={formatDate(item.issue_date)} />
+                            <DetailRow label="Due Date" value={formatDate(item.due_date)} color={isCurrentlyOverdue ? "#d32f2f" : undefined} />
+                            {item.payment_date && <DetailRow label="Payment Date" value={formatDate(item.payment_date)} color={isPaidLate ? "#d32f2f" : undefined} />}
+                            <DetailRow label="Created At" value={formatDate(item.created_at)} />
+                        </View>
+
+                        <View style={styles.dashedDivider} />
+
+                        <View style={styles.totalSection}>
+                            <ThemedText type="small" style={{ color: Colors.gray9 }}>
+                                {isCurrentlyOverdue ? "Balance Due (Overdue)" : (isPaidLate ? "Amount Paid (Late)" : (!isUnpaid ? "Amount Paid" : "Total Amount Due"))}
+                            </ThemedText>
+                            <ThemedText type="titleMedium" style={styles.totalAmount}>₦{Number(displayAmount).toLocaleString()}</ThemedText>
+                        </View>
+
+                        {isUnpaid && (
+                            <TouchableOpacity
+                                onPress={() => [setAmount1(displayAmount), setInvoiceid(item.invoice_id), openPopup1()]}
+                                style={styles.payButton}
+                            >
+                                <ThemedText style={styles.payButtonText}>Pay Now</ThemedText>
+                                <MaterialIcons name="chevron-right" size={20} color="white" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                )}
+            </View>
+        );
+    };
 
     if (isFetching || isPinLoading) {
         return <LogoSpinner lightColor='' darkColor='' />
@@ -331,6 +356,14 @@ export default function invoice({
             <FlatList
                 data={invoiceList}
                 keyExtractor={(item) => item.id.toString()}
+                contentContainerStyle={{ paddingBottom: 20 }}
+                ListEmptyComponent={() => (
+                    <View style={styles.emptyContainer}>
+                        <MaterialIcons name="description" size={64} color={Colors.gray9} style={{ opacity: 0.3 }} />
+                        <ThemedText style={styles.emptyText}>No invoices found</ThemedText>
+                        <ThemedText style={styles.emptySubtext}>Your pending and past invoices will appear here.</ThemedText>
+                    </View>
+                )}
                 renderItem={({ item }) => (
                     <InvoiceItem
                         item={item}
@@ -369,7 +402,7 @@ export default function invoice({
                     </ThemedView>
 
                     <ThemedText style={{ textAlign: 'center', color: Colors.green }} type='titleMedium'>
-                        {!amount1 ? "0.00" : amount1.toLocaleString('en-NG', {
+                        {!amount1 ? "₦0.00" : Number(amount1).toLocaleString('en-NG', {
                             style: 'currency',
                             currency: 'NGN',
                         })}
@@ -393,7 +426,7 @@ export default function invoice({
                                             <ThemedText>{item.name}</ThemedText>
 
                                             <ThemedText style={{ color: Colors.gray9 }} type='small'>
-                                                {!amount1 ? "0.00" : amount1.toLocaleString('en-NG', {
+                                                {!amount1 ? "₦0.00" : Number(amount1).toLocaleString('en-NG', {
                                                     style: 'currency',
                                                     currency: 'NGN',
                                                 })}
@@ -513,6 +546,170 @@ export default function invoice({
 
 
 const styles = StyleSheet.create({
+    cardContainer: {
+        marginBottom: 16,
+        borderRadius: 16,
+        backgroundColor: 'transparent',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    invoiceCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#f0f0f0',
+    },
+    invoiceCardExpanded: {
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        borderBottomWidth: 0,
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    iconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 12,
+        backgroundColor: '#F1F8E9',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    invoiceNumber: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#1a1a1a',
+    },
+    invoiceDate: {
+        fontSize: 12,
+        color: Colors.gray9,
+        marginTop: 2,
+    },
+    invoiceAmount: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: Colors.green,
+    },
+    expandIconContainer: {
+        marginLeft: 8,
+    },
+    badge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+        marginTop: 4,
+    },
+    badgeDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        marginRight: 6,
+    },
+    badgeText: {
+        fontSize: 10,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+    },
+    detailsContainer: {
+        backgroundColor: '#fff',
+        borderBottomLeftRadius: 16,
+        borderBottomRightRadius: 16,
+        padding: 20,
+        paddingTop: 0,
+        borderWidth: 1,
+        borderColor: '#f0f0f0',
+        borderTopWidth: 0,
+    },
+    receiptHeader: {
+        marginBottom: 16,
+    },
+    receiptTitle: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#333',
+        marginBottom: 8,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#f0f0f0',
+    },
+    detailsGrid: {
+        gap: 12,
+    },
+    detailRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    detailLabel: {
+        fontSize: 13,
+        color: Colors.gray9,
+    },
+    detailValue: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#1a1a1a',
+    },
+    dashedDivider: {
+        height: 1,
+        borderWidth: 1,
+        borderColor: '#eee',
+        borderStyle: 'dashed',
+        marginVertical: 20,
+    },
+    totalSection: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    totalAmount: {
+        fontSize: 20,
+        fontWeight: '800',
+        color: '#1a1a1a',
+    },
+    payButton: {
+        backgroundColor: Colors.green,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 14,
+        borderRadius: 12,
+        gap: 8,
+    },
+    payButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '700',
+    },
+    emptyContainer: {
+        paddingTop: 60,
+        alignItems: 'center',
+        paddingHorizontal: 40,
+    },
+    emptyText: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#333',
+        marginTop: 16,
+    },
+    emptySubtext: {
+        fontSize: 14,
+        color: Colors.gray9,
+        textAlign: 'center',
+        marginTop: 8,
+        lineHeight: 20,
+    },
     popup: {
         position: 'absolute',
         bottom: 0,
@@ -520,7 +717,6 @@ const styles = StyleSheet.create({
         padding: 20,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        // boxShadow: '0px 4px 6px rgba(0,0,0,0.35)',
     },
     overlay: {
         flex: 1,

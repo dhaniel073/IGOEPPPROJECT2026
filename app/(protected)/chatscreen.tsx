@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/AuthContext";
 import { helperget, PUBLIC_API_BASE_URL, YOUR_API_BASE_URL } from "@/hooks/AuthRoutes";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import axiosClient from "@/api/axiosClient";
 import axios from "axios";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -50,7 +51,7 @@ export default function ChatScreen() {
     const fetchMessages = useCallback(async () => {
         try {
             const url = `${YOUR_API_BASE_URL}auth/hrequest/helpchatview/${id}/customer`;
-            const response = await axios.get(url, {
+            const response = await axiosClient.get(url, {
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${decryptData(token)}`,
@@ -90,7 +91,7 @@ export default function ChatScreen() {
 
     const SendMessage = (text: any,) => {
         const url = `${YOUR_API_BASE_URL}auth/hrequest/helpchat`
-        axios.post(url, {
+        axiosClient.post(url, {
             help_id: id,
             from_user_id: user?.userid,
             to_user_id: helper_user_id,

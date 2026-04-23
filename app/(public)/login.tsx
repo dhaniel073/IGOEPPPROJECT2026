@@ -7,7 +7,9 @@ import { Colors, encryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { authenticateLogin, loginwithbiometric } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import { getDeviceId } from '@/utils/deviceAuth'
 import { Octicons } from '@expo/vector-icons'
+import * as Device from 'expo-device'
 import * as LocalAuthentication from "expo-local-authentication"
 import { useRouter } from 'expo-router'
 import * as SecureStore from "expo-secure-store"
@@ -61,8 +63,12 @@ export default function login({
         // --- API Call ---
         try {
             setIsLoading(true);
+            const os = Platform.OS;
+            const deviceId = await getDeviceId();
+            const deviceName = Device.modelName || 'Unknown Device';
+
             const encryptedPassword = encryptData(password);
-            const response = await authenticateLogin(email, encryptedPassword);
+            const response = await authenticateLogin(email, encryptedPassword, deviceId, os, deviceName);
 
             if (response) {
                 await login(encryptData(response.access_token), response);
@@ -71,7 +77,8 @@ export default function login({
                 Alert.alert("Login Failed", response?.message || "Invalid credentials.");
             }
         } catch (error: any) {
-            Alert.alert("Error", error.response.data.message || "An error occurred during login.");
+            const errorMessage = error?.response?.data?.message || error.message || error.response.message || "An error occurred during login.";
+            Alert.alert("Error", errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -118,8 +125,12 @@ export default function login({
         }
         try {
             setIsLoading(true);
+            const os = Platform.OS;
+            const deviceId = await getDeviceId();
+            const deviceName = Device.modelName || 'Unknown Device';
+
             const encryptedBiometric = encryptData(deviceToken);
-            const response = await loginwithbiometric(encryptedBiometric);
+            const response = await loginwithbiometric(encryptedBiometric, deviceId, os, deviceName);
             if (response) {
                 await login(encryptData(response.access_token), response);
                 router.replace("/");
