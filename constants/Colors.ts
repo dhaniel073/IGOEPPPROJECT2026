@@ -20,6 +20,7 @@ export const DIMENSION = {
   WIDTH: Dimensions.get('window').width
 }
 
+export const appName = Constants.expoConfig?.name;
 
 const base64Key = Constants.expoConfig?.extra?.aesBase64Key;
 

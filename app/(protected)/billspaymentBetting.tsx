@@ -1,3 +1,4 @@
+import axios from '@/api/axiosClient'
 import GoBack from '@/components/GoBack'
 import Input from '@/components/Input'
 import LogoSpinner from '@/components/LoadingScreen'
@@ -8,12 +9,11 @@ import { ThemedButton } from '@/components/ThemedButton'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { validateBet } from '@/components/validateBet'
-import { Colors, decryptData, encryptData } from '@/constants/Colors'
+import { appName, Colors, decryptData, encryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { betpay, customerbillercommission, validatebetting, validatepin, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
-import axios from '@/api/axiosClient';
 import dayjs from "dayjs"
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -456,7 +456,7 @@ export default function billspaymentBetting({
 
         </Animated.ScrollView>
 
-        <ReceiptView visible={visible} onClose={() => setVisible(false)} watermarkText="IGOEPP">
+        <ReceiptView visible={visible} onClose={() => setVisible(false)} watermarkText={appName}>
           <ThemedView style={{ backgroundColor: Colors.gray6, marginHorizontal: 5, paddingHorizontal: 10, paddingVertical: 10, borderRadius: 8 }}>
             <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
               <ThemedText style={{ color: '#000' }} type='small'>From</ThemedText>

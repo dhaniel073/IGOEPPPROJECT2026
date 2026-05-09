@@ -9,7 +9,7 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation, useRouter } from 'expo-router'
 import React, { useLayoutEffect, useState } from 'react'
-import { Alert, Image, ScrollView, StyleSheet, Text, TextProps, TouchableOpacity, View } from 'react-native'
+import { Alert, Animated, Image, StyleSheet, Text, TextProps, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import * as LocalAuthentication from "expo-local-authentication"
@@ -99,6 +99,11 @@ export default function wallethistory({
         <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
       </GoBack>
 
+      <View style={{ margin: 6 }} />
+      <ThemedText type="titleMedium">Wallet History</ThemedText>
+      <ThemedText style={{ color: Colors.gray9 }}>View your wallet transactions</ThemedText>
+      <View style={{ margin: 10 }} />
+
       <ThemedView style={styles.walletcontainer}>
         <View style={{ margin: 6 }} />
 
@@ -144,7 +149,7 @@ export default function wallethistory({
       </ThemedView>
 
       <View style={{ margin: 10 }} />
-      <SafeAreaView style={{ flex: 1, backgroundColor: color1 }}>
+      <View style={{ flex: 1 }}>
         {history.length === 0 ? (
           <View style={{ flexDirection: 'row', padding: 16 }}>
             <Image source={require('@/assets/images/frame7.png')} style={{ width: 50, height: 50, borderRadius: 50 }} />
@@ -155,9 +160,9 @@ export default function wallethistory({
             </View>
           </View>
         ) : (
-          <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+          <Animated.ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
             {history.map((item: any, key: any) => (
-              <View key={key} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+              <Animated.View key={key} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
                 <View style={{ flexDirection: 'row', flex: 1 }}>
                   <View style={{
                     padding: 10,
@@ -189,11 +194,11 @@ export default function wallethistory({
                     {item.status === 'D' ? '- NGN' : '+ NGN'} {item.amount.toLocaleString()}
                   </Text>
                 </View>
-              </View>
+              </Animated.View>
             ))}
-          </ScrollView>
+          </Animated.ScrollView>
         )}
-      </SafeAreaView>
+      </View>
 
     </SafeAreaView>
   )

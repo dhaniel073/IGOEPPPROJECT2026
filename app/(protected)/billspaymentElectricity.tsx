@@ -1,3 +1,4 @@
+import axios from '@/api/axiosClient'
 import GoBack from '@/components/GoBack'
 import Input from '@/components/Input'
 import LogoSpinner from '@/components/LoadingScreen'
@@ -8,12 +9,11 @@ import { ThemedButton } from '@/components/ThemedButton'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { validateElectricity } from '@/components/validateElectricity'
-import { Colors, decryptData, encryptData, extractInsideParentheses } from '@/constants/Colors'
+import { appName, Colors, decryptData, encryptData, extractInsideParentheses } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { customerbillercommission, discopayment, validatedisco, validatepin, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
-import axios from '@/api/axiosClient';
 import dayjs from 'dayjs'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -544,7 +544,7 @@ export default function billspaymentElectricity({
             </KeyboardAvoidingView>
           </Modal>
 
-          <ReceiptView visible={visible} onClose={() => setVisible(false)} watermarkText="IGOEPP" imageuri={formData.imagepath}>
+          <ReceiptView visible={visible} onClose={() => setVisible(false)} watermarkText={appName} imageuri={formData.imagepath}>
             <ThemedView style={{ backgroundColor: Colors.gray6, marginHorizontal: 10, paddingHorizontal: 20, paddingVertical: 20 }}>
               <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
                 <ThemedText style={{ color: '#000' }} type='small'>From</ThemedText>

@@ -569,6 +569,18 @@ export default function bookings1({
                                 <DetailRow label="State" value={item.help_state} />
                                 <DetailRow label="L.G.A" value={item.help_lga} />
                                 <DetailRow label="Help Size" value={item.help_size} />
+
+                                {
+                                    item.help_frequency === 'One-off' || item.help_frequency === 'one-off' ? "" :
+                                        <>
+                                            <DetailRow label="Number of Helper" value={item.no} />
+                                            <DetailRow label="Payment Frequency" value={item.payment_frequency} />
+                                            <DetailRow label="Start Date" value={item.start_date} />
+                                            <DetailRow label="End Date" value={item.end_date} />
+                                        </>
+                                }
+
+
                                 <DetailRow label="Status" value={item.help_status === "A" ? "Active" : item.help_status === "N" ? "Negotiating" : item.help_status === "C" ? "Completed" : "Cancelled"} />
                                 <DetailRow label="Date" value={item.help_date} />
                                 <DetailRow label="Time" value={item.help_time} />

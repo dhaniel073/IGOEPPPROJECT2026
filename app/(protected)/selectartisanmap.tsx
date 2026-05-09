@@ -1,15 +1,13 @@
-import GoBack from '@/components/GoBack'
 import LogoSpinner from '@/components/LoadingScreen'
 import { ThemedText } from '@/components/ThemedText'
 import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { getsubcathelper, PUBLIC_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Animated, Dimensions, Image, ImageBackground, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Animated, Dimensions, Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 
 const { width, height } = Dimensions.get('window');
 
@@ -63,6 +61,7 @@ export default function selectartisanmap({
   darkColor,
 }: any) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
   const router = useRouter()
   const { token } = useAuth()
   const [responseData, setresponseData] = useState<any>([])
@@ -71,6 +70,13 @@ export default function selectartisanmap({
 
   const [selectedArtisan, setSelectedArtisan] = useState<any>(null);
   const slideAnim = useRef(new Animated.Value(height)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredArtisans = responseData.filter((artisan: any) =>
+    artisan.helper_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    artisan.helper_location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   useLayoutEffect(() => {
     const fetchArtisans = async () => {
@@ -134,76 +140,116 @@ export default function selectartisanmap({
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={require("@/assets/images/stylized_map.png")}
-        style={styles.map}
+      <Animated.Image
+        source={require("@/assets/images/stylized_map.jpg")}
+        style={[
+          styles.map,
+          {
+            transform: [
+              {
+                translateY: scrollY.interpolate({
+                  inputRange: [0, height],
+                  outputRange: [0, -100],
+                  extrapolate: 'clamp',
+                }),
+              },
+              {
+                scale: 1.3,
+              }
+            ],
+          },
+        ]}
         resizeMode="cover"
+      />
+      <View style={styles.overlay} />
+
+      <Animated.ScrollView
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+        contentContainerStyle={{
+          height: Math.max(height, 200 + Math.ceil(responseData.length / 3) * 120),
+          paddingBottom: 400
+        }}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.overlay} />
-        
-        <Animated.ScrollView 
-          contentContainerStyle={{ 
-            height: Math.max(height, 200 + Math.ceil(responseData.length / 3) * 120),
-            paddingBottom: 400 
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          {responseData.map((item: any, index: number) => (
+        {filteredArtisans.map((item: any) => {
+          const originalIndex = responseData.findIndex((i: any) => i.helper_id === item.helper_id);
+          return (
             <ArtisanMarker
-              key={item.helper_id || index}
+              key={item.helper_id}
               artisan={item}
-              position={getPosition(item.helper_id, index)}
+              position={getPosition(item.helper_id, originalIndex)}
               onPress={onMarkerPress}
             />
-          ))}
-        </Animated.ScrollView>
+          );
+        })}
+      </Animated.ScrollView>
 
-        <SafeAreaView style={styles.header} edges={['top']}>
-          <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
-            <ThemedText style={{ marginLeft: 5, fontWeight: '600' }}>Back</ThemedText>
-          </GoBack>
-        </SafeAreaView>
+      <TouchableOpacity
+        style={[styles.backButton, { backgroundColor: color1 }]}
+        onPress={() => router.back()}
+      >
+        <Ionicons name="chevron-back" size={24} color={color} />
+      </TouchableOpacity>
 
-        {selectedArtisan && (
-          <Animated.View style={[styles.detailCard, { transform: [{ translateY: slideAnim }] }]}>
-            <TouchableOpacity style={styles.closeButton} onPress={closeDetails}>
-              <MaterialCommunityIcons name="close" size={24} color={Colors.gray9} />
-            </TouchableOpacity>
-            <View style={styles.detailRow}>
-              <View style={styles.detailImageWrapper}>
-                <Image
-                  source={selectedArtisan.photo ? { uri: `${PUBLIC_API_BASE_URL}handyman/${selectedArtisan.photo}` } : require("@/assets/images/person-4.png")}
-                  style={styles.detailImage}
-                />
-              </View>
-              <View style={styles.detailText}>
-                <ThemedText style={styles.artisanName}>{selectedArtisan.helper_name}</ThemedText>
-                <ThemedText type="small" style={styles.locationText}>
-                  <MaterialCommunityIcons name="map-marker" size={16} color={Colors.gray9} />{selectedArtisan.helper_location}
-                </ThemedText>
-                <View style={styles.ratingRow}>
-                  <MaterialCommunityIcons name="star" size={16} color={Colors.yellow1} />
-                  <ThemedText type="small" style={{ marginLeft: 4, color: Colors.gray9 }}>4.8 (24 reviews)</ThemedText>
-                </View>
-              </View>
-            </View>
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: Colors.green }]}
-                onPress={() => router.push({ pathname: "/requesthelp", params: { request_type, catid, subcatid, preassessment_flg, name, helperid: selectedArtisan.helper_id, enable_go_to_artisan } })}
-              >
-                <ThemedText style={{ color: '#fff', fontWeight: '600' }}>Select Artisan</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: Colors.gray6 }]}
-                onPress={() => router.push({ pathname: "/artisan", params: { request_type, catid, subcatid, preassessment_flg, name, helperid: selectedArtisan.helper_id, enable_go_to_artisan } })}
-              >
-                <ThemedText style={{ fontWeight: '600', color: Colors.gray9 }}>View Profile</ThemedText>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
+      <View style={[styles.searchBar, { backgroundColor: color1 }]}>
+        <Ionicons name="search" size={18} color={Colors.gray9} style={styles.searchIcon} />
+        <TextInput
+          style={[styles.searchInput, { color: color }]}
+          placeholder="Search artisan or location..."
+          placeholderTextColor={Colors.gray9}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <Ionicons name="close-circle" size={18} color={Colors.gray9} />
+          </TouchableOpacity>
         )}
-      </ImageBackground>
+      </View>
+
+      {selectedArtisan && (
+        <Animated.View style={[styles.detailCard, { transform: [{ translateY: slideAnim }] }]}>
+          <TouchableOpacity style={styles.closeButton} onPress={closeDetails}>
+            <MaterialCommunityIcons name="close" size={24} color={Colors.gray9} />
+          </TouchableOpacity>
+          <View style={styles.detailRow}>
+            <View style={styles.detailImageWrapper}>
+              <Image
+                source={selectedArtisan.photo ? { uri: `${PUBLIC_API_BASE_URL}handyman/${selectedArtisan.photo}` } : require("@/assets/images/person-4.png")}
+                style={styles.detailImage}
+              />
+            </View>
+            <View style={styles.detailText}>
+              <ThemedText style={styles.artisanName}>{selectedArtisan.helper_name}</ThemedText>
+              <ThemedText type="small" style={styles.locationText}>
+                <MaterialCommunityIcons name="map-marker" size={16} color={Colors.gray9} />{selectedArtisan.helper_location}
+              </ThemedText>
+              <View style={styles.ratingRow}>
+                <MaterialCommunityIcons name="star" size={16} color={Colors.yellow1} />
+                <ThemedText type="small" style={{ marginLeft: 4, color: Colors.gray9 }}>4.8 (24 reviews)</ThemedText>
+              </View>
+            </View>
+          </View>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: Colors.green }]}
+              onPress={() => router.push({ pathname: "/requesthelp", params: { request_type, catid, subcatid, preassessment_flg, name, helperid: selectedArtisan.helper_id, enable_go_to_artisan } })}
+            >
+              <ThemedText style={{ color: '#fff', fontWeight: '600' }}>Select Artisan</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: Colors.gray6 }]}
+              onPress={() => router.push({ pathname: "/artisan", params: { request_type, catid, subcatid, preassessment_flg, name, helperid: selectedArtisan.helper_id, enable_go_to_artisan } })}
+            >
+              <ThemedText style={{ fontWeight: '600', color: Colors.gray9 }}>View Profile</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      )}
     </View>
   )
 }
@@ -214,18 +260,45 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   map: {
-    width: '100%',
-    height: '100%',
+    ...StyleSheet.absoluteFillObject,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(255, 255, 255, 0.2)', // Soft overlay to make UI elements pop
   },
-  header: {
+  backButton: {
     position: 'absolute',
-    top: 10,
+    top: 50,
     left: 20,
     zIndex: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    boxShadow: '0px 4px 10px rgba(0,0,0,0.2)',
+  },
+  searchBar: {
+    position: 'absolute',
+    top: 50,
+    left: 74,
+    right: 20,
+    zIndex: 10,
+    borderRadius: 22,
+    paddingHorizontal: 15,
+    height: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    boxShadow: '0px 4px 10px rgba(0,0,0,0.2)',
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: 'poppinsRegular',
+    padding: 0,
   },
   markerContainer: {
     position: 'absolute',

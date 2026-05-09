@@ -448,7 +448,7 @@ export const BookingCard = ({ item, onPress }: any) => {
           )}
 
           {item.help_status === "A" && item.attachment && (
-            <TouchableOpacity style={styles.actionItem} onPress={() => [closePopup(), router.push({ pathname: '/(protected)/attachment', params: { url: `https://phixotech.com/igoeppms/public/attachment/${item.attachment}` } })]}>
+            <TouchableOpacity style={styles.actionItem} onPress={() => [closePopup(), router.push({ pathname: '/(protected)/attachment', params: { url: `${PUBLIC_API_BASE_URL}attachment/${item.attachment}` } })]}>
               <Entypo name="attachment" size={20} color={color} />
               <ThemedText style={styles.actionText}>View Attachment's</ThemedText>
             </TouchableOpacity>

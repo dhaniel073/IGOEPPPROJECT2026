@@ -209,7 +209,7 @@ export default function ReceiptView({
               )}
             </View>
           )} */}
-          <RepeatedWatermark text="IGOEPP" />
+          <RepeatedWatermark text={`IGOHELP`} />
         </ViewShot>
 
         {/* Action Buttons */}

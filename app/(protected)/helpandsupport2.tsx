@@ -2,7 +2,7 @@ import GoBack from '@/components/GoBack'
 import { ThemedButton } from '@/components/ThemedButton'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
-import { Colors } from '@/constants/Colors'
+import { appName, Colors } from '@/constants/Colors'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
@@ -29,7 +29,7 @@ export default function helpandsupport2({
 
   const openWhatsApp = () => {
     const phoneNumber = "+2348105638530"; // Replace with the phone number
-    const message = "Hello IGOEPP customer care."; // Replace with your message
+    const message = "Hello " + appName + " customer care."; // Replace with your message
     const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
     Linking.canOpenURL(url)

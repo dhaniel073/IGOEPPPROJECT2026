@@ -1,3 +1,4 @@
+import axios from '@/api/axiosClient'
 import CustomDropdown from '@/components/CustomDropdown'
 import GoBack from '@/components/GoBack'
 import Input from '@/components/Input'
@@ -11,7 +12,6 @@ import { requestinfo, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Entypo, EvilIcons, Feather, Ionicons, MaterialIcons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import axios from '@/api/axiosClient';
 import * as ImagePicker from 'expo-image-picker'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
@@ -88,6 +88,8 @@ export default function categoryScreen({
     payment_frequency: "",
     no_of_helper: ""
   });
+
+  console.log(gotoArtisanLocation);
 
   const openPopup = () => {
     setModalVisible(true);
@@ -340,7 +342,7 @@ export default function categoryScreen({
       setisloading(true)
       const response = await requestinfo(user?.customer_id, formData.interest, formData.no_of_helper, formData.addressfield, formData.countryName, formData.stateName, formData.cityName, formData.landmark,
         formData.helpsize, formData.vehiclerequest, formData.description, catid, subcatid, formData.helptime, formData.helpdate, formData.frequency, formData.start_date, formData.end_date,
-        formData.payment_frequency, preassessment_flg, request_type, helperid, formData.uploadUrl, enable_go_to_artisan, decryptData(token)
+        formData.payment_frequency, preassessment_flg, request_type, helperid, formData.uploadUrl, gotoArtisanLocation, decryptData(token)
       )
       return openPopup()
     } catch (error: any) {

@@ -129,7 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(true);
       if (token) {
         try {
-          await logoutcustomer(decryptData(token));
+          const response = await logoutcustomer(decryptData(token));
         } catch (error: any) {
           console.log("Backend logout failed or session already dead:", error.response);
         }

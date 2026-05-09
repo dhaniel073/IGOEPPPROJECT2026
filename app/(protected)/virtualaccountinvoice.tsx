@@ -4,7 +4,7 @@ import LogoSpinner from '@/components/LoadingScreen'
 import { ThemedButton } from '@/components/ThemedButton'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
-import { Colors, decryptData, encryptData } from '@/constants/Colors'
+import { appName, Colors, decryptData, encryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { getVFDVirtualAccountCustomerInvoiceApp, validatetransaction, vfdvalidatetransaction } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
@@ -63,6 +63,7 @@ export default function virtualaccountinvoice({
                 try {
                     setIsloading(true)
                     const response = await getVFDVirtualAccountCustomerInvoiceApp(encryptData(invoiceid), decryptData(token))
+                    console.log("getVFDVirtualAccountCustomerInvoiceApp handlePayin", response)
                     setPayload(response.data.provider_response)
                     setIsloading(false)
                 } catch (error: any) {
@@ -80,6 +81,7 @@ export default function virtualaccountinvoice({
                 try {
                     setIsloading(true)
                     const response = await getVFDVirtualAccountCustomerInvoiceApp(encryptData(invoiceid), decryptData(token))
+                    console.log("getVFDVirtualAccountCustomerInvoiceApp handlePayin", response)
                     setPayload(response)
                 } catch (error: any) {
                     console.log(error.response)
@@ -165,7 +167,7 @@ export default function virtualaccountinvoice({
 
                     <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between', borderBottomWidth: 0.5, borderBottomColor: Colors.gray7, paddingTop: 30, paddingBottom: 30 }}>
                         <ThemedText>Account Name</ThemedText>
-                        <ThemedText>IGOEPP</ThemedText>
+                        <ThemedText>{appName}</ThemedText>
                     </View>
                 </SafeAreaView>
 

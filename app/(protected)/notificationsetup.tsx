@@ -1,3 +1,4 @@
+import axios from '@/api/axiosClient'
 import GoBack from '@/components/GoBack'
 import LogoSpinner from '@/components/LoadingScreen'
 import { ThemedText } from '@/components/ThemedText'
@@ -5,7 +6,6 @@ import { Colors, decryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { viewalertsetup, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
-import axios from '@/api/axiosClient';
 import { useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { Alert, Animated, StyleSheet, Switch, View } from 'react-native'

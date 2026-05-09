@@ -1,22 +1,23 @@
+import { PUBLIC_API_BASE_URL } from "@/hooks/AuthRoutes";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
 import {
-    Dimensions,
-    FlatList,
-    Image,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  FlatList,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
 
 const images = [
-  "https://igoeppms.com/igoepp/public/products/Vulcanizer1705317221.jpeg",
-  "https://igoeppms.com/igoepp/public/products/Plumber1689021238.jpeg",
-  "https://igoeppms.com/igoepp/public/products/Tiler1689021324.jpeg",
-  "https://igoeppms.com/igoepp/public/products/Transformer-Producers-768x580.webp",
-  "https://igoeppms.com/igoepp/public/products/GreenEnergy1705310479.jpeg",
+  `${PUBLIC_API_BASE_URL}products/Vulcanizer1705317221.jpeg`,
+  `${PUBLIC_API_BASE_URL}products/Plumber1689021238.jpeg`,
+  `${PUBLIC_API_BASE_URL}products/Tiler1689021324.jpeg`,
+  `${PUBLIC_API_BASE_URL}products/Transformer-Producers-768x580.webp`,
+  `${PUBLIC_API_BASE_URL}products/GreenEnergy1705310479.jpeg`,
 ];
 
 export default function ImageCarousel() {

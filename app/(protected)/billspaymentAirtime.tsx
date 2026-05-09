@@ -1,3 +1,4 @@
+import axios from '@/api/axiosClient'
 import GoBack from '@/components/GoBack'
 import Input from '@/components/Input'
 import LogoSpinner from '@/components/LoadingScreen'
@@ -9,12 +10,11 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { validateAirtime } from '@/components/validateAirtime'
 import { validateData } from '@/components/validateData'
-import { Colors, decryptData, DIMENSION, encryptData } from '@/constants/Colors'
+import { appName, Colors, decryptData, DIMENSION, encryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { customerbillercommission, validatecustomerself, validatecustomerthirdparty, validatepin, vtupayairtime, vtupaydata, YOUR_API_BASE_URL } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { AntDesign, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
-import axios from '@/api/axiosClient';
 import dayjs from "dayjs"
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -949,7 +949,7 @@ export default function billspaymentAirtime({
         <ReceiptView
           visible={visible}
           onClose={() => setVisible(false)}
-          watermarkText="IGOEPP"
+          watermarkText={`${appName}`}
           showIcon={true}
           imageuri={formData.imagepath}
         >

@@ -196,6 +196,7 @@ export default function invoice({
         try {
             setIsFetching(true);
             const response = await updateinvoice(invoiceid, decryptData(token));
+            console.log("Success handler for debit card invoice payment", response)
             setAmount1(null)
             Alert.alert("Success", "Payment was successful", [{ text: "Ok", onPress: () => router.push("/invoice"), },]);
         } catch (error: any) {

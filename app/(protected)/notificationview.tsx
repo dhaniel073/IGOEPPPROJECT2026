@@ -2,6 +2,7 @@ import EmptyScreen from '@/components/EmptyScreen';
 import GoBack from '@/components/GoBack';
 import LogoSpinner from '@/components/LoadingScreen';
 import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 import { Colors, decryptData } from '@/constants/Colors';
 import { useAuth } from '@/hooks/AuthContext';
 import { notification, notificationbyid } from '@/hooks/AuthRoutes';
@@ -113,16 +114,19 @@ export default function notificationview({
             style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10, backgroundColor: color1 }}
             edges={['top', 'bottom']}
         >
-            <Animated.View>
+            <ThemedView style={styles.header}>
                 <GoBack onClick={() => router.back()} lightColor={color} darkColor={color}>
                     <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
                 </GoBack>
 
                 <View style={{ margin: 6 }} />
-                <ThemedText type="titleMedium">Notifications</ThemedText>
-                <ThemedText style={{ color: Colors.gray9 }}>View your app activities here</ThemedText>
+                <ThemedText style={styles.headerTitle}>Notifications</ThemedText>
+                <ThemedText style={{ color: Colors.gray9, marginTop: 10 }}>View your app activities here</ThemedText>
+            </ThemedView>
 
-                <View style={{ margin: 15 }} />
+            <Animated.View style={{ flex: 1 }}>
+
+                <View style={{ margin: 5 }} />
 
                 {
                     fetchedmessage.length === 0 ? (
@@ -179,9 +183,16 @@ export default function notificationview({
 }
 
 const styles = StyleSheet.create({
+    header: {
+        paddingTop: 10,
+        // paddingBottom: 10,
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontFamily: 'poppinsSemiBold',
+        // flex: 1,
+    },
     popup: {
-        // position: 'absolute',
-        // bottom: 0,
         width: '100%',
         padding: 20,
         borderTopLeftRadius: 20,

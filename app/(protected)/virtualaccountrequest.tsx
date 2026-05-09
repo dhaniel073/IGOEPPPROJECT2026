@@ -4,7 +4,7 @@ import LogoSpinner from '@/components/LoadingScreen'
 import { ThemedButton } from '@/components/ThemedButton'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
-import { Colors, decryptData, encryptData } from '@/constants/Colors'
+import { appName, Colors, decryptData, encryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { bidaccepttransfer, validatetransaction, vfdvalidatetransaction, virtualaccount } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
@@ -159,7 +159,7 @@ export default function virtualaccountrequest({
 
                     <View style={{ flexDirection: 'row', padding: 10, justifyContent: 'space-between', borderBottomWidth: 0.5, borderBottomColor: Colors.gray7, paddingTop: 30, paddingBottom: 30 }}>
                         <ThemedText>Account Name</ThemedText>
-                        <ThemedText>IGOEPP</ThemedText>
+                        <ThemedText>{appName}</ThemedText>
                     </View>
                 </SafeAreaView>
 

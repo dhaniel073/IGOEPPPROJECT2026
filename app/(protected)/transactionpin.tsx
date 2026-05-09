@@ -2,7 +2,7 @@ import GoBack from '@/components/GoBack'
 import LogoSpinner from '@/components/LoadingScreen'
 import PinInput from '@/components/PinInput'
 import { ThemedText } from '@/components/ThemedText'
-import { Colors, decryptData, encryptData } from '@/constants/Colors'
+import { appName, Colors, decryptData, encryptData } from '@/constants/Colors'
 import { useAuth } from '@/hooks/AuthContext'
 import { customerinfocheck, setuppin, updatepin, validatepin } from '@/hooks/AuthRoutes'
 import { useThemeColor } from '@/hooks/useThemeColor'
@@ -209,7 +209,7 @@ export default function TransactionPin({
             Enter a four-digit transaction PIN to enable
           </ThemedText>
           <ThemedText style={{ color: Colors.gray9 }}>
-            transactions on the IGOEPP app
+            transactions on the {appName} app
           </ThemedText>
 
           <View style={{ margin: 20 }} />

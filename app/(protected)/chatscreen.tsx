@@ -1,3 +1,4 @@
+import axiosClient from "@/api/axiosClient";
 import GoBack from "@/components/GoBack";
 import LogoSpinner from "@/components/LoadingScreen";
 import { ThemedText } from "@/components/ThemedText";
@@ -6,48 +7,65 @@ import { Colors, decryptData } from "@/constants/Colors";
 import { useAuth } from "@/hooks/AuthContext";
 import { helperget, PUBLIC_API_BASE_URL, YOUR_API_BASE_URL } from "@/hooks/AuthRoutes";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { FontAwesome5, Ionicons } from "@expo/vector-icons";
-import axiosClient from "@/api/axiosClient";
-import axios from "axios";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Alert, Image, Platform, StyleSheet, View } from "react-native";
-import { Bubble, GiftedChat, Send, User } from "react-native-gifted-chat";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Alert, Image, StyleSheet, View } from "react-native";
+import { Bubble, GiftedChat, IMessage, InputToolbar, Send } from "react-native-gifted-chat";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
+interface ExtendedMessage extends IMessage {
+    pending?: boolean;
+    sent?: boolean;
+}
 
-export default function ChatScreen() {
-    const { id, helperId, helper_user_id } = useLocalSearchParams()
+export type Props = {
+    lightColor?: string;
+    darkColor?: string;
+    headerBackgroundColor?: { dark: string; light: string };
+};
+
+export default function chatscreen({
+    lightColor,
+    darkColor,
+}: Props) {
+    const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+    const color1 = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+    const { helperId, helper_user_id, id } = useLocalSearchParams();
     const { token, user, logout } = useAuth();
+    const router = useRouter();
+    const insets = useSafeAreaInsets();
+    id
 
-    const [messages, setMessages] = useState<any>([]);
+
+
+
+    const [messages, setMessages] = useState<ExtendedMessage[]>([]);
     const [loading, setLoading] = useState(true);
+    const [helperData, setHelperData] = useState<any>(null);
 
     const backgroundColor = useThemeColor({}, "background");
-    const textColor = useThemeColor({}, "text");
-    const [previousMessages, setPreviousMessage] = useState<any>([])
-    const navigation = useNavigation()
-    const CustomerId = user?.userid.toString() || "";
-    const [helperdata, setHelperData] = useState<any>([])
-    const router = useRouter()
+    const HelperId = user?.userid?.toString() || "";
 
     useEffect(() => {
-        helperInfo()
-    }, [])
+        const fetchHelperInfo = async () => {
+            try {
+                setLoading(true);
+                const response = await helperget(helperId, decryptData(token));
+                setHelperData(response.data.data);
+                console.log(response.data)
+            } catch (error: any) {
+                if (error.response?.status !== 401) {
+                    console.log("Error fetching helper info:", error.response || error.response);
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const helperInfo = async () => {
-        try {
-            setLoading(true)
-            const response = await helperget(helperId, decryptData(token))
-            setHelperData(response.data.data)
-        } catch (error: any) {
-            Alert.alert('Error', 'An error occurred. Please try again later.')
-        } finally {
-            setLoading(false)
-        }
-    }
+        fetchHelperInfo();
+    }, [helperId, token, logout, router]);
 
-    // Fetch chat messages
     const fetchMessages = useCallback(async () => {
         try {
             const url = `${YOUR_API_BASE_URL}auth/hrequest/helpchatview/${id}/customer`;
@@ -57,140 +75,222 @@ export default function ChatScreen() {
                     Authorization: `Bearer ${decryptData(token)}`,
                 },
             });
-            var count = Object.keys(response.data).length;
-            let stateArray = []
-            for (var i = 0; i < count; i++) {
-                stateArray.push({
-                    _id: response.data[i].id,
-                    createdAt: response.data[i].created_at,
-                    text: response.data[i].message,
-                    user: {
-                        _id: `${response.data[i].from_user_id}`,
-                        name: 'React Native',
-                        avatar: null
-                        // avatar: helper.photo === null ? `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKLYtkaHut2_Xctb0hUZGZk7pbCbIzcoMSNA&usqp=CAU`: `${PUBLIC_API_BASE_URL}handyman/${helper.photo}`,
-                    },
-                },
-                )
-                setPreviousMessage(response.data[i].from_user_id)
+
+            const data = response.data;
+            if (Array.isArray(data)) {
+                const formattedMessages: IMessage[] = data.map((msg: any) => {
+                    const msgFromIdStr = msg.from_user_id?.toString();
+                    // If it matches the customer's ID, it's not me. Otherwise, it's me.
+                    const isMe = msgFromIdStr !== helper_user_id;
+
+                    return {
+                        _id: msg.id,
+                        createdAt: new Date(msg.created_at),
+                        text: msg.message,
+                        user: {
+                            _id: isMe ? HelperId : msgFromIdStr,
+                            name: isMe ? (user?.first_name || 'Me') : (helperData?.first_name || 'Customer'),
+                            avatar: isMe ? undefined : (helperData?.photo ? `${PUBLIC_API_BASE_URL}handyman/${helperData.photo}` : undefined),
+                        },
+                    };
+                });
+
+
+                // Sort by newest first
+                formattedMessages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+                setMessages(prevMessages => {
+                    // Keep pending messages that are not yet in the server response
+                    const serverIds = new Set(formattedMessages.map(m => m._id));
+                    const pendingMessages = prevMessages.filter(m => m.pending && !serverIds.has(m._id));
+
+                    const combined = [...pendingMessages, ...formattedMessages];
+                    combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+                    return combined;
+                });
             }
-            const descArr = stateArray.sort().reverse();
-            setMessages(descArr)
         } catch (error: any) {
-            return;
-        } finally {
-            setLoading(false);
+            // console.log("Error fetching messages:", error.response?.data || error.message);
         }
-    }, [id, token]);
+    }, [id, token, helper_user_id, HelperId, helperData]);
 
     useEffect(() => {
         fetchMessages();
-        const interval = setInterval(fetchMessages, 10000);
+        const interval = setInterval(fetchMessages, 5000); // Poll every 5 seconds
         return () => clearInterval(interval);
-    }, []);
+    }, [fetchMessages]);
 
-    const SendMessage = (text: any,) => {
-        const url = `${YOUR_API_BASE_URL}auth/hrequest/helpchat`
-        axiosClient.post(url, {
-            help_id: id,
-            from_user_id: user?.userid,
-            to_user_id: helper_user_id,
-            message: text,
-            user_type: 'helper'
-        }, {
-            headers: {
-                Accept: 'application/json',
-                Authorization: `Bearer ${decryptData(token)}`
+    const sendMessageToApi = useCallback(async (localMessage: IMessage) => {
+        try {
+            const url = `${YOUR_API_BASE_URL}auth/hrequest/helpchat`;
+            const response = await axiosClient.post(url, {
+                help_id: id,
+                from_user_id: user?.userid,
+                to_user_id: helper_user_id,
+                message: localMessage.text,
+                user_type: 'helper'
+            }, {
+                headers: {
+                    Accept: 'application/json',
+                    Authorization: `Bearer ${decryptData(token)}`
+                }
+            });
+
+            if (response.data && response.data.id) {
+                setMessages((previousMessages) => {
+                    return previousMessages.map(msg =>
+                        msg._id === localMessage._id
+                            ? { ...msg, _id: response.data.id, sent: true, pending: false } // Update ID to match server
+                            : msg
+                    );
+                });
+            } else {
+                // Just mark sent
+                setMessages((previousMessages) => {
+                    return previousMessages.map(msg =>
+                        msg._id === localMessage._id
+                            ? { ...msg, sent: true, pending: false }
+                            : msg
+                    );
+                });
             }
-        }).then((res) => {
-            return
-        }).catch((error: any) => {
-            return;
-        })
-    }
 
-    const onSend = useCallback((messages = []) => {
-        setMessages((previousMessages: any) => GiftedChat.append(previousMessages, messages))
+        } catch (error: any) {
+            console.log(error.response)
+            console.log("Error sending message:", error.response?.data);
+            Alert.alert("Error", "Failed to send message");
+            // Mark as not pending (or error state?)
+            setMessages((previousMessages) => {
+                return previousMessages.map(msg =>
+                    msg._id === localMessage._id
+                        ? { ...msg, pending: false, error: true } // Or keep pending?
+                        : msg
+                );
+            });
+        }
+    }, [id, user?.userid, helper_user_id, token, HelperId]);
 
-        const { _id, createdAt, text, user } = messages[0]
-        SendMessage(text)
-    }, [])
+    const onSend = useCallback((newMessages: IMessage[] = []) => {
+        // Add pending flag
+        const messagesWithStatus = newMessages.map(msg => ({ ...msg, pending: true, sent: false }));
 
-    // Custom bubble styling
+        setMessages((previousMessages) => GiftedChat.append(previousMessages, messagesWithStatus));
+        // const { text } = newMessages[0];
+        sendMessageToApi(messagesWithStatus[0]);
+    }, [sendMessageToApi]);
+
     const renderBubble = (props: any) => (
         <Bubble
             {...props}
             wrapperStyle={{
-                right: { backgroundColor: Colors.green },
-                left: { backgroundColor: "#E5E5EA" },
+                right: {
+                    backgroundColor: Colors.green,
+                    borderRadius: 15,
+                    borderBottomRightRadius: 2,
+                    padding: 2,
+                },
+                left: {
+                    backgroundColor: "#F0F0F0",
+                    borderRadius: 15,
+                    borderBottomLeftRadius: 2,
+                    padding: 2,
+                },
             }}
             textStyle={{
-                right: { color: "#fff" },
-                left: { color: "#000" },
+                right: { color: "#fff", fontFamily: 'poppinsRegular', fontSize: 14 },
+                left: { color: "#000", fontFamily: 'poppinsRegular', fontSize: 14 },
             }}
         />
     );
 
-    const scrollToBottomComponent = (props: any) => {
-        return (
-            <FontAwesome5 name="angle-double-down" size={22} color="#333" />
-        )
-    }
-
-    // Custom send button
     const renderSend = (props: any) => (
         <Send {...props}>
             <View style={{ marginRight: 10, marginBottom: 5 }}>
-                <Ionicons name="send" size={22} color={Colors.green} />
+                <Ionicons name="send" size={24} color={Colors.green} />
             </View>
         </Send>
     );
 
-    if (loading) {
-        return (
-            <LogoSpinner lightColor="" darkColor="" />
-        );
+    // const scrollToBottomComponent = () => (
+    //     <FontAwesome5 name="angle-double-down" size={22} color="#333" />
+    // );
+
+    if (loading && !helperData) {
+        return <LogoSpinner lightColor="" darkColor="" />;
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, paddingTop: 10, backgroundColor: backgroundColor, }} edges={['top', 'bottom']}>
-            <ThemedView style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 15, marginBottom: 10 }}>
-                <GoBack onClick={() => router.push("/(protected)/(tabs)/bookings")} lightColor={""} darkColor={""}>
-                    <ThemedText style={{ marginLeft: 5 }}>Back</ThemedText>
-                </GoBack>
-                {
-                    helperdata.photo === null ?
-                        <Image style={styles.image} source={require("@/assets/images/avatar1.png")} />
-                        :
-                        <Image style={styles.image} source={{ uri: `${PUBLIC_API_BASE_URL}handyman/${helperdata.photo}` }} />
-                }
-                <ThemedText style={{ fontSize: 14, fontFamily: 'poppinsSemiBold' }}>{helperdata.first_name} {helperdata.last_name}</ThemedText>
-                {/* <Text style={styles.chattxt}>Chat</Text> */}
-            </ThemedView>
-            <GiftedChat
-                messages={messages}
-                showAvatarForEveryMessage={false}
-                onSend={onSend}
-                user={{
-                    _id: CustomerId,
-                    name: user?.first_name,
-                } as User}
-                renderBubble={renderBubble}
-                alwaysShowSend
-                renderSend={renderSend}
-                scrollToBottomComponent={() => null}
-                keyboardShouldPersistTaps="handled"
-                bottomOffset={Platform.OS === "ios" ? 20 : 0}
-            />
+        <SafeAreaView style={{ flex: 1, backgroundColor: color1 }} edges={['top', 'bottom']}>
+            <View style={{ flex: 1 }}>
+
+                <ThemedView style={styles.header}>
+                    <GoBack onClick={() => router.back()} lightColor="" darkColor=""></GoBack>
+
+                    {helperData?.photo ? (
+                        <Image style={styles.avatar} source={{ uri: `${PUBLIC_API_BASE_URL}handyman/${helperData.photo}` }} />
+                    ) : (
+                        <Ionicons name="person-circle-outline" size={28} color={color} />
+                    )}
+
+                    <ThemedText style={styles.headerTitle}>
+                        {helperData ? `${helperData.first_name} ${helperData.last_name}` : 'Chat'}
+                    </ThemedText>
+                </ThemedView>
+
+                <GiftedChat
+                    messages={messages}
+                    onSend={messages => onSend(messages)}
+                    user={{
+                        _id: HelperId,
+                        name: user?.first_name || 'Me',
+                    }}
+                    renderBubble={renderBubble}
+                    renderSend={renderSend}
+                    bottomOffset={insets.bottom}
+                    keyboardShouldPersistTaps="handled"
+                    renderInputToolbar={props => (
+                        <InputToolbar
+                            {...props}
+                            containerStyle={{
+                                borderTopWidth: 1,
+                                borderTopColor: '#eee',
+                                paddingHorizontal: 5,
+                                paddingVertical: 2,
+                            }}
+                        />
+                    )}
+                />
+            </View>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    image: {
-        width: 35,
-        height: 35,
-        marginRight: 3,
-        borderRadius: 100
+    container: {
+        flex: 1,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 15,
+        paddingTop: 10,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee', // Consider theming this border color if needed
+    },
+    avatar: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        marginHorizontal: 10,
+        backgroundColor: '#f0f0f0',
+        borderWidth: 1,
+        borderColor: '#eee',
+    },
+    headerTitle: {
+        fontSize: 16,
+        fontFamily: 'poppinsSemiBold',
+        flex: 1,
     }
-})
+});

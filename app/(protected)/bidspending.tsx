@@ -134,7 +134,9 @@ export default function bidspending({
                 setIsFetching(true);
                 const response = await bidrequests(bookingId, decryptData(token));
                 setFetchedRequest(response);
+                console.log(response)
             } catch (error: any) {
+                console.log(error.response)
                 Alert.alert('Error', 'An error occurred. Please try again later.')
             } finally {
                 setIsFetching(false);
@@ -403,7 +405,7 @@ export default function bidspending({
     const declinehandler = async (id: any) => {
         try {
             setIsFetching(true);
-            const response = await biddecline(id, token);
+            const response = await biddecline(id, decryptData(token));
             Alert.alert("Success", "You have sucessfully declined the artisan's bid", [{ text: "Ok", onPress: () => [router.back()], },]);
         } catch (error: any) {
             Alert.alert("Error", error.response.data.message || "An error occurred. Please try again later");
